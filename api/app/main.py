@@ -3,6 +3,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.openapi_extra import build_openapi_schema
 from app.routes import admin, categories, directory, health
 
 
@@ -30,3 +31,13 @@ app.include_router(health.router)
 app.include_router(categories.router)
 app.include_router(directory.router)
 app.include_router(admin.router)
+
+
+def custom_openapi():
+    if app.openapi_schema:
+        return app.openapi_schema
+    app.openapi_schema = build_openapi_schema()
+    return app.openapi_schema
+
+
+app.openapi = custom_openapi

@@ -29,6 +29,14 @@ uvicorn app.main:app --reload --port 8080
 
 API docs: http://localhost:8080/docs
 
+OpenAPI spec (all shared models, including Cleanup / TrashReport): http://localhost:8080/openapi.json
+
+```bash
+# Export a static copy for TypeScript codegen in other apps
+python scripts/export_openapi.py
+# → openapi/dogs-schemas.json
+```
+
 ## Import from CSV (local dev)
 
 ```bash
