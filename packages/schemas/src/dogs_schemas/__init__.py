@@ -11,10 +11,12 @@ from dogs_schemas.directory import (
     DirectoryEntryUpdate,
 )
 from dogs_schemas.location import Coordinates, SocialLinks, StructuredLocation
+from dogs_schemas.status import ActivityStatus
 from dogs_schemas.trash_report import TrashReport, TrashReportSeverity
 
 __all__ = [
     "CATEGORY_DISPLAY_NAMES",
+    "ActivityStatus",
     "Category",
     "CategorySlug",
     "Cleanup",

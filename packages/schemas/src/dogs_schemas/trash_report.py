@@ -1,11 +1,13 @@
 """Trash report schema — shared contract only (no DOGS DB table in Phase 1)."""
 
+from datetime import datetime
 from enum import StrEnum
 from uuid import UUID
 
 from pydantic import BaseModel, Field
 
 from dogs_schemas.location import Coordinates
+from dogs_schemas.status import ActivityStatus
 
 
 class TrashReportSeverity(StrEnum):
@@ -16,9 +18,11 @@ class TrashReportSeverity(StrEnum):
 
 class TrashReport(BaseModel):
     id: UUID
+    title: str
+    description: str | None = None
     location_text: str | None = None
     coordinates: Coordinates | None = None
-    photo_urls: list[str] = Field(default_factory=list)
+    image_urls: list[str] = Field(default_factory=list)
     severity: TrashReportSeverity | None = None
-    status: str | None = None
-    description: str | None = None
+    status: ActivityStatus | None = None
+    reported_at: datetime | None = None

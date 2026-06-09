@@ -10,13 +10,14 @@ from dogs_schemas.location import Coordinates, SocialLinks, StructuredLocation
 class DirectoryEntry(BaseModel):
     id: UUID
     name: str
-    focus: str | None = None
+    description: str | None = None
     image_url: str | None = None
     location: StructuredLocation | None = None
     coordinates: Coordinates | None = None
     social_links: SocialLinks | None = None
-    category_slugs: list[CategorySlug] = Field(default_factory=list)
+    categories: list[CategorySlug] = Field(default_factory=list)
     featured: bool = False
+    user_ids: list[UUID] = Field(default_factory=list)
     created_at: datetime
     updated_at: datetime
 
@@ -25,22 +26,24 @@ class DirectoryEntry(BaseModel):
 
 class DirectoryEntryCreate(BaseModel):
     name: str
-    focus: str | None = None
+    description: str | None = None
     image_url: str | None = None
     location: StructuredLocation | None = None
     social_links: SocialLinks | None = None
-    category_slugs: list[CategorySlug] = Field(default_factory=list)
+    categories: list[CategorySlug] = Field(default_factory=list)
     featured: bool = False
+    user_ids: list[UUID] = Field(default_factory=list)
 
 
 class DirectoryEntryUpdate(BaseModel):
     name: str | None = None
-    focus: str | None = None
+    description: str | None = None
     image_url: str | None = None
     location: StructuredLocation | None = None
     social_links: SocialLinks | None = None
-    category_slugs: list[CategorySlug] | None = None
+    categories: list[CategorySlug] | None = None
     featured: bool | None = None
+    user_ids: list[UUID] | None = None
 
 
 class Category(BaseModel):

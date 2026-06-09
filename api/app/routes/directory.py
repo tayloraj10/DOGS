@@ -45,8 +45,8 @@ async def create_directory_entry(body: DirectoryEntryCreate, db: Session = Depen
     db.add(entry)
     db.flush()
 
-    if body.category_slugs:
-        set_entry_categories(db, entry, body.category_slugs)
+    if body.categories:
+        set_entry_categories(db, entry, body.categories)
 
     if body.location:
         coords = await geocode_location(entry.location)
@@ -73,8 +73,8 @@ async def update_directory_entry(
     location_before = dict(entry.location) if entry.location else None
     apply_update_data(entry, body)
 
-    if body.category_slugs is not None:
-        set_entry_categories(db, entry, body.category_slugs)
+    if body.categories is not None:
+        set_entry_categories(db, entry, body.categories)
 
     location_changed = body.location is not None and (
         body.location.model_dump(exclude_none=True) != location_before

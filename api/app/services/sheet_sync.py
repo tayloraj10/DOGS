@@ -149,7 +149,7 @@ def _build_location(row: dict[str, str]) -> dict[str, str] | None:
     return loc or None
 
 
-def _resolve_category_slugs(category_cell: str | None, errors: list[str], row_num: int) -> list[str]:
+def _resolve_categories(category_cell: str | None, errors: list[str], row_num: int) -> list[str]:
     if not category_cell or not category_cell.strip():
         return []
     parts = [p.strip() for p in category_cell.split("|") if p.strip()]
@@ -227,21 +227,21 @@ def _apply_row_to_entry(
     entry: DirectoryEntry,
     *,
     name: str,
-    focus: str | None,
+    description: str | None,
     image_url: str | None,
     location: dict[str, str] | None,
     social: dict[str, str],
-    category_slugs: list[str],
+    categories: list[str],
 ) -> None:
     entry.name = name[:255]
-    entry.focus = focus
+    entry.description = description
     entry.image_url = image_url
     entry.location = location
     entry.social_links = social or None
-    if category_slugs:
+    if categories:
         from dogs_schemas import CategorySlug
 
-        set_entry_categories(db, entry, [CategorySlug(s) for s in category_slugs])
+        set_entry_categories(db, entry, [CategorySlug(s) for s in categories])
     else:
         entry.categories = []
 
@@ -266,14 +266,14 @@ def sync_from_sheet_values(db: Session, values: list[list[Any]]) -> SheetSyncRes
         social = _build_social_links(parsed)
         instagram = social.get("instagram")
         location = _build_location(parsed)
-        category_slugs = _resolve_category_slugs(parsed.get("category"), errors, row_num)
+        categories = _resolve_categories(parsed.get("category"), errors, row_num)
 
         raw_image = (parsed.get("image") or "").strip() or None
         image_url, skip_reason = sanitize_image_url(raw_image)
         if skip_reason:
             images_skipped += 1
 
-        focus = (parsed.get("focus") or "").strip() or None
+        description = (parsed.get("focus") or "").strip() or None
         entry = find_existing_entry(db, name, instagram)
 
         if entry is None:
@@ -284,11 +284,11 @@ def sync_from_sheet_values(db: Session, values: list[list[Any]]) -> SheetSyncRes
                 db,
                 entry,
                 name=name,
-                focus=focus,
+                description=description,
                 image_url=image_url,
                 location=location,
                 social=social,
-                category_slugs=category_slugs,
+                categories=categories,
             )
             created += 1
         else:
@@ -296,15 +296,15 @@ def sync_from_sheet_values(db: Session, values: list[list[Any]]) -> SheetSyncRes
                 db,
                 entry,
                 name=name,
-                focus=focus,
+                description=description,
                 image_url=image_url,
                 location=location,
                 social=social,
-                category_slugs=category_slugs,
+                categories=categories,
             )
             updated += 1
 
-        if category_slugs and not all(s in slug_to_category for s in category_slugs):
+        if categories and not all(s in slug_to_category for s in categories):
             slug_to_category = {c.slug: c for c in db.query(Category).all()}
 
     try:
