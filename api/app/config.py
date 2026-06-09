@@ -1,16 +1,29 @@
-import os
+from pathlib import Path
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+_API_DIR = Path(__file__).resolve().parent.parent
+_REPO_ROOT = _API_DIR.parent
+
+
+def _env_files() -> tuple[str, ...]:
+    candidates = (_REPO_ROOT / ".env", _API_DIR / ".env")
+    existing = tuple(str(path) for path in candidates if path.exists())
+    return existing or (str(_REPO_ROOT / ".env"),)
+
 
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
+    model_config = SettingsConfigDict(
+        env_file=_env_files(),
+        env_file_encoding="utf-8",
+        extra="ignore",
+    )
 
-    POSTGRES_DB: str = "app_db"
-    POSTGRES_USER: str = "app_user"
-    POSTGRES_PASSWORD: str = "app_password"
+    POSTGRES_DB: str = "dogs_db"
+    POSTGRES_USER: str = "dogs_user"
+    POSTGRES_PASSWORD: str = "dogs_password"
     POSTGRES_HOST: str = "localhost"
-    POSTGRES_PORT: int = 5432
+    POSTGRES_PORT: int = 5433
 
     DB_PASSWORD: str = ""
     DATABASE_URL: str = ""

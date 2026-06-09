@@ -6,58 +6,79 @@ Phase 1 provides:
 
 - Shared Pydantic schemas (`packages/schemas`)
 - FastAPI service (`api/`) with Directory of Good CRUD + Google Sheet sync
-- PostgreSQL `dogs` schema (same Cloud SQL instance as CAN)
+- PostgreSQL `dogs` schema (same Cloud SQL instance as CAN in production)
 
-## Quick start
+## Local development (standalone)
 
-```bash
-# Install schemas + API (from repo root)
-pip install -e packages/schemas
-pip install -e api
+Same pattern as `collective_action_backend`: Postgres in Docker, API via venv or Docker Compose.
 
-# Configure environment
-cp api/.env.example api/.env
-# Edit api/.env with your DATABASE_URL and API keys
+### 1. One-time setup
 
-# Run migrations
+```powershell
+cd C:\Users\taylo\OneDrive\Desktop\projects\DOGS
+
+# Venv + install packages + copy .env
+.\scripts\setup_venv.ps1
+
+# Or manually:
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+pip install -e packages\schemas -e api
+copy .env.example .env
+```
+
+### 2. Start Postgres
+
+```powershell
+docker compose up -d db
+```
+
+Uses its own database (`dogs_db`) on host port **5433** (avoids conflict with CAN on 5432) — no CAN required.
+
+### 3. Migrate and run API
+
+```powershell
+.\.venv\Scripts\Activate.ps1
 cd api
 alembic upgrade head
-
-# Start API
 uvicorn app.main:app --reload --port 8080
 ```
 
-API docs: http://localhost:8080/docs
+- Docs: http://localhost:8080/docs
+- OpenAPI: http://localhost:8080/openapi.json
 
-OpenAPI spec (all shared models, including Cleanup / TrashReport): http://localhost:8080/openapi.json
+### OpenAPI only (no Postgres)
 
-```bash
-# Export a static copy for TypeScript codegen in other apps
-python scripts/export_openapi.py
+```powershell
+.\.venv\Scripts\Activate.ps1
+python scripts\export_openapi.py
 # → openapi/dogs-schemas.json
 ```
 
-## Import from CSV (local dev)
+### Full stack in Docker
 
-```bash
-pip install -e packages/schemas -e api
-python scripts/import_csv.py "path/to/export.csv" --geocode
+```powershell
+copy .env.example .env
+docker compose up --build
 ```
 
-## Sync from Google Sheet
+API on http://localhost:8080 — migrations run automatically on container start.
 
-```bash
+## Import data
+
+```powershell
+# CSV (local dev)
+python scripts\import_csv.py "path\to\export.csv" --geocode
+
+# Google Sheet (needs creds in .env)
 curl -X POST http://localhost:8080/admin/sync-from-sheet
 ```
 
-Share the sheet with your GCP service account and set `GOOGLE_APPLICATION_CREDENTIALS` or use ADC on Cloud Run.
+Place service account JSON in `creds/` and set `GOOGLE_APPLICATION_CREDENTIALS=creds\your-key.json`.
 
-## Docker
+## Production
 
-```bash
-docker build -f api/Dockerfile -t dogs-api .
-docker run -p 8080:8080 --env-file api/.env dogs-api
-```
+Deploy as a separate Cloud Run service on the same GCP project and Cloud SQL instance as CAN. Tables live in the `dogs` schema.
 
 ## Docs
 

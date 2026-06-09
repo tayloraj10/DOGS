@@ -6,7 +6,7 @@ import sqlalchemy as sa
 from alembic import op
 from sqlalchemy.dialects import postgresql
 
-revision: str = "002_directory_entry_schema_updates"
+revision: str = "002_entry_updates"
 down_revision: Union[str, None] = "001_create_dogs_schema"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
