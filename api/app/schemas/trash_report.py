@@ -6,8 +6,8 @@ from uuid import UUID
 
 from pydantic import BaseModel, Field
 
-from dogs_schemas.location import Coordinates
-from dogs_schemas.status import ActivityStatus
+from app.schemas.location import Coordinates
+from app.schemas.status import ActivityStatus
 
 
 class TrashReportSeverity(StrEnum):

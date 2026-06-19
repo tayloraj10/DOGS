@@ -10,11 +10,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libpq-dev gcc \
     && rm -rf /var/lib/apt/lists/*
 
-COPY packages/schemas /app/packages/schemas
 COPY api /app/api
 
-RUN pip install --no-cache-dir -e /app/packages/schemas \
-    && pip install --no-cache-dir -e /app/api
+RUN pip install --no-cache-dir -e /app/api
 
 WORKDIR /app/api
 

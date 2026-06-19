@@ -10,7 +10,7 @@ import re
 from dataclasses import dataclass
 from typing import Any
 
-from dogs_schemas import category_slug_from_label
+from app.schemas import category_slug_from_label
 from google.auth import default as google_auth_default
 from google.auth.exceptions import DefaultCredentialsError
 from google.oauth2 import service_account
@@ -239,7 +239,7 @@ def _apply_row_to_entry(
     entry.location = location
     entry.social_links = social or None
     if categories:
-        from dogs_schemas import CategorySlug
+        from app.schemas import CategorySlug
 
         set_entry_categories(db, entry, [CategorySlug(s) for s in categories])
     else:

@@ -39,7 +39,6 @@ services:
         condition: service_healthy
     volumes:
       - ./api/app:/app/api/app
-      - ./packages/schemas/src:/app/packages/schemas/src
       - ./creds:/app/creds:ro
 
 volumes:

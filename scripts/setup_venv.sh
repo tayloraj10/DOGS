@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Create a local venv and install dogs-schemas + dogs-api (standalone dev).
+# Create a local venv and install dogs-api (standalone dev).
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
@@ -13,7 +13,6 @@ fi
 source .venv/bin/activate
 
 pip install --upgrade pip
-pip install -e packages/schemas
 pip install -e api
 
 if [[ ! -f .env ]]; then

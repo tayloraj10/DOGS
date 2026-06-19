@@ -3,8 +3,8 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from dogs_schemas.categories import CategorySlug
-from dogs_schemas.location import Coordinates, SocialLinks, StructuredLocation
+from app.schemas.categories import CategorySlug
+from app.schemas.location import Coordinates, SocialLinks, StructuredLocation
 
 
 class DirectoryEntry(BaseModel):

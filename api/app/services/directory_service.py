@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from dogs_schemas import (
+from app.schemas import (
     CategorySlug,
     Coordinates,
     DirectoryEntry,
@@ -106,23 +106,23 @@ def apply_create_data(entry: DirectoryEntryModel, body: DirectoryEntryCreate) ->
 
 
 def apply_update_data(entry: DirectoryEntryModel, body: DirectoryEntryUpdate) -> None:
-    data = body.model_dump(exclude_unset=True)
-    if "name" in data and data["name"] is not None:
-        entry.name = data["name"][:255]
-    if "description" in data:
-        entry.description = data["description"]
-    if "image_url" in data:
-        entry.image_url = data["image_url"]
-    if "location" in data:
-        loc = data["location"]
-        entry.location = loc.model_dump(exclude_none=True) if loc else None
-    if "social_links" in data:
-        links = data["social_links"]
-        entry.social_links = links.model_dump(exclude_none=True) if links else None
-    if "featured" in data and data["featured"] is not None:
-        entry.featured = data["featured"]
-    if "user_ids" in data and data["user_ids"] is not None:
-        entry.user_ids = _serialize_user_ids(data["user_ids"])
+    fields = body.model_fields_set
+    if "name" in fields and body.name is not None:
+        entry.name = body.name[:255]
+    if "description" in fields:
+        entry.description = body.description
+    if "image_url" in fields:
+        entry.image_url = body.image_url
+    if "location" in fields:
+        entry.location = body.location.model_dump(exclude_none=True) if body.location else None
+    if "social_links" in fields:
+        entry.social_links = (
+            body.social_links.model_dump(exclude_none=True) if body.social_links else None
+        )
+    if "featured" in fields and body.featured is not None:
+        entry.featured = body.featured
+    if "user_ids" in fields and body.user_ids is not None:
+        entry.user_ids = _serialize_user_ids(body.user_ids)
 
 
 def set_entry_categories(db: Session, entry: DirectoryEntryModel, slugs: list[CategorySlug]) -> None:

@@ -5,8 +5,8 @@ from uuid import UUID
 
 from pydantic import BaseModel, Field
 
-from dogs_schemas.location import Coordinates, StructuredLocation
-from dogs_schemas.status import ActivityStatus
+from app.schemas.location import Coordinates, StructuredLocation
+from app.schemas.status import ActivityStatus
 
 
 class CleanupMetrics(BaseModel):

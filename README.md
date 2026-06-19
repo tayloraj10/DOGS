@@ -4,7 +4,6 @@
 
 Phase 1 provides:
 
-- Shared Pydantic schemas (`packages/schemas`)
 - FastAPI service (`api/`) with Directory of Good CRUD + Google Sheet sync
 - PostgreSQL `dogs` schema (same Cloud SQL instance as CAN in production)
 
@@ -17,13 +16,13 @@ Same pattern as `collective_action_backend`: Postgres in Docker, API via venv or
 ```powershell
 cd C:\Users\taylo\OneDrive\Desktop\projects\DOGS
 
-# Venv + install packages + copy .env
+# Venv + install package + copy .env
 .\scripts\setup_venv.ps1
 
 # Or manually:
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
-pip install -e packages\schemas -e api
+pip install -e api
 copy .env.example .env
 ```
 
@@ -52,7 +51,7 @@ uvicorn app.main:app --reload --port 8080
 ```powershell
 .\.venv\Scripts\Activate.ps1
 python scripts\export_openapi.py
-# → openapi/dogs-schemas.json
+# → openapi/dogs-api.json
 ```
 
 ### Full stack in Docker

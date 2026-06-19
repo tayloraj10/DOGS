@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from dogs_schemas import CategorySlug, DirectoryEntry, DirectoryEntryCreate, DirectoryEntryUpdate
+from app.schemas import CategorySlug, DirectoryEntry, DirectoryEntryCreate, DirectoryEntryUpdate
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 

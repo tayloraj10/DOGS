@@ -1,4 +1,4 @@
-# Create a local venv and install dogs-schemas + dogs-api (standalone dev).
+# Create a local venv and install dogs-api (standalone dev).
 $ErrorActionPreference = "Stop"
 $Root = Split-Path -Parent $PSScriptRoot
 
@@ -12,7 +12,6 @@ if (-not (Test-Path ".venv")) {
 & .\.venv\Scripts\Activate.ps1
 
 python -m pip install --upgrade pip
-python -m pip install -e packages\schemas
 python -m pip install -e api
 
 if (-not (Test-Path ".env")) {

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from dogs_schemas import (
+from app.schemas import (
     ActivityStatus,
     Cleanup,
     CleanupMetrics,

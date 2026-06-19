@@ -1,18 +1,18 @@
-from dogs_schemas.categories import (
+from app.schemas.categories import (
     CATEGORY_DISPLAY_NAMES,
     CategorySlug,
     category_slug_from_label,
 )
-from dogs_schemas.cleanup import Cleanup, CleanupMetrics
-from dogs_schemas.directory import (
+from app.schemas.cleanup import Cleanup, CleanupMetrics
+from app.schemas.directory import (
     Category,
     DirectoryEntry,
     DirectoryEntryCreate,
     DirectoryEntryUpdate,
 )
-from dogs_schemas.location import Coordinates, SocialLinks, StructuredLocation
-from dogs_schemas.status import ActivityStatus
-from dogs_schemas.trash_report import TrashReport, TrashReportSeverity
+from app.schemas.location import Coordinates, SocialLinks, StructuredLocation
+from app.schemas.status import ActivityStatus
+from app.schemas.trash_report import TrashReport, TrashReportSeverity
 
 __all__ = [
     "CATEGORY_DISPLAY_NAMES",

@@ -20,8 +20,8 @@ def main() -> None:
         "-o",
         "--output",
         type=Path,
-        default=Path(__file__).resolve().parents[1] / "openapi" / "dogs-schemas.json",
-        help="Output path (default: openapi/dogs-schemas.json)",
+        default=Path(__file__).resolve().parents[1] / "openapi" / "dogs-api.json",
+        help="Output path (default: openapi/dogs-api.json)",
     )
     args = parser.parse_args()
 

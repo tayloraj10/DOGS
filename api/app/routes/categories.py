@@ -1,4 +1,4 @@
-from dogs_schemas import Category as CategorySchema, CategorySlug
+from app.schemas import Category as CategorySchema, CategorySlug
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
