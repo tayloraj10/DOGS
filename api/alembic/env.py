@@ -10,7 +10,13 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")
 
 from app.config import settings  # noqa: E402
 from app.database import Base, DOGS_SCHEMA  # noqa: E402
-from app.models import Category, DirectoryEntry, DirectoryEntryCategory  # noqa: F401, E402
+from app.models import (  # noqa: F401, E402
+    Category,
+    Cleanup,
+    DirectoryEntry,
+    DirectoryEntryCategory,
+    TrashReport,
+)
 
 config = context.config
 config.set_main_option("sqlalchemy.url", settings.database_url)

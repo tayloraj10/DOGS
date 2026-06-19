@@ -91,9 +91,19 @@ Deploy as a separate Cloud Run service on the same GCP project and Cloud SQL ins
 |--------|------|-------------|
 | GET | `/health` | Health check |
 | GET | `/categories` | List categories |
-| GET | `/directory` | List DOG entries |
+| GET | `/directory` | List DOG entries (groups) |
 | GET | `/directory/{id}` | Get entry |
 | POST | `/directory` | Create entry |
 | PATCH | `/directory/{id}` | Update entry |
 | DELETE | `/directory/{id}` | Delete entry |
+| GET | `/cleanups` | List cleanups |
+| GET | `/cleanups/{id}` | Get cleanup |
+| POST | `/cleanups` | Create cleanup |
+| PATCH | `/cleanups/{id}` | Update cleanup |
+| DELETE | `/cleanups/{id}` | Delete cleanup |
+| GET | `/trash-reports` | List trash reports |
+| GET | `/trash-reports/{id}` | Get trash report |
+| POST | `/trash-reports` | Create trash report |
+| PATCH | `/trash-reports/{id}` | Update trash report |
+| DELETE | `/trash-reports/{id}` | Delete trash report |
 | POST | `/admin/sync-from-sheet` | Sync from Google Sheet |

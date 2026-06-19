@@ -1,4 +1,4 @@
-"""Create dogs schema, directory tables, and seed categories."""
+"""Create dogs schema and all tables."""
 
 import uuid
 from typing import Sequence, Union
@@ -7,7 +7,7 @@ import sqlalchemy as sa
 from alembic import op
 from sqlalchemy.dialects import postgresql
 
-revision: str = "001_create_dogs_schema"
+revision: str = "001_initial_schema"
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -41,13 +41,14 @@ def upgrade() -> None:
         "directory_entries",
         sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True, nullable=False),
         sa.Column("name", sa.String(255), nullable=False),
-        sa.Column("focus", sa.Text(), nullable=True),
+        sa.Column("description", sa.Text(), nullable=True),
         sa.Column("image_url", sa.Text(), nullable=True),
         sa.Column("location", postgresql.JSONB(astext_type=sa.Text()), nullable=True),
         sa.Column("latitude", sa.Double(), nullable=True),
         sa.Column("longitude", sa.Double(), nullable=True),
         sa.Column("social_links", postgresql.JSONB(astext_type=sa.Text()), nullable=True),
         sa.Column("featured", sa.Boolean(), nullable=False, server_default=sa.text("false")),
+        sa.Column("user_ids", postgresql.JSONB(astext_type=sa.Text()), nullable=True),
         sa.Column(
             "created_at",
             sa.DateTime(timezone=True),
@@ -98,6 +99,47 @@ def upgrade() -> None:
         postgresql_using="btree",
     )
 
+    op.create_table(
+        "cleanups",
+        sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True, nullable=False),
+        sa.Column("title", sa.String(255), nullable=False),
+        sa.Column("description", sa.Text(), nullable=True),
+        sa.Column("location", postgresql.JSONB(astext_type=sa.Text()), nullable=True),
+        sa.Column("latitude", sa.Double(), nullable=True),
+        sa.Column("longitude", sa.Double(), nullable=True),
+        sa.Column("scheduled_start", sa.DateTime(timezone=True), nullable=True),
+        sa.Column("scheduled_end", sa.DateTime(timezone=True), nullable=True),
+        sa.Column("status", sa.String(50), nullable=True),
+        sa.Column("photo_urls", postgresql.JSONB(astext_type=sa.Text()), nullable=True),
+        sa.Column("metrics", postgresql.JSONB(astext_type=sa.Text()), nullable=True),
+        sa.Column("submitted_by_user_id", postgresql.UUID(as_uuid=True), nullable=True),
+        sa.Column("organizer_user_ids", postgresql.JSONB(astext_type=sa.Text()), nullable=True),
+        sa.Column("rsvp_user_ids", postgresql.JSONB(astext_type=sa.Text()), nullable=True),
+        sa.Column("attended_user_ids", postgresql.JSONB(astext_type=sa.Text()), nullable=True),
+        schema=SCHEMA,
+    )
+
+    op.create_table(
+        "trash_reports",
+        sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True, nullable=False),
+        sa.Column("title", sa.String(255), nullable=False),
+        sa.Column("description", sa.Text(), nullable=True),
+        sa.Column("location", postgresql.JSONB(astext_type=sa.Text()), nullable=True),
+        sa.Column("latitude", sa.Double(), nullable=True),
+        sa.Column("longitude", sa.Double(), nullable=True),
+        sa.Column("image_urls", postgresql.JSONB(astext_type=sa.Text()), nullable=True),
+        sa.Column("severity", sa.String(20), nullable=True),
+        sa.Column("status", sa.String(50), nullable=True),
+        sa.Column("reported_at", sa.DateTime(timezone=True), nullable=True),
+        sa.Column("submitted_by_user_id", postgresql.UUID(as_uuid=True), nullable=True),
+        sa.Column("resolved_by_user_id", postgresql.UUID(as_uuid=True), nullable=True),
+        # Soft reference to cleanups.id — intentionally no FK constraint, to keep
+        # trash_reports decoupled from the cleanups table.
+        sa.Column("resolved_by_cleanup_id", postgresql.UUID(as_uuid=True), nullable=True),
+        sa.Column("resolved_at", sa.DateTime(timezone=True), nullable=True),
+        schema=SCHEMA,
+    )
+
     categories_table = sa.table(
         "categories",
         sa.column("id", postgresql.UUID(as_uuid=True)),
@@ -112,6 +154,8 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
+    op.drop_table("trash_reports", schema=SCHEMA)
+    op.drop_table("cleanups", schema=SCHEMA)
     op.drop_index("ix_directory_entries_instagram", table_name="directory_entries", schema=SCHEMA)
     op.drop_index("ix_directory_entries_name_lower", table_name="directory_entries", schema=SCHEMA)
     op.drop_table("directory_entry_categories", schema=SCHEMA)
