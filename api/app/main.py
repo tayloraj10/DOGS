@@ -4,7 +4,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.openapi_extra import build_openapi_schema
-from app.routes import admin, categories, cleanups, directory, health, trash_reports
+from app.routes import admin, categories, cleanups, directory, erd, health, trash_reports
 
 
 @asynccontextmanager
@@ -33,6 +33,7 @@ app.include_router(directory.router)
 app.include_router(cleanups.router)
 app.include_router(trash_reports.router)
 app.include_router(admin.router)
+app.include_router(erd.router)
 
 
 def custom_openapi():

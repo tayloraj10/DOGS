@@ -85,6 +85,19 @@ Deploy as a separate Cloud Run service on the same GCP project and Cloud SQL ins
 - [Dev plans index](./DOGS_Dev_Plans_Index.md)
 - [Phase 1 plan](./DOGS_Phase1_Dev_Plan.md)
 
+## ER diagram
+
+A Mermaid `erDiagram` of the live schema is generated from the SQLAlchemy
+models. View it via the running API at `/erd`, or regenerate the checked-in
+copy at [`docs/erd.mmd`](./docs/erd.mmd):
+
+```powershell
+.\.venv\Scripts\Activate.ps1
+python scripts\generate_erd.py
+```
+
+Paste the output into [mermaid.live](https://mermaid.live) to render it.
+
 ## Endpoints
 
 | Method | Path | Description |
@@ -107,3 +120,4 @@ Deploy as a separate Cloud Run service on the same GCP project and Cloud SQL ins
 | PATCH | `/trash-reports/{id}` | Update trash report |
 | DELETE | `/trash-reports/{id}` | Delete trash report |
 | POST | `/admin/sync-from-sheet` | Sync from Google Sheet |
+| GET | `/erd` | Mermaid ER diagram of the live schema |

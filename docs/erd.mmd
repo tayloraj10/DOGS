@@ -1,0 +1,64 @@
+erDiagram
+    CATEGORIES {
+        uuid id PK
+        string slug "CategorySlug enum - animals | environment | fitness | nature | trash | water"
+        string name
+    }
+
+    CLEANUPS {
+        uuid id PK
+        string title
+        text description
+        jsonb location "StructuredLocation - city: str?, state: str?, zip_code: str?, country: str?"
+        double latitude
+        double longitude
+        timestamptz scheduled_start
+        timestamptz scheduled_end
+        string status "ActivityStatus enum - open | scheduled | in_progress | completed | addressed | verified | cancelled"
+        jsonb photo_urls "list of str (URLs)"
+        jsonb metrics "CleanupMetrics - small_bags: int?, large_bags: int?, pounds: float?"
+        uuid submitted_by_user_id
+        jsonb organizer_user_ids "list of UUID"
+        jsonb rsvp_user_ids "list of UUID"
+        jsonb attended_user_ids "list of UUID"
+    }
+
+    DIRECTORY_ENTRIES {
+        uuid id PK
+        string name
+        text description
+        text image_url
+        jsonb location "StructuredLocation - city: str?, state: str?, zip_code: str?, country: str?"
+        float latitude
+        float longitude
+        jsonb social_links "SocialLinks - website: str?, instagram: str?, tiktok: str?, youtube: str?, facebook: str?, twitter: str?"
+        boolean featured
+        jsonb user_ids "list of UUID"
+        timestamptz created_at
+        timestamptz updated_at
+    }
+
+    DIRECTORY_ENTRY_CATEGORIES {
+        uuid directory_entry_id PK,FK
+        uuid category_id PK,FK
+    }
+
+    TRASH_REPORTS {
+        uuid id PK
+        string title
+        text description
+        jsonb location "StructuredLocation - city: str?, state: str?, zip_code: str?, country: str?"
+        double latitude
+        double longitude
+        jsonb image_urls "list of str (URLs)"
+        string severity "TrashReportSeverity enum - low | medium | high"
+        string status "ActivityStatus enum - open | scheduled | in_progress | completed | addressed | verified | cancelled"
+        timestamptz reported_at
+        uuid submitted_by_user_id
+        uuid resolved_by_user_id
+        uuid resolved_by_cleanup_id
+        timestamptz resolved_at
+    }
+
+    CATEGORIES ||--o{ DIRECTORY_ENTRY_CATEGORIES : has
+    DIRECTORY_ENTRIES ||--o{ DIRECTORY_ENTRY_CATEGORIES : has
