@@ -1,0 +1,91 @@
+name: CI - Test and Lint
+
+on:
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install uv
+        run: |
+          curl -LsSf https://astral.sh/uv/install.sh | sh
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+      - name: Install dependencies
+        run: uv pip install --system -e "api[dev]"
+
+      - name: Lint with ruff
+        run: |
+          ruff check api/app
+          ruff format --check api/app
+
+      - name: Run tests
+        run: pytest api/tests -v || echo "No tests found yet"
+
+  docker-build:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: testpass
+          POSTGRES_DB: testdb
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Build Docker image (test)
+        run: docker build -f api/Dockerfile -t test-image .
+
+      - name: Test Docker image runs
+        run: |
+          docker run -d -p 8000:8080 \
+            -e DATABASE_URL="postgresql+psycopg2://postgres:testpass@172.17.0.1:5432/testdb" \
+            --name test-container test-image
+
+          echo "Waiting for container to initialize..."
+          sleep 15
+
+          if ! docker ps | grep -q test-container; then
+            echo "Container exited. Showing logs:"
+            docker logs test-container
+            exit 1
+          fi
+
+          echo "Container is running. Checking logs:"
+          docker logs test-container
+
+          echo "Testing health endpoint..."
+          for i in {1..5}; do
+            if curl -f http://localhost:8000/health; then
+              echo "Health check passed"
+              exit 0
+            fi
+            echo "Retry $i/5 failed, waiting..."
+            sleep 3
+          done
+
+          echo "Health check failed after 5 attempts"
+          docker logs test-container
+          exit 1

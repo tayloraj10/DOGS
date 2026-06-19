@@ -79,6 +79,8 @@ Place service account JSON in `creds/` and set `GOOGLE_APPLICATION_CREDENTIALS=c
 
 Deploy as a separate Cloud Run service on the same GCP project and Cloud SQL instance as CAN. Tables live in the `dogs` schema.
 
+See [DEPLOY.md](./DEPLOY.md) for the GitHub Actions workflow and manual deploy steps.
+
 ## Docs
 
 - [Architecture](./DOGS_Architecture_Specification.md)
