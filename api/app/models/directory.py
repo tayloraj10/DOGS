@@ -25,6 +25,7 @@ class DirectoryEntry(Base):
     latitude: Mapped[float | None] = mapped_column(nullable=True)
     longitude: Mapped[float | None] = mapped_column(nullable=True)
     social_links: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    suggested_category: Mapped[str | None] = mapped_column(String(255), nullable=True)
     featured: Mapped[bool] = mapped_column(default=False, nullable=False)
     status: Mapped[str] = mapped_column(String(20), default="published", nullable=False)
     user_ids: Mapped[list | None] = mapped_column(JSON, nullable=True)

@@ -22,6 +22,7 @@ class DirectoryEntry(BaseModel):
     coordinates: Coordinates | None = None
     social_links: SocialLinks | None = None
     categories: list[CategorySlug] = Field(default_factory=list)
+    suggested_category: str | None = None
     featured: bool = False
     status: DirectoryEntryStatus = DirectoryEntryStatus.published
     user_ids: list[UUID] = Field(default_factory=list)
@@ -38,6 +39,7 @@ class DirectoryEntryCreate(BaseModel):
     location: StructuredLocation | None = None
     social_links: SocialLinks | None = None
     categories: list[CategorySlug] = Field(default_factory=list)
+    suggested_category: str | None = None
     featured: bool = False
     status: DirectoryEntryStatus = DirectoryEntryStatus.published
     user_ids: list[UUID] = Field(default_factory=list)
@@ -50,6 +52,7 @@ class DirectoryEntryUpdate(BaseModel):
     location: StructuredLocation | None = None
     social_links: SocialLinks | None = None
     categories: list[CategorySlug] | None = None
+    suggested_category: str | None = None
     featured: bool | None = None
     status: DirectoryEntryStatus | None = None
     user_ids: list[UUID] | None = None

@@ -36,6 +36,13 @@ export default function ReviewEntryPage() {
         showcase.
       </p>
 
+      {entry.suggested_category && (
+        <p className="mt-4 rounded-lg bg-amber-50 px-4 py-2 text-sm text-amber-800 ring-1 ring-amber-200">
+          They suggested a new category: <span className="font-medium">{entry.suggested_category}</span>.
+          If it's worth adding, create it and assign it below before publishing.
+        </p>
+      )}
+
       <div className="mt-6 rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
         <DirectoryEntryForm
           initialValues={entry}

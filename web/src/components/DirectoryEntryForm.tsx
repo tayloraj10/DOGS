@@ -64,6 +64,9 @@ export default function DirectoryEntryForm({
   const [selectedCategories, setSelectedCategories] = useState<CategorySlug[]>(
     initialValues?.categories ?? [],
   );
+  const [suggestedCategory, setSuggestedCategory] = useState(
+    initialValues?.suggested_category ?? "",
+  );
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
@@ -108,6 +111,7 @@ export default function DirectoryEntryForm({
         social_links:
           Object.values(socialLinks).some(Boolean) ? socialLinks : null,
         categories: selectedCategories,
+        suggested_category: suggestedCategory.trim() || null,
       });
     } catch {
       setSubmitError("Something went wrong while saving. Please try again.");
@@ -219,6 +223,18 @@ export default function DirectoryEntryForm({
               {category.name}
             </button>
           ))}
+        </div>
+        <div className="mt-3">
+          <label className="block text-xs font-medium text-slate-500">
+            Don't see a category that fits? Suggest one (we'll review and add it)
+          </label>
+          <input
+            type="text"
+            placeholder="e.g. Community gardens"
+            value={suggestedCategory}
+            onChange={(e) => setSuggestedCategory(e.target.value)}
+            className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none"
+          />
         </div>
       </div>
 

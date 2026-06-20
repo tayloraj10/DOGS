@@ -39,6 +39,11 @@ export default function ReviewQueuePage() {
                 {entry.description}
               </p>
             )}
+            {entry.suggested_category && (
+              <p className="mt-2 inline-block rounded-full bg-amber-50 px-2.5 py-0.5 text-xs font-medium text-amber-700 ring-1 ring-amber-200">
+                Suggested category: {entry.suggested_category}
+              </p>
+            )}
           </Link>
         ))}
       </div>

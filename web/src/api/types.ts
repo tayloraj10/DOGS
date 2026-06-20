@@ -53,6 +53,7 @@ export interface DirectoryEntry {
   coordinates: Coordinates | null;
   social_links: SocialLinks | null;
   categories: CategorySlug[];
+  suggested_category: string | null;
   featured: boolean;
   status: DirectoryEntryStatus;
   user_ids: string[];
@@ -67,6 +68,7 @@ export interface DirectoryEntryInput {
   location?: StructuredLocation | null;
   social_links?: SocialLinks | null;
   categories?: CategorySlug[];
+  suggested_category?: string | null;
   featured?: boolean;
   status?: DirectoryEntryStatus;
 }

@@ -40,6 +40,7 @@ def entry_to_schema(entry: DirectoryEntryModel) -> DirectoryEntry:
         coordinates=coordinates,
         social_links=social,
         categories=categories,
+        suggested_category=entry.suggested_category,
         featured=entry.featured,
         status=DirectoryEntryStatus(entry.status),
         user_ids=_parse_user_ids(entry.user_ids),
@@ -112,6 +113,7 @@ def apply_create_data(entry: DirectoryEntryModel, body: DirectoryEntryCreate) ->
     entry.social_links = (
         body.social_links.model_dump(exclude_none=True) if body.social_links else None
     )
+    entry.suggested_category = body.suggested_category.strip()[:255] if body.suggested_category else None
     entry.featured = body.featured
     entry.status = body.status.value
     entry.user_ids = _serialize_user_ids(body.user_ids)
@@ -130,6 +132,10 @@ def apply_update_data(entry: DirectoryEntryModel, body: DirectoryEntryUpdate) ->
     if "social_links" in fields:
         entry.social_links = (
             body.social_links.model_dump(exclude_none=True) if body.social_links else None
+        )
+    if "suggested_category" in fields:
+        entry.suggested_category = (
+            body.suggested_category.strip()[:255] if body.suggested_category else None
         )
     if "featured" in fields and body.featured is not None:
         entry.featured = body.featured
