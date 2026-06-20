@@ -6,6 +6,7 @@ from app.schemas import (
     DirectoryEntryCreate,
     DirectoryEntryStatus,
     DirectoryEntryUpdate,
+    StructuredLocation,
 )
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
@@ -20,7 +21,7 @@ from app.services.directory_service import (
     list_entries,
     set_entry_categories,
 )
-from app.services.geocoding import geocode_location
+from app.services.geocoding import geocode_location, lookup_location
 
 router = APIRouter(prefix="/directory", tags=["directory"])
 
@@ -35,6 +36,18 @@ async def list_directory(
 ):
     entries = list_entries(db, limit=limit, offset=offset, category_slug=category, status=status)
     return [entry_to_schema(e) for e in entries]
+
+
+@router.post("/location/lookup", response_model=StructuredLocation)
+async def lookup_directory_location(body: StructuredLocation):
+    """Fill in missing location fields (city/state/zip/country) from whatever's already
+    entered, using the Geocoding API. Never overwrites fields the caller already filled in."""
+    merged = await lookup_location(body.model_dump(exclude_none=True))
+    if not merged:
+        raise HTTPException(
+            status_code=404, detail="Could not find a matching location for the info provided"
+        )
+    return StructuredLocation(**merged)
 
 
 @router.get("/{entry_id}", response_model=DirectoryEntry)

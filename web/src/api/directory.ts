@@ -4,6 +4,7 @@ import type {
   DirectoryEntryInput,
   DirectoryEntryStatus,
   DirectoryExtractResponse,
+  StructuredLocation,
 } from "./types";
 
 export function listDirectoryEntries(status?: DirectoryEntryStatus, limit = 50) {
@@ -31,4 +32,8 @@ export function deleteDirectoryEntry(id: string) {
 
 export function extractFromUrl(url: string) {
   return apiClient.post<DirectoryExtractResponse>("/directory/extract", { url });
+}
+
+export function lookupLocation(partial: StructuredLocation) {
+  return apiClient.post<StructuredLocation>("/directory/location/lookup", partial);
 }

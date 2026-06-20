@@ -40,6 +40,48 @@ def build_geocode_address(location: dict | None) -> str | None:
     return ", ".join(parts) if parts else None
 
 
+async def lookup_location(partial: dict | None) -> dict | None:
+    """Given whatever location fields are already known, fetch the rest (city/state/zip/country)
+    from the Geocoding API. Never overwrites fields the caller already provided."""
+    api_key = settings.GOOGLE_MAPS_GEOCODING_API_KEY
+    if not api_key:
+        return None
+
+    address = build_geocode_address(partial)
+    if not address:
+        return None
+
+    try:
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            resp = await client.get(
+                _GEOCODING_URL,
+                params={"address": address, "key": api_key},
+            )
+        data = resp.json()
+        if data.get("status") != "OK" or not data.get("results"):
+            return None
+
+        found: dict[str, str] = {}
+        for component in data["results"][0]["address_components"]:
+            types = component.get("types", [])
+            if "locality" in types or "postal_town" in types:
+                found.setdefault("city", component["long_name"])
+            elif "administrative_area_level_1" in types:
+                found.setdefault("state", component["short_name"])
+            elif "postal_code" in types:
+                found.setdefault("zip_code", component["long_name"])
+            elif "country" in types:
+                found.setdefault("country", component["long_name"])
+
+        merged = dict(partial or {})
+        for key, value in found.items():
+            if not merged.get(key):
+                merged[key] = value
+        return merged
+    except Exception:
+        return None
+
+
 async def geocode_location(location: dict | None) -> tuple[float, float] | None:
     api_key = settings.GOOGLE_MAPS_GEOCODING_API_KEY
     if not api_key:

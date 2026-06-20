@@ -1,5 +1,8 @@
 import { useState } from "react";
 import { useCategories } from "../hooks/useCategories";
+import { lookupLocation } from "../api/directory";
+import { ApiError } from "../api/client";
+import { extractSocialUsername } from "../utils/socialLinks";
 import UrlExtractBox from "./UrlExtractBox";
 import type {
   CategorySlug,
@@ -69,6 +72,8 @@ export default function DirectoryEntryForm({
   );
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [lookingUpLocation, setLookingUpLocation] = useState(false);
+  const [lookupError, setLookupError] = useState<string | null>(null);
 
   function handleExtractResult(result: DirectoryExtractResponse) {
     if (!name && result.name) setName(result.name);
@@ -93,6 +98,38 @@ export default function DirectoryEntryForm({
     );
   }
 
+  function handleSocialBlur(field: Exclude<keyof SocialLinks, "website">) {
+    setSocialLinks((s) => {
+      const value = s[field];
+      if (!value) return s;
+      const username = extractSocialUsername(field, value);
+      return username === value ? s : { ...s, [field]: username };
+    });
+  }
+
+  async function handleLocationLookup() {
+    if (!Object.values(location).some(Boolean)) return;
+    setLookingUpLocation(true);
+    setLookupError(null);
+    try {
+      const result = await lookupLocation(location);
+      setLocation((l) => ({
+        city: l.city || result.city,
+        state: l.state || result.state,
+        zip_code: l.zip_code || result.zip_code,
+        country: l.country || result.country,
+      }));
+    } catch (err) {
+      setLookupError(
+        err instanceof ApiError
+          ? err.message
+          : "Couldn't look up that location. Try filling in more fields manually.",
+      );
+    } finally {
+      setLookingUpLocation(false);
+    }
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!name.trim()) {
@@ -113,8 +150,12 @@ export default function DirectoryEntryForm({
         categories: selectedCategories,
         suggested_category: suggestedCategory.trim() || null,
       });
-    } catch {
-      setSubmitError("Something went wrong while saving. Please try again.");
+    } catch (err) {
+      setSubmitError(
+        err instanceof ApiError
+          ? err.message
+          : "Something went wrong while saving. Please try again.",
+      );
     } finally {
       setSubmitting(false);
     }
@@ -155,8 +196,22 @@ export default function DirectoryEntryForm({
       </div>
 
       <div>
-        <p className="block text-sm font-medium text-slate-700">Location</p>
-        <div className="mt-1 grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <div className="flex items-center justify-between">
+          <p className="block text-sm font-medium text-slate-700">Location</p>
+          <button
+            type="button"
+            onClick={handleLocationLookup}
+            disabled={lookingUpLocation || !Object.values(location).some(Boolean)}
+            className="text-sm font-medium text-emerald-700 hover:text-emerald-900 disabled:cursor-not-allowed disabled:text-slate-300"
+          >
+            {lookingUpLocation ? "Looking up..." : "Fill in the rest"}
+          </button>
+        </div>
+        <p className="mt-1 text-xs text-slate-500">
+          Fill in whatever you know (e.g. just a zip code) and use "Fill in the rest" to
+          look up the rest.
+        </p>
+        <div className="mt-2 grid grid-cols-2 gap-3 sm:grid-cols-4">
           <input
             type="text"
             placeholder="City"
@@ -166,7 +221,7 @@ export default function DirectoryEntryForm({
           />
           <input
             type="text"
-            placeholder="State"
+            placeholder="State (2-letter, US)"
             value={location.state ?? ""}
             onChange={(e) => setLocation((l) => ({ ...l, state: e.target.value || null }))}
             className="rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none"
@@ -186,22 +241,36 @@ export default function DirectoryEntryForm({
             className="rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none"
           />
         </div>
+        {lookupError && <p className="mt-1 text-sm text-red-600">{lookupError}</p>}
       </div>
 
       <div>
         <p className="block text-sm font-medium text-slate-700">Social links</p>
-        <div className="mt-1 grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <p className="mt-1 text-xs text-slate-500">
+          Just the username, not the full link (e.g. "sodogs", not
+          instagram.com/sodogs) — paste a full link and we'll trim it down for you.
+        </p>
+        <div className="mt-2 grid grid-cols-1 gap-3 sm:grid-cols-2">
           {SOCIAL_FIELDS.map((field) => (
-            <input
-              key={field}
-              type="text"
-              placeholder={SOCIAL_LABELS[field]}
-              value={socialLinks[field] ?? ""}
-              onChange={(e) =>
-                setSocialLinks((s) => ({ ...s, [field]: e.target.value || null }))
-              }
-              className="rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none"
-            />
+            <div key={field} className="relative">
+              {field !== "website" && (
+                <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-sm text-slate-400">
+                  @
+                </span>
+              )}
+              <input
+                type="text"
+                placeholder={field === "website" ? "Website" : `${SOCIAL_LABELS[field]} username`}
+                value={socialLinks[field] ?? ""}
+                onChange={(e) =>
+                  setSocialLinks((s) => ({ ...s, [field]: e.target.value || null }))
+                }
+                onBlur={() => field !== "website" && handleSocialBlur(field)}
+                className={`w-full rounded-lg border border-slate-300 py-2 text-sm focus:border-emerald-500 focus:outline-none ${
+                  field !== "website" ? "pl-7 pr-3" : "px-3"
+                }`}
+              />
+            </div>
           ))}
         </div>
       </div>
