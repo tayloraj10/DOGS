@@ -12,7 +12,7 @@ export default function ShowcasePage() {
   const [selectedCategory, setSelectedCategory] = useState<CategorySlug | null>(null);
 
   useEffect(() => {
-    listDirectoryEntries("published")
+    listDirectoryEntries("published", 500)
       .then(setEntries)
       .finally(() => setLoading(false));
   }, []);
@@ -41,6 +41,13 @@ export default function ShowcasePage() {
           onSelect={setSelectedCategory}
         />
       </div>
+
+      {!loading && (
+        <p className="mt-6 text-center text-sm text-slate-500">
+          {visibleEntries.length} {visibleEntries.length === 1 ? "entry" : "entries"}
+          {selectedCategory ? " in this category" : ""}
+        </p>
+      )}
 
       {loading && <p className="mt-10 text-center text-sm text-slate-400">Loading...</p>}
 

@@ -1,6 +1,12 @@
 from uuid import UUID
 
-from app.schemas import CategorySlug, DirectoryEntry, DirectoryEntryCreate, DirectoryEntryUpdate
+from app.schemas import (
+    CategorySlug,
+    DirectoryEntry,
+    DirectoryEntryCreate,
+    DirectoryEntryStatus,
+    DirectoryEntryUpdate,
+)
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
@@ -21,12 +27,13 @@ router = APIRouter(prefix="/directory", tags=["directory"])
 
 @router.get("", response_model=list[DirectoryEntry])
 async def list_directory(
-    limit: int = Query(50, ge=1, le=200),
+    limit: int = Query(50, ge=1, le=500),
     offset: int = Query(0, ge=0),
     category: CategorySlug | None = Query(None),
+    status: DirectoryEntryStatus | None = Query(None),
     db: Session = Depends(get_db),
 ):
-    entries = list_entries(db, limit=limit, offset=offset, category_slug=category)
+    entries = list_entries(db, limit=limit, offset=offset, category_slug=category, status=status)
     return [entry_to_schema(e) for e in entries]
 
 

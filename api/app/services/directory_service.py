@@ -5,6 +5,7 @@ from app.schemas import (
     Coordinates,
     DirectoryEntry,
     DirectoryEntryCreate,
+    DirectoryEntryStatus,
     DirectoryEntryUpdate,
     SocialLinks,
     StructuredLocation,
@@ -40,6 +41,7 @@ def entry_to_schema(entry: DirectoryEntryModel) -> DirectoryEntry:
         social_links=social,
         categories=categories,
         featured=entry.featured,
+        status=DirectoryEntryStatus(entry.status),
         user_ids=_parse_user_ids(entry.user_ids),
         created_at=entry.created_at,
         updated_at=entry.updated_at,
@@ -61,17 +63,26 @@ def list_entries(
     limit: int = 50,
     offset: int = 0,
     category_slug: CategorySlug | None = None,
+    status: DirectoryEntryStatus | None = None,
 ) -> list[DirectoryEntryModel]:
     q = db.query(DirectoryEntryModel).options(selectinload(DirectoryEntryModel.categories))
     if category_slug:
         q = q.join(DirectoryEntryModel.categories).filter(Category.slug == category_slug.value)
+    if status:
+        q = q.filter(DirectoryEntryModel.status == status.value)
     return q.order_by(DirectoryEntryModel.name).offset(offset).limit(limit).all()
 
 
-def count_entries(db: Session, category_slug: CategorySlug | None = None) -> int:
+def count_entries(
+    db: Session,
+    category_slug: CategorySlug | None = None,
+    status: DirectoryEntryStatus | None = None,
+) -> int:
     q = db.query(DirectoryEntryModel)
     if category_slug:
         q = q.join(DirectoryEntryModel.categories).filter(Category.slug == category_slug.value)
+    if status:
+        q = q.filter(DirectoryEntryModel.status == status.value)
     return q.count()
 
 
@@ -102,6 +113,7 @@ def apply_create_data(entry: DirectoryEntryModel, body: DirectoryEntryCreate) ->
         body.social_links.model_dump(exclude_none=True) if body.social_links else None
     )
     entry.featured = body.featured
+    entry.status = body.status.value
     entry.user_ids = _serialize_user_ids(body.user_ids)
 
 
@@ -121,6 +133,8 @@ def apply_update_data(entry: DirectoryEntryModel, body: DirectoryEntryUpdate) ->
         )
     if "featured" in fields and body.featured is not None:
         entry.featured = body.featured
+    if "status" in fields and body.status is not None:
+        entry.status = body.status.value
     if "user_ids" in fields and body.user_ids is not None:
         entry.user_ids = _serialize_user_ids(body.user_ids)
 

@@ -6,6 +6,7 @@ Phase 1 provides:
 
 - FastAPI service (`api/`) with Directory of Good CRUD + Google Sheet sync
 - PostgreSQL `dogs` schema (same Cloud SQL instance as CAN in production)
+- React frontend (`web/`) for capturing, submitting, reviewing, and showcasing Directory of Good entries
 
 ## Local development (standalone)
 
@@ -63,6 +64,26 @@ docker compose up --build
 
 API on http://localhost:8080 — migrations run automatically on container start.
 
+## Frontend (`web/`)
+
+A Vite + React + TypeScript + Tailwind app that talks directly to the API (CORS is wide open). It has no auth — `/capture` and `/review` are unlisted routes meant for local, personal use only.
+
+```powershell
+cd web
+npm install
+npm run dev
+```
+
+Runs on http://localhost:5173 by default, pointed at `http://localhost:8080`. Override with a `VITE_API_BASE_URL` env var if the API runs elsewhere.
+
+| Route | Purpose |
+|-------|---------|
+| `/` | Showcase — public grid of published entries, filterable by category |
+| `/submit` | Public form for others to submit themselves/their group (saved as `pending`) |
+| `/capture` | Unlisted — paste a social/website link, auto-fill via `/directory/extract`, fill gaps, publish directly |
+| `/review` | Unlisted — queue of `pending` submissions awaiting verification |
+| `/review/:id` | Unlisted — fill in gaps on a pending submission, then publish |
+
 ## Import data
 
 ```powershell
@@ -106,7 +127,7 @@ Paste the output into [mermaid.live](https://mermaid.live) to render it.
 |--------|------|-------------|
 | GET | `/health` | Health check |
 | GET | `/categories` | List categories |
-| GET | `/directory` | List DOG entries (groups) |
+| GET | `/directory` | List DOG entries (groups); filter with `?status=pending\|published` and `?category=<slug>` |
 | GET | `/directory/{id}` | Get entry |
 | POST | `/directory` | Create entry |
 | PATCH | `/directory/{id}` | Update entry |

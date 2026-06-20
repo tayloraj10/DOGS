@@ -6,9 +6,11 @@ import type {
   DirectoryExtractResponse,
 } from "./types";
 
-export function listDirectoryEntries(status?: DirectoryEntryStatus) {
-  const query = status ? `?status=${status}` : "";
-  return apiClient.get<DirectoryEntry[]>(`/directory${query}`);
+export function listDirectoryEntries(status?: DirectoryEntryStatus, limit = 50) {
+  const params = new URLSearchParams();
+  if (status) params.set("status", status);
+  params.set("limit", String(limit));
+  return apiClient.get<DirectoryEntry[]>(`/directory?${params.toString()}`);
 }
 
 export function getDirectoryEntry(id: string) {

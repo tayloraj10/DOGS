@@ -1,10 +1,16 @@
 from datetime import datetime
+from enum import StrEnum
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field
 
 from app.schemas.categories import CategorySlug
 from app.schemas.location import Coordinates, SocialLinks, StructuredLocation
+
+
+class DirectoryEntryStatus(StrEnum):
+    pending = "pending"
+    published = "published"
 
 
 class DirectoryEntry(BaseModel):
@@ -17,6 +23,7 @@ class DirectoryEntry(BaseModel):
     social_links: SocialLinks | None = None
     categories: list[CategorySlug] = Field(default_factory=list)
     featured: bool = False
+    status: DirectoryEntryStatus = DirectoryEntryStatus.published
     user_ids: list[UUID] = Field(default_factory=list)
     created_at: datetime
     updated_at: datetime
@@ -32,6 +39,7 @@ class DirectoryEntryCreate(BaseModel):
     social_links: SocialLinks | None = None
     categories: list[CategorySlug] = Field(default_factory=list)
     featured: bool = False
+    status: DirectoryEntryStatus = DirectoryEntryStatus.published
     user_ids: list[UUID] = Field(default_factory=list)
 
 
@@ -43,6 +51,7 @@ class DirectoryEntryUpdate(BaseModel):
     social_links: SocialLinks | None = None
     categories: list[CategorySlug] | None = None
     featured: bool | None = None
+    status: DirectoryEntryStatus | None = None
     user_ids: list[UUID] | None = None
 
 

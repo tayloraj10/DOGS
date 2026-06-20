@@ -8,6 +8,7 @@ from app.schemas.directory import (
     Category,
     DirectoryEntry,
     DirectoryEntryCreate,
+    DirectoryEntryStatus,
     DirectoryEntryUpdate,
 )
 from app.schemas.location import Coordinates, SocialLinks, StructuredLocation
@@ -31,6 +32,7 @@ __all__ = [
     "Coordinates",
     "DirectoryEntry",
     "DirectoryEntryCreate",
+    "DirectoryEntryStatus",
     "DirectoryEntryUpdate",
     "SocialLinks",
     "StructuredLocation",
