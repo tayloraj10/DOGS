@@ -83,7 +83,7 @@ export default function DirectoryEntryForm({
     if (!imageUrl && result.image_url) {
       uploadDirectoryPhotoFromUrl(result.image_url)
         .then((uploaded) => setImageUrl(uploaded.url))
-        .catch(() => {});
+        .catch(() => { });
     }
     if (result.social_links) {
       setSocialLinks((prev) => {
@@ -245,8 +245,8 @@ export default function DirectoryEntryForm({
       <div>
         <p className="block text-sm font-medium text-slate-700">Social links</p>
         <p className="mt-1 text-xs text-slate-500">
-          Just the username, not the full link (e.g. "sodogs", not
-          instagram.com/sodogs) — paste a full link and we'll trim it down for you.
+          Just the username, not the full link (e.g. "dogs", not
+          instagram.com/dogs) — paste a full link and we'll trim it down for you.
         </p>
         <div className="mt-2 grid grid-cols-1 gap-3 sm:grid-cols-2">
           {SOCIAL_FIELDS.map((field) => (
@@ -268,9 +268,8 @@ export default function DirectoryEntryForm({
                     setSocialLinks((s) => ({ ...s, [field]: e.target.value || null }))
                   }
                   onBlur={() => field !== "website" && handleSocialBlur(field)}
-                  className={`w-full rounded-lg border border-slate-300 py-2 text-sm focus:border-emerald-500 focus:outline-none ${
-                    field !== "website" ? "pl-7 pr-3" : "px-3"
-                  }`}
+                  className={`w-full rounded-lg border border-slate-300 py-2 text-sm focus:border-emerald-500 focus:outline-none ${field !== "website" ? "pl-7 pr-3" : "px-3"
+                    }`}
                 />
               </div>
             </div>
@@ -286,11 +285,10 @@ export default function DirectoryEntryForm({
               key={category.id}
               type="button"
               onClick={() => toggleCategory(category.slug)}
-              className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
-                selectedCategories.includes(category.slug)
+              className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${selectedCategories.includes(category.slug)
                   ? "bg-emerald-600 text-white"
                   : "bg-white text-slate-600 ring-1 ring-slate-200 hover:bg-slate-100"
-              }`}
+                }`}
             >
               {category.name}
             </button>

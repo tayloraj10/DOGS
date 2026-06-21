@@ -29,8 +29,7 @@ export default function ShowcasePage() {
           The Directory of Good
         </h1>
         <p className="mx-auto mt-3 max-w-xl text-slate-600">
-          A growing collection of people and groups doing good for animals,
-          the environment, and our communities.
+          A growing collection of people and groups taking action for good of the world
         </p>
       </div>
 
