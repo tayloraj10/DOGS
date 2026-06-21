@@ -16,6 +16,7 @@ dependencies = [
     "httpx>=0.25",
     "beautifulsoup4>=4.12",
     "lxml>=5.0",
+    "python-multipart>=0.0.6",
 ]
 
 [project.optional-dependencies]
