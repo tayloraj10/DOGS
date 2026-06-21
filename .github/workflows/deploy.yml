@@ -57,6 +57,7 @@ jobs:
             --region ${{ env.REGION }} \
             --add-cloudsql-instances ${{ env.PROJECT_ID }}:${{ env.REGION }}:${{ env.CLOUD_SQL_INSTANCE }} \
             --set-env-vars DATABASE_URL="postgresql+psycopg2://postgres@/postgres?host=/cloudsql/${{ env.PROJECT_ID }}:${{ env.REGION }}:${{ env.CLOUD_SQL_INSTANCE }}" \
+            --set-env-vars ENVIRONMENT="production" \
             --set-env-vars GOOGLE_SHEETS_SPREADSHEET_ID="1KVYFjM8E_c65hzia2LWgtwvO9UKeqUXJpsfhB2OeOAo" \
             --set-env-vars GOOGLE_SHEETS_SHEET_GID="1363212709" \
             --set-env-vars GCS_DIRECTORY_IMAGES_BUCKET="dogs-directory-images" \
