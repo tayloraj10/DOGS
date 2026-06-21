@@ -8,6 +8,8 @@ from app.schemas import (
     DirectoryEntryCreate,
     DirectoryEntryStatus,
     DirectoryEntryUpdate,
+    DirectoryExtractRequest,
+    DirectoryExtractResponse,
     DirectoryPhotoFromUrlRequest,
     DirectoryPhotoUploadResponse,
     StructuredLocation,
@@ -27,6 +29,7 @@ from app.services.directory_service import (
     set_entry_categories,
 )
 from app.services.geocoding import geocode_location, lookup_location
+from app.services.scraping import extract_from_url
 from app.services.storage import ALLOWED_CONTENT_TYPES, gcs_storage
 
 router = APIRouter(prefix="/directory", tags=["directory"])
@@ -113,6 +116,13 @@ async def list_directory(
         db, limit=limit, offset=offset, category_slug=category, status=status, needs_photo=needs_photo
     )
     return [entry_to_schema(e) for e in entries]
+
+
+@router.post("/extract", response_model=DirectoryExtractResponse)
+async def extract_directory_entry(body: DirectoryExtractRequest):
+    if not (body.url.startswith("http://") or body.url.startswith("https://")):
+        raise HTTPException(status_code=400, detail="url must start with http:// or https://")
+    return await extract_from_url(body.url)
 
 
 @router.post("/location/lookup", response_model=StructuredLocation)

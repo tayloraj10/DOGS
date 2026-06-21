@@ -137,6 +137,7 @@ Paste the output into [mermaid.live](https://mermaid.live) to render it.
 | POST | `/directory` | Create entry |
 | PATCH | `/directory/{id}` | Update entry |
 | DELETE | `/directory/{id}` | Delete entry |
+| POST | `/directory/extract` | Scrape a social/website link for a name, description, image, and social links |
 | POST | `/directory/photos` | Upload a photo file, returns its hosted URL |
 | POST | `/directory/photos/from-url` | Fetch an external image and re-host it, returns its hosted URL |
 | GET | `/cleanups` | List cleanups |
