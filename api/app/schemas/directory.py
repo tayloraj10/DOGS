@@ -30,6 +30,7 @@ class DirectoryEntry(BaseModel):
     name: str
     description: str | None = None
     image_url: str | None = None
+    image_is_external: bool = False
     location: StructuredLocation | None = None
     coordinates: Coordinates | None = None
     social_links: SocialLinks | None = None

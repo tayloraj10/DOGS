@@ -39,6 +39,9 @@ class Settings(BaseSettings):
     GOOGLE_APPLICATION_CREDENTIALS: str = ""
     GOOGLE_MAPS_GEOCODING_API_KEY: str = ""
 
+    GCS_DIRECTORY_IMAGES_BUCKET: str = ""
+    GCS_PROJECT_ID: str = ""
+
     @property
     def database_url(self) -> str:
         if self.DATABASE_URL:

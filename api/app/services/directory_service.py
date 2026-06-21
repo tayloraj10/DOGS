@@ -14,6 +14,7 @@ from sqlalchemy import func
 from sqlalchemy.orm import Session, selectinload
 
 from app.models import Category, DirectoryEntry as DirectoryEntryModel
+from app.services.storage import hosted_image_url_prefix, is_hosted_image_url
 
 
 def _parse_user_ids(raw: list | None) -> list[UUID]:
@@ -36,6 +37,7 @@ def entry_to_schema(entry: DirectoryEntryModel) -> DirectoryEntry:
         name=entry.name,
         description=entry.description,
         image_url=entry.image_url,
+        image_is_external=bool(entry.image_url) and not is_hosted_image_url(entry.image_url),
         location=location,
         coordinates=coordinates,
         social_links=social,
@@ -58,6 +60,14 @@ def get_entry(db: Session, entry_id: UUID) -> DirectoryEntryModel | None:
     )
 
 
+def _filter_needs_photo(q):
+    q = q.filter(DirectoryEntryModel.image_url.isnot(None))
+    prefix = hosted_image_url_prefix()
+    if prefix:
+        q = q.filter(~DirectoryEntryModel.image_url.like(f"{prefix}%"))
+    return q
+
+
 def list_entries(
     db: Session,
     *,
@@ -65,12 +75,15 @@ def list_entries(
     offset: int = 0,
     category_slug: CategorySlug | None = None,
     status: DirectoryEntryStatus | None = None,
+    needs_photo: bool = False,
 ) -> list[DirectoryEntryModel]:
     q = db.query(DirectoryEntryModel).options(selectinload(DirectoryEntryModel.categories))
     if category_slug:
         q = q.join(DirectoryEntryModel.categories).filter(Category.slug == category_slug.value)
     if status:
         q = q.filter(DirectoryEntryModel.status == status.value)
+    if needs_photo:
+        q = _filter_needs_photo(q)
     return q.order_by(DirectoryEntryModel.name).offset(offset).limit(limit).all()
 
 

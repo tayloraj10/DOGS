@@ -49,6 +49,7 @@ export interface DirectoryEntry {
   name: string;
   description: string | null;
   image_url: string | null;
+  image_is_external: boolean;
   location: StructuredLocation | null;
   coordinates: Coordinates | null;
   social_links: SocialLinks | null;
@@ -80,4 +81,8 @@ export interface DirectoryExtractResponse {
   social_links: SocialLinks | null;
   other_links: string[];
   source_url: string;
+}
+
+export interface DirectoryPhotoUploadResponse {
+  url: string;
 }

@@ -12,6 +12,7 @@ from app.schemas.directory import (
     DirectoryEntryUpdate,
 )
 from app.schemas.location import Coordinates, SocialLinks, StructuredLocation
+from app.schemas.photo import DirectoryPhotoFromUrlRequest, DirectoryPhotoUploadResponse
 from app.schemas.status import ActivityStatus
 from app.schemas.trash_report import (
     TrashReport,
@@ -34,6 +35,8 @@ __all__ = [
     "DirectoryEntryCreate",
     "DirectoryEntryStatus",
     "DirectoryEntryUpdate",
+    "DirectoryPhotoFromUrlRequest",
+    "DirectoryPhotoUploadResponse",
     "SocialLinks",
     "StructuredLocation",
     "TrashReport",

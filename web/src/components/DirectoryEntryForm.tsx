@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { useCategories } from "../hooks/useCategories";
 import { lookupLocation } from "../api/directory";
+import { uploadDirectoryPhotoFromUrl } from "../api/photos";
 import { ApiError } from "../api/client";
 import { extractSocialUsername } from "../utils/socialLinks";
 import UrlExtractBox from "./UrlExtractBox";
+import PhotoUploadField from "./PhotoUploadField";
 import type {
   CategorySlug,
   DirectoryEntryInput,
@@ -78,7 +80,11 @@ export default function DirectoryEntryForm({
   function handleExtractResult(result: DirectoryExtractResponse) {
     if (!name && result.name) setName(result.name);
     if (!description && result.description) setDescription(result.description);
-    if (!imageUrl && result.image_url) setImageUrl(result.image_url);
+    if (!imageUrl && result.image_url) {
+      uploadDirectoryPhotoFromUrl(result.image_url)
+        .then((uploaded) => setImageUrl(uploaded.url))
+        .catch(() => {});
+    }
     if (result.social_links) {
       setSocialLinks((prev) => {
         const next = { ...prev };
@@ -185,15 +191,7 @@ export default function DirectoryEntryForm({
         />
       </div>
 
-      <div>
-        <label className="block text-sm font-medium text-slate-700">Image URL</label>
-        <input
-          type="text"
-          value={imageUrl ?? ""}
-          onChange={(e) => setImageUrl(e.target.value)}
-          className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none"
-        />
-      </div>
+      <PhotoUploadField value={imageUrl || null} onChange={(url) => setImageUrl(url ?? "")} />
 
       <div>
         <div className="flex items-center justify-between">

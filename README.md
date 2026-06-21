@@ -83,6 +83,11 @@ Runs on http://localhost:5173 by default, pointed at `http://localhost:8080`. Ov
 | `/capture` | Unlisted — paste a social/website link, auto-fill via `/directory/extract`, fill gaps, publish directly |
 | `/review` | Unlisted — queue of `pending` submissions awaiting verification |
 | `/review/:id` | Unlisted — fill in gaps on a pending submission, then publish |
+| `/review/photos` | Unlisted — entries whose photo is still an external link; re-host it or upload a new one |
+
+### Photo uploads
+
+Entry photos are re-hosted to Google Cloud Storage rather than linked externally, so they don't break if the source page changes. Set `GCS_DIRECTORY_IMAGES_BUCKET` and `GCS_PROJECT_ID` in `.env` to enable uploads; with them unset, photo upload routes are disabled and entries keep their external `image_url` as-is.
 
 ## Import data
 
@@ -132,6 +137,8 @@ Paste the output into [mermaid.live](https://mermaid.live) to render it.
 | POST | `/directory` | Create entry |
 | PATCH | `/directory/{id}` | Update entry |
 | DELETE | `/directory/{id}` | Delete entry |
+| POST | `/directory/photos` | Upload a photo file, returns its hosted URL |
+| POST | `/directory/photos/from-url` | Fetch an external image and re-host it, returns its hosted URL |
 | GET | `/cleanups` | List cleanups |
 | GET | `/cleanups/{id}` | Get cleanup |
 | POST | `/cleanups` | Create cleanup |

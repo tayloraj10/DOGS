@@ -14,6 +14,10 @@ export function listDirectoryEntries(status?: DirectoryEntryStatus, limit = 50) 
   return apiClient.get<DirectoryEntry[]>(`/directory?${params.toString()}`);
 }
 
+export function listEntriesNeedingPhoto() {
+  return apiClient.get<DirectoryEntry[]>("/directory?needs_photo=true&limit=500");
+}
+
 export function getDirectoryEntry(id: string) {
   return apiClient.get<DirectoryEntry>(`/directory/${id}`);
 }
