@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { syncFromSheet } from "../api/admin";
 import { ApiError } from "../api/client";
+import ReviewNav from "../components/ReviewNav";
 import type { SheetSyncResponse } from "../api/types";
 
 export default function AdminSyncPage() {
@@ -34,17 +35,7 @@ export default function AdminSyncPage() {
         afterward to re-host or replace them.
       </p>
 
-      <div className="mt-4 flex gap-4 text-sm font-medium">
-        <Link to="/review" className="text-slate-500 hover:text-slate-800">
-          Pending review
-        </Link>
-        <Link to="/review/photos" className="text-slate-500 hover:text-slate-800">
-          Needs photo
-        </Link>
-        <Link to="/admin/sync" className="text-emerald-700">
-          Sync sheet
-        </Link>
-      </div>
+      <ReviewNav />
 
       <button
         type="button"

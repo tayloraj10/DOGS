@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { listEntriesNeedingPhoto, updateDirectoryEntry } from "../api/directory";
 import { uploadDirectoryPhoto, uploadDirectoryPhotoFromUrl } from "../api/photos";
 import { ApiError } from "../api/client";
+import ReviewNav from "../components/ReviewNav";
 import type { DirectoryEntry } from "../api/types";
 
 export default function NeedsPhotoPage() {
@@ -70,17 +71,7 @@ export default function NeedsPhotoPage() {
         upload one if there isn't one yet or the link is broken or low quality.
       </p>
 
-      <div className="mt-4 flex gap-4 text-sm font-medium">
-        <Link to="/review" className="text-slate-500 hover:text-slate-800">
-          Pending review
-        </Link>
-        <Link to="/review/photos" className="text-emerald-700">
-          Needs photo ({entries.length})
-        </Link>
-        <Link to="/admin/sync" className="text-slate-500 hover:text-slate-800">
-          Sync sheet
-        </Link>
-      </div>
+      <ReviewNav />
 
       {loading && <p className="mt-6 text-sm text-slate-400">Loading...</p>}
 
