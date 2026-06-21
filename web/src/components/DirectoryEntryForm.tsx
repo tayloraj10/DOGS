@@ -250,24 +250,29 @@ export default function DirectoryEntryForm({
         </p>
         <div className="mt-2 grid grid-cols-1 gap-3 sm:grid-cols-2">
           {SOCIAL_FIELDS.map((field) => (
-            <div key={field} className="relative">
-              {field !== "website" && (
-                <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-sm text-slate-400">
-                  @
-                </span>
-              )}
-              <input
-                type="text"
-                placeholder={field === "website" ? "Website" : `${SOCIAL_LABELS[field]} username`}
-                value={socialLinks[field] ?? ""}
-                onChange={(e) =>
-                  setSocialLinks((s) => ({ ...s, [field]: e.target.value || null }))
-                }
-                onBlur={() => field !== "website" && handleSocialBlur(field)}
-                className={`w-full rounded-lg border border-slate-300 py-2 text-sm focus:border-emerald-500 focus:outline-none ${
-                  field !== "website" ? "pl-7 pr-3" : "px-3"
-                }`}
-              />
+            <div key={field}>
+              <label className="block text-xs font-medium text-slate-500">
+                {SOCIAL_LABELS[field]}
+              </label>
+              <div className="relative mt-0.5">
+                {field !== "website" && (
+                  <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-sm text-slate-400">
+                    @
+                  </span>
+                )}
+                <input
+                  type="text"
+                  placeholder={field === "website" ? "https://example.com" : "username"}
+                  value={socialLinks[field] ?? ""}
+                  onChange={(e) =>
+                    setSocialLinks((s) => ({ ...s, [field]: e.target.value || null }))
+                  }
+                  onBlur={() => field !== "website" && handleSocialBlur(field)}
+                  className={`w-full rounded-lg border border-slate-300 py-2 text-sm focus:border-emerald-500 focus:outline-none ${
+                    field !== "website" ? "pl-7 pr-3" : "px-3"
+                  }`}
+                />
+              </div>
             </div>
           ))}
         </div>
