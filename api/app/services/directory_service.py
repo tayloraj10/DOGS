@@ -61,11 +61,12 @@ def get_entry(db: Session, entry_id: UUID) -> DirectoryEntryModel | None:
 
 
 def _filter_needs_photo(q):
-    q = q.filter(DirectoryEntryModel.image_url.isnot(None))
+    no_image = DirectoryEntryModel.image_url.is_(None)
     prefix = hosted_image_url_prefix()
     if prefix:
-        q = q.filter(~DirectoryEntryModel.image_url.like(f"{prefix}%"))
-    return q
+        external_image = ~DirectoryEntryModel.image_url.like(f"{prefix}%")
+        return q.filter(no_image | external_image)
+    return q.filter(no_image)
 
 
 def list_entries(
