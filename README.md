@@ -84,6 +84,7 @@ Runs on http://localhost:5173 by default, pointed at `http://localhost:8080`. Ov
 | `/review` | Unlisted — queue of `pending` submissions awaiting verification |
 | `/review/:id` | Unlisted — fill in gaps on a pending submission, then publish |
 | `/review/photos` | Unlisted — entries whose photo is still an external link; re-host it or upload a new one |
+| `/admin/sync` | Unlisted — trigger a Google Sheet sync and see the results |
 
 ### Photo uploads
 

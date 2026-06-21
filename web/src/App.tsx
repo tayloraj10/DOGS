@@ -5,6 +5,7 @@ import CapturePage from "./pages/CapturePage";
 import ReviewQueuePage from "./pages/ReviewQueuePage";
 import ReviewEntryPage from "./pages/ReviewEntryPage";
 import NeedsPhotoPage from "./pages/NeedsPhotoPage";
+import AdminSyncPage from "./pages/AdminSyncPage";
 
 const navLinkClasses = ({ isActive }: { isActive: boolean }) =>
   `text-sm font-medium transition-colors ${
@@ -37,6 +38,7 @@ function App() {
           <Route path="/capture" element={<CapturePage />} />
           <Route path="/review" element={<ReviewQueuePage />} />
           <Route path="/review/photos" element={<NeedsPhotoPage />} />
+          <Route path="/admin/sync" element={<AdminSyncPage />} />
           <Route path="/review/:id" element={<ReviewEntryPage />} />
         </Routes>
       </main>

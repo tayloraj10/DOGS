@@ -86,3 +86,14 @@ export interface DirectoryExtractResponse {
 export interface DirectoryPhotoUploadResponse {
   url: string;
 }
+
+export interface SheetSyncResponse {
+  created: number;
+  updated: number;
+  skipped: number;
+  rows_seen: number;
+  geocoded: number;
+  geo_failed: number;
+  images_skipped: number;
+  errors: string[];
+}

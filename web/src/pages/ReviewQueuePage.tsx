@@ -20,6 +20,18 @@ export default function ReviewQueuePage() {
         Pending submissions waiting for verification before going live.
       </p>
 
+      <div className="mt-4 flex gap-4 text-sm font-medium">
+        <Link to="/review" className="text-emerald-700">
+          Pending review
+        </Link>
+        <Link to="/review/photos" className="text-slate-500 hover:text-slate-800">
+          Needs photo
+        </Link>
+        <Link to="/admin/sync" className="text-slate-500 hover:text-slate-800">
+          Sync sheet
+        </Link>
+      </div>
+
       {loading && <p className="mt-6 text-sm text-slate-400">Loading...</p>}
 
       {!loading && entries.length === 0 && (
