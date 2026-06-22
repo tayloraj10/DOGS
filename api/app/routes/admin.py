@@ -5,10 +5,15 @@ from sqlalchemy.orm import Session
 from app.config import settings
 from app.database import get_db
 from app.models import DirectoryEntry
+from app.services.directory_service import get_or_create_edit_token
 from app.services.geocoding import geocode_location
 from app.services.sheet_sync import sync_from_google_sheet
 
 router = APIRouter(prefix="/admin", tags=["admin"])
+
+
+class BackfillEditTokensResponse(BaseModel):
+    backfilled: int
 
 
 class SheetSyncResponse(BaseModel):
@@ -61,3 +66,12 @@ async def sync_from_sheet(db: Session = Depends(get_db)):
         images_skipped=result.images_skipped,
         errors=result.errors,
     )
+
+
+@router.post("/backfill-edit-tokens", response_model=BackfillEditTokensResponse)
+def backfill_edit_tokens(db: Session = Depends(get_db)):
+    """Generate edit tokens for any existing entries that don't have one yet."""
+    entries = db.query(DirectoryEntry).filter(DirectoryEntry.edit_token.is_(None)).all()
+    for entry in entries:
+        get_or_create_edit_token(db, entry)
+    return BackfillEditTokensResponse(backfilled=len(entries))

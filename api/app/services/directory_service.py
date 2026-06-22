@@ -1,3 +1,4 @@
+import secrets
 from uuid import UUID
 
 from app.schemas import (
@@ -5,6 +6,7 @@ from app.schemas import (
     Coordinates,
     DirectoryEntry,
     DirectoryEntryCreate,
+    DirectoryEntryPublicUpdate,
     DirectoryEntryStatus,
     DirectoryEntryUpdate,
     SocialLinks,
@@ -133,7 +135,16 @@ def apply_create_data(entry: DirectoryEntryModel, body: DirectoryEntryCreate) ->
     entry.user_ids = _serialize_user_ids(body.user_ids)
 
 
-def apply_update_data(entry: DirectoryEntryModel, body: DirectoryEntryUpdate) -> None:
+def get_or_create_edit_token(db: Session, entry: DirectoryEntryModel) -> str:
+    if not entry.edit_token:
+        entry.edit_token = secrets.token_urlsafe(24)
+        db.commit()
+    return entry.edit_token
+
+
+def apply_update_data(
+    entry: DirectoryEntryModel, body: DirectoryEntryUpdate | DirectoryEntryPublicUpdate
+) -> None:
     fields = body.model_fields_set
     if "name" in fields and body.name is not None:
         entry.name = body.name[:255]

@@ -1,11 +1,14 @@
 import io
 import mimetypes
+import secrets
 from uuid import UUID
 
 from app.schemas import (
     CategorySlug,
     DirectoryEntry,
     DirectoryEntryCreate,
+    DirectoryEntryEditLink,
+    DirectoryEntryPublicUpdate,
     DirectoryEntryStatus,
     DirectoryEntryUpdate,
     DirectoryExtractRequest,
@@ -25,6 +28,7 @@ from app.services.directory_service import (
     apply_update_data,
     entry_to_schema,
     get_entry,
+    get_or_create_edit_token,
     list_entries,
     set_entry_categories,
 )
@@ -145,6 +149,16 @@ def get_directory_entry(entry_id: UUID, db: Session = Depends(get_db)):
     return entry_to_schema(entry)
 
 
+@router.get("/{entry_id}/edit-link", response_model=DirectoryEntryEditLink)
+def get_directory_entry_edit_link(entry_id: UUID, db: Session = Depends(get_db)):
+    """Returns the secret token for a self-service edit link. Not linked from any public
+    page; only meant to be called from admin/review tooling to hand out to an entry's owner."""
+    entry = get_entry(db, entry_id)
+    if not entry:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Entry not found")
+    return DirectoryEntryEditLink(token=get_or_create_edit_token(db, entry))
+
+
 @router.post("", response_model=DirectoryEntry, status_code=status.HTTP_201_CREATED)
 async def create_directory_entry(body: DirectoryEntryCreate, db: Session = Depends(get_db)):
     entry = DirectoryEntryModel()
@@ -176,6 +190,43 @@ async def update_directory_entry(
     entry = get_entry(db, entry_id)
     if not entry:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Entry not found")
+
+    location_before = dict(entry.location) if entry.location else None
+    apply_update_data(entry, body)
+
+    if body.categories is not None:
+        set_entry_categories(db, entry, body.categories)
+
+    location_changed = body.location is not None and (
+        body.location.model_dump(exclude_none=True) != location_before
+    )
+    if location_changed or (entry.latitude is None and entry.location):
+        coords = await geocode_location(entry.location)
+        if coords:
+            entry.latitude, entry.longitude = coords
+
+    db.commit()
+    db.refresh(entry)
+    entry = get_entry(db, entry.id)
+    assert entry is not None
+    return entry_to_schema(entry)
+
+
+@router.patch("/{entry_id}/public", response_model=DirectoryEntry)
+async def update_directory_entry_public(
+    entry_id: UUID,
+    body: DirectoryEntryPublicUpdate,
+    token: str = Query(...),
+    db: Session = Depends(get_db),
+):
+    """Self-service update for an entry's owner, gated by the secret edit-link token
+    (handed out via GET /{entry_id}/edit-link). Only allows a safe subset of fields —
+    status, featured, and user_ids stay admin-only."""
+    entry = get_entry(db, entry_id)
+    if not entry:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Entry not found")
+    if not entry.edit_token or not secrets.compare_digest(entry.edit_token, token):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Invalid or missing edit link")
 
     location_before = dict(entry.location) if entry.location else None
     apply_update_data(entry, body)

@@ -8,6 +8,8 @@ from app.schemas.directory import (
     Category,
     DirectoryEntry,
     DirectoryEntryCreate,
+    DirectoryEntryEditLink,
+    DirectoryEntryPublicUpdate,
     DirectoryEntryStatus,
     DirectoryEntryUpdate,
 )
@@ -34,6 +36,8 @@ __all__ = [
     "Coordinates",
     "DirectoryEntry",
     "DirectoryEntryCreate",
+    "DirectoryEntryEditLink",
+    "DirectoryEntryPublicUpdate",
     "DirectoryEntryStatus",
     "DirectoryEntryUpdate",
     "DirectoryExtractRequest",
