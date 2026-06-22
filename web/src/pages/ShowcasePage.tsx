@@ -1,15 +1,36 @@
 import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { listDirectoryEntries } from "../api/directory";
 import { useCategories } from "../hooks/useCategories";
 import CategoryFilterBar from "../components/CategoryFilterBar";
 import EntryCard from "../components/EntryCard";
 import type { CategorySlug, DirectoryEntry } from "../api/types";
 
+type SortOption = "name" | "newest";
+
+const SORT_LABELS: Record<SortOption, string> = {
+  name: "Name (A-Z)",
+  newest: "Newest first",
+};
+
+function sortEntries(entries: DirectoryEntry[], sort: SortOption): DirectoryEntry[] {
+  const sorted = [...entries];
+  if (sort === "newest") {
+    sorted.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+  } else {
+    sorted.sort((a, b) => a.name.localeCompare(b.name));
+  }
+  return sorted;
+}
+
 export default function ShowcasePage() {
+  const navigate = useNavigate();
   const { categories } = useCategories();
   const [entries, setEntries] = useState<DirectoryEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState<CategorySlug | null>(null);
+  const [search, setSearch] = useState("");
+  const [sort, setSort] = useState<SortOption>("name");
 
   useEffect(() => {
     listDirectoryEntries("published", 500)
@@ -18,9 +39,26 @@ export default function ShowcasePage() {
   }, []);
 
   const visibleEntries = useMemo(() => {
-    if (!selectedCategory) return entries;
-    return entries.filter((entry) => entry.categories.includes(selectedCategory));
-  }, [entries, selectedCategory]);
+    let result = entries;
+    if (selectedCategory) {
+      result = result.filter((entry) => entry.categories.includes(selectedCategory));
+    }
+    const query = search.trim().toLowerCase();
+    if (query) {
+      result = result.filter(
+        (entry) =>
+          entry.name.toLowerCase().includes(query) ||
+          entry.description?.toLowerCase().includes(query),
+      );
+    }
+    return sortEntries(result, sort);
+  }, [entries, selectedCategory, search, sort]);
+
+  function handleRandom() {
+    if (visibleEntries.length === 0) return;
+    const entry = visibleEntries[Math.floor(Math.random() * visibleEntries.length)];
+    navigate(`/entry/${entry.id}`);
+  }
 
   return (
     <div>
@@ -41,6 +79,35 @@ export default function ShowcasePage() {
         />
       </div>
 
+      <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+        <input
+          type="text"
+          placeholder="Search by name or description"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="w-64 rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none"
+        />
+        <select
+          value={sort}
+          onChange={(e) => setSort(e.target.value as SortOption)}
+          className="rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none"
+        >
+          {Object.entries(SORT_LABELS).map(([value, label]) => (
+            <option key={value} value={value}>
+              {label}
+            </option>
+          ))}
+        </select>
+        <button
+          type="button"
+          onClick={handleRandom}
+          disabled={visibleEntries.length === 0}
+          className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700 disabled:cursor-not-allowed disabled:bg-emerald-300"
+        >
+          Random entry
+        </button>
+      </div>
+
       {!loading && (
         <p className="mt-6 text-center text-sm text-slate-500">
           {visibleEntries.length} {visibleEntries.length === 1 ? "entry" : "entries"}
@@ -52,7 +119,7 @@ export default function ShowcasePage() {
 
       {!loading && visibleEntries.length === 0 && (
         <p className="mt-10 text-center text-sm text-slate-400">
-          No entries yet in this category.
+          No entries match your search.
         </p>
       )}
 

@@ -11,6 +11,7 @@ export default function NeedsPhotoPage() {
   const [loading, setLoading] = useState(true);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [urlInputs, setUrlInputs] = useState<Record<string, string>>({});
   const fileInputs = useRef<Record<string, HTMLInputElement | null>>({});
 
   useEffect(() => {
@@ -40,6 +41,25 @@ export default function NeedsPhotoPage() {
       setError(
         entry.id,
         err instanceof ApiError ? err.message : "Couldn't fetch that image. Try uploading one instead.",
+      );
+    } finally {
+      setBusyId(null);
+    }
+  }
+
+  async function handleUseUrl(entry: DirectoryEntry) {
+    const url = urlInputs[entry.id]?.trim();
+    if (!url) return;
+    setBusyId(entry.id);
+    setError(entry.id, null);
+    try {
+      const result = await uploadDirectoryPhotoFromUrl(url);
+      await updateDirectoryEntry(entry.id, { image_url: result.url });
+      setEntries((prev) => prev.filter((e) => e.id !== entry.id));
+    } catch (err) {
+      setError(
+        entry.id,
+        err instanceof ApiError ? err.message : "Couldn't fetch that image. Check the URL and try again.",
       );
     } finally {
       setBusyId(null);
@@ -112,6 +132,26 @@ export default function NeedsPhotoPage() {
                 {entry.image_url ?? "No image link"}
               </p>
               {errors[entry.id] && <p className="mt-1 text-sm text-red-600">{errors[entry.id]}</p>}
+              <div className="mt-2 flex items-center gap-2">
+                <input
+                  type="url"
+                  placeholder="Paste an image URL"
+                  value={urlInputs[entry.id] ?? ""}
+                  onChange={(e) =>
+                    setUrlInputs((prev) => ({ ...prev, [entry.id]: e.target.value }))
+                  }
+                  disabled={busyId === entry.id}
+                  className="w-full max-w-xs rounded-lg border border-slate-300 px-2 py-1 text-xs focus:border-emerald-500 focus:outline-none"
+                />
+                <button
+                  type="button"
+                  onClick={() => handleUseUrl(entry)}
+                  disabled={busyId === entry.id || !urlInputs[entry.id]?.trim()}
+                  className="flex-shrink-0 rounded-lg bg-white px-3 py-1 text-xs font-medium text-slate-600 ring-1 ring-slate-300 transition-colors hover:bg-slate-50 disabled:cursor-not-allowed disabled:text-slate-300"
+                >
+                  Use URL
+                </button>
+              </div>
             </div>
             <div className="flex flex-shrink-0 items-center gap-2">
               {entry.image_url && (

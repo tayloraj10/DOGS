@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import { ApiError } from "../api/client";
-import { uploadDirectoryPhoto } from "../api/photos";
+import { uploadDirectoryPhoto, uploadDirectoryPhotoFromUrl } from "../api/photos";
 
 interface PhotoUploadFieldProps {
   value: string | null;
@@ -10,6 +10,7 @@ interface PhotoUploadFieldProps {
 export default function PhotoUploadField({ value, onChange }: PhotoUploadFieldProps) {
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [photoUrl, setPhotoUrl] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
 
   async function handleFileSelected(e: React.ChangeEvent<HTMLInputElement>) {
@@ -26,6 +27,23 @@ export default function PhotoUploadField({ value, onChange }: PhotoUploadFieldPr
     } finally {
       setUploading(false);
       if (inputRef.current) inputRef.current.value = "";
+    }
+  }
+
+  async function handleUseUrl() {
+    const url = photoUrl.trim();
+    if (!url) return;
+
+    setUploading(true);
+    setError(null);
+    try {
+      const result = await uploadDirectoryPhotoFromUrl(url);
+      onChange(result.url);
+      setPhotoUrl("");
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : "Failed to fetch image from that URL.");
+    } finally {
+      setUploading(false);
     }
   }
 
@@ -54,6 +72,26 @@ export default function PhotoUploadField({ value, onChange }: PhotoUploadFieldPr
         disabled={uploading}
         className="mt-2 block w-full text-sm text-slate-600 file:mr-3 file:rounded-lg file:border-0 file:bg-emerald-50 file:px-3 file:py-2 file:text-sm file:font-medium file:text-emerald-700 hover:file:bg-emerald-100"
       />
+
+      <div className="mt-2 flex items-center gap-2">
+        <span className="text-xs text-slate-400">or</span>
+        <input
+          type="url"
+          placeholder="Paste an image URL"
+          value={photoUrl}
+          onChange={(e) => setPhotoUrl(e.target.value)}
+          disabled={uploading}
+          className="flex-1 rounded-lg border border-slate-300 px-3 py-1.5 text-sm focus:border-emerald-500 focus:outline-none"
+        />
+        <button
+          type="button"
+          onClick={handleUseUrl}
+          disabled={uploading || !photoUrl.trim()}
+          className="rounded-lg bg-slate-100 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-200 disabled:cursor-not-allowed disabled:text-slate-300"
+        >
+          Use URL
+        </button>
+      </div>
 
       {uploading && <p className="mt-1 text-sm text-slate-400">Uploading...</p>}
       {error && <p className="mt-1 text-sm text-red-600">{error}</p>}

@@ -87,6 +87,14 @@ export interface DirectoryPhotoUploadResponse {
   url: string;
 }
 
+export interface DirectoryEntryEditLink {
+  token: string;
+}
+
+export interface BackfillEditTokensResponse {
+  backfilled: number;
+}
+
 export interface SheetSyncResponse {
   created: number;
   updated: number;

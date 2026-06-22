@@ -1,6 +1,7 @@
 import { apiClient } from "./client";
 import type {
   DirectoryEntry,
+  DirectoryEntryEditLink,
   DirectoryEntryInput,
   DirectoryEntryStatus,
   DirectoryExtractResponse,
@@ -28,6 +29,21 @@ export function createDirectoryEntry(body: DirectoryEntryInput) {
 
 export function updateDirectoryEntry(id: string, body: Partial<DirectoryEntryInput>) {
   return apiClient.patch<DirectoryEntry>(`/directory/${id}`, body);
+}
+
+export function getDirectoryEntryEditLink(id: string) {
+  return apiClient.get<DirectoryEntryEditLink>(`/directory/${id}/edit-link`);
+}
+
+export function updateDirectoryEntryPublic(
+  id: string,
+  token: string,
+  body: Partial<DirectoryEntryInput>,
+) {
+  return apiClient.patch<DirectoryEntry>(
+    `/directory/${id}/public?token=${encodeURIComponent(token)}`,
+    body,
+  );
 }
 
 export function deleteDirectoryEntry(id: string) {

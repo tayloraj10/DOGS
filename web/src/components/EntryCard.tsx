@@ -1,5 +1,7 @@
+import { Link } from "react-router-dom";
 import type { DirectoryEntry } from "../api/types";
 import { CATEGORY_DISPLAY_NAMES } from "../api/types";
+import EntryImage from "./EntryImage";
 import SocialIcon, { SOCIAL_FIELDS } from "./SocialIcon";
 
 interface EntryCardProps {
@@ -12,14 +14,13 @@ export default function EntryCard({ entry }: EntryCardProps) {
   );
 
   return (
-    <div className="flex flex-col overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-slate-200 transition-shadow hover:shadow-md">
+    <Link
+      to={`/entry/${entry.id}`}
+      className="flex flex-col overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-slate-200 transition-shadow hover:shadow-md"
+    >
       <div className="aspect-[4/3] w-full bg-slate-100">
         {entry.image_url ? (
-          <img
-            src={entry.image_url}
-            alt={entry.name}
-            className="h-full w-full object-cover"
-          />
+          <EntryImage src={entry.image_url} alt={entry.name} />
         ) : (
           <div className="flex h-full w-full items-center justify-center text-slate-300">
             <span className="text-3xl font-semibold">
@@ -66,6 +67,6 @@ export default function EntryCard({ entry }: EntryCardProps) {
           </div>
         )}
       </div>
-    </div>
+    </Link>
   );
 }
