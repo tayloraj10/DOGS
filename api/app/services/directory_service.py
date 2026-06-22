@@ -16,7 +16,7 @@ from sqlalchemy import func
 from sqlalchemy.orm import Session, selectinload
 
 from app.models import Category, DirectoryEntry as DirectoryEntryModel
-from app.services.storage import hosted_image_url_prefix, is_hosted_image_url
+from app.services.storage import gcs_storage, hosted_image_url_prefix, is_hosted_image_url
 
 
 def _parse_user_ids(raw: list | None) -> list[UUID]:
@@ -197,3 +197,19 @@ def find_existing_entry(
         .order_by(DirectoryEntryModel.created_at.asc())
         .first()
     )
+
+
+def find_orphaned_images(db: Session) -> list:
+    """GCS-hosted directory photos no entry's image_url points to anymore.
+
+    Happens when a photo is re-hosted or replaced (NeedsPhotoPage, edits, sheet sync) —
+    nothing deletes the old blob automatically.
+    """
+    if not gcs_storage:
+        return []
+    referenced = {
+        url for (url,) in db.query(DirectoryEntryModel.image_url).filter(
+            DirectoryEntryModel.image_url.isnot(None)
+        )
+    }
+    return [b for b in gcs_storage.list_directory_entry_photos() if b.public_url not in referenced]

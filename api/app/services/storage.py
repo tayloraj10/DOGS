@@ -67,6 +67,16 @@ class GCSStorage:
         except GoogleCloudError as e:
             raise Exception(f"Failed to upload photo to GCS: {e}")
 
+    def list_directory_entry_photos(self):
+        bucket = self.client.bucket(self.bucket_name)
+        return list(bucket.list_blobs(prefix=self._path("directory/")))
+
+    def delete_blob(self, blob_name: str) -> None:
+        try:
+            self.client.bucket(self.bucket_name).blob(blob_name).delete()
+        except GoogleCloudError as e:
+            raise Exception(f"Failed to delete blob from GCS: {e}")
+
 
 gcs_storage = GCSStorage() if settings.GCS_DIRECTORY_IMAGES_BUCKET else None
 

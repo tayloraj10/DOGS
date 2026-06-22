@@ -5,15 +5,30 @@ from sqlalchemy.orm import Session
 from app.config import settings
 from app.database import get_db
 from app.models import DirectoryEntry
-from app.services.directory_service import get_or_create_edit_token
+from app.services.directory_service import find_orphaned_images, get_or_create_edit_token
 from app.services.geocoding import geocode_location
 from app.services.sheet_sync import sync_from_google_sheet
+from app.services.storage import gcs_storage
 
 router = APIRouter(prefix="/admin", tags=["admin"])
 
 
 class BackfillEditTokensResponse(BaseModel):
     backfilled: int
+
+
+class OrphanedImage(BaseModel):
+    name: str
+    url: str
+    size_bytes: int
+
+
+class OrphanedImagesResponse(BaseModel):
+    orphans: list[OrphanedImage]
+
+
+class DeleteOrphanedImagesResponse(BaseModel):
+    deleted: int
 
 
 class SheetSyncResponse(BaseModel):
@@ -75,3 +90,23 @@ def backfill_edit_tokens(db: Session = Depends(get_db)):
     for entry in entries:
         get_or_create_edit_token(db, entry)
     return BackfillEditTokensResponse(backfilled=len(entries))
+
+
+@router.get("/orphaned-images", response_model=OrphanedImagesResponse)
+def list_orphaned_images(db: Session = Depends(get_db)):
+    """GCS-hosted directory photos no entry references anymore (left behind by re-hosts/replacements)."""
+    orphans = find_orphaned_images(db)
+    return OrphanedImagesResponse(
+        orphans=[
+            OrphanedImage(name=b.name, url=b.public_url, size_bytes=b.size or 0) for b in orphans
+        ]
+    )
+
+
+@router.delete("/orphaned-images", response_model=DeleteOrphanedImagesResponse)
+def delete_orphaned_images(db: Session = Depends(get_db)):
+    """Delete GCS-hosted directory photos no entry references anymore."""
+    orphans = find_orphaned_images(db)
+    for blob in orphans:
+        gcs_storage.delete_blob(blob.name)
+    return DeleteOrphanedImagesResponse(deleted=len(orphans))
