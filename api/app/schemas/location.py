@@ -7,6 +7,25 @@ _MAX_HANDLE_LEN = 200
 
 _US_COUNTRY_ALIASES = {"", "us", "usa", "u.s.", "u.s.a.", "united states", "united states of america"}
 
+_US_STATE_NAME_TO_ABBR = {
+    "alabama": "AL", "alaska": "AK", "arizona": "AZ", "arkansas": "AR", "california": "CA",
+    "colorado": "CO", "connecticut": "CT", "delaware": "DE", "florida": "FL", "georgia": "GA",
+    "hawaii": "HI", "idaho": "ID", "illinois": "IL", "indiana": "IN", "iowa": "IA",
+    "kansas": "KS", "kentucky": "KY", "louisiana": "LA", "maine": "ME", "maryland": "MD",
+    "massachusetts": "MA", "michigan": "MI", "minnesota": "MN", "mississippi": "MS",
+    "missouri": "MO", "montana": "MT", "nebraska": "NE", "nevada": "NV",
+    "new hampshire": "NH", "new jersey": "NJ", "new mexico": "NM", "new york": "NY",
+    "north carolina": "NC", "north dakota": "ND", "ohio": "OH", "oklahoma": "OK",
+    "oregon": "OR", "pennsylvania": "PA", "rhode island": "RI", "south carolina": "SC",
+    "south dakota": "SD", "tennessee": "TN", "texas": "TX", "utah": "UT", "vermont": "VT",
+    "virginia": "VA", "washington": "WA", "west virginia": "WV", "wisconsin": "WI",
+    "wyoming": "WY", "district of columbia": "DC", "washington dc": "DC", "washington d.c.": "DC",
+    "puerto rico": "PR", "guam": "GU", "american samoa": "AS", "u.s. virgin islands": "VI",
+    "virgin islands": "VI", "northern mariana islands": "MP",
+}
+
+_VALID_US_STATE_ABBRS = frozenset(_US_STATE_NAME_TO_ABBR.values()) | {"DC"}
+
 # Matches a profile URL on each platform and captures the username segment.
 _PLATFORM_URL_PATTERNS: dict[str, re.Pattern[str]] = {
     "instagram": re.compile(r"instagram\.com/([A-Za-z0-9_.]+)", re.I),
@@ -47,15 +66,33 @@ def _extract_username_from_url(field: str, value: str) -> str:
     return candidate
 
 
+_US_ZIP_RE = re.compile(r"^\d{5}(-\d{4})?$")
+
+
 def is_us_country(country: str | None) -> bool:
     return (country or "").strip().lower() in _US_COUNTRY_ALIASES
 
 
-def validate_us_state(state: str) -> str:
-    normalized = state.strip().upper()
-    if len(normalized) != 2 or not normalized.isalpha():
-        raise ValueError("State must be a 2-letter code for US locations (e.g. CA, NY).")
+def validate_us_zip(zip_code: str) -> str:
+    """Accepts a 5-digit or ZIP+4 US zip code."""
+    normalized = zip_code.strip()
+    if not _US_ZIP_RE.match(normalized):
+        raise ValueError("Zip code must be 5 digits or ZIP+4 (e.g. 12345 or 12345-6789).")
     return normalized
+
+
+def validate_us_state(state: str) -> str:
+    """Accepts a 2-letter US state/territory code or a full state name and
+    returns the canonical 2-letter abbreviation."""
+    normalized = state.strip().upper()
+    if len(normalized) == 2 and normalized.isalpha() and normalized in _VALID_US_STATE_ABBRS:
+        return normalized
+    by_name = _US_STATE_NAME_TO_ABBR.get(state.strip().lower())
+    if by_name:
+        return by_name
+    raise ValueError(
+        "State must be a 2-letter US state code or full state name (e.g. CA or California)."
+    )
 
 
 class StructuredLocation(BaseModel):

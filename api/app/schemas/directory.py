@@ -11,6 +11,7 @@ from app.schemas.location import (
     StructuredLocation,
     is_us_country,
     validate_us_state,
+    validate_us_zip,
 )
 
 
@@ -20,8 +21,11 @@ class DirectoryEntryStatus(StrEnum):
 
 
 def _validate_location(location: StructuredLocation | None) -> StructuredLocation | None:
-    if location and location.state and is_us_country(location.country):
-        location.state = validate_us_state(location.state)
+    if location and is_us_country(location.country):
+        if location.state:
+            location.state = validate_us_state(location.state)
+        if location.zip_code:
+            location.zip_code = validate_us_zip(location.zip_code)
     return location
 
 

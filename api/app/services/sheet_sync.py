@@ -19,6 +19,7 @@ from googleapiclient.errors import HttpError
 from sqlalchemy.orm import Session
 
 from app.models import Category, DirectoryEntry
+from app.schemas.location import is_us_country, validate_us_state, validate_us_zip
 from app.services.directory_service import find_existing_entry, set_entry_categories
 from app.services.images import sanitize_image_url
 
@@ -132,11 +133,24 @@ def _build_social_links(row: dict[str, str]) -> dict[str, str]:
     return out
 
 
-def _build_location(row: dict[str, str]) -> dict[str, str] | None:
+def _build_location(
+    row: dict[str, str], errors: list[str], row_num: int
+) -> dict[str, str] | None:
     city = (row.get("city") or "").strip() or None
     state = (row.get("state") or "").strip() or None
     country = (row.get("country") or "").strip() or None
     zip_code = (row.get("zip") or "").strip() or None
+    if is_us_country(country):
+        if state:
+            try:
+                state = validate_us_state(state)
+            except ValueError:
+                errors.append(f"Row {row_num}: unrecognized state '{state}', left as-is")
+        if zip_code:
+            try:
+                zip_code = validate_us_zip(zip_code)
+            except ValueError:
+                errors.append(f"Row {row_num}: invalid zip code '{zip_code}', left as-is")
     loc: dict[str, str] = {}
     if city:
         loc["city"] = city
@@ -265,7 +279,7 @@ def sync_from_sheet_values(db: Session, values: list[list[Any]]) -> SheetSyncRes
         name = parsed["name"]
         social = _build_social_links(parsed)
         instagram = social.get("instagram")
-        location = _build_location(parsed)
+        location = _build_location(parsed, errors, row_num)
         categories = _resolve_categories(parsed.get("category"), errors, row_num)
 
         raw_image = (parsed.get("image") or "").strip() or None

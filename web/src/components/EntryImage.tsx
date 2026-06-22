@@ -1,6 +1,10 @@
 import { useState } from "react";
 
-const WIDE_RATIO_THRESHOLD = 1.6;
+// Only crop to fill (object-cover) when the image's aspect ratio is already
+// close to the container's 16:9, otherwise contain it so logos/portraits
+// (square, tall, or very wide) don't get their edges cut off.
+const MIN_COVER_RATIO = 1.3;
+const MAX_COVER_RATIO = 2.3;
 
 interface EntryImageProps {
   src: string;
@@ -9,7 +13,7 @@ interface EntryImageProps {
 }
 
 export default function EntryImage({ src, alt, className }: EntryImageProps) {
-  const [isWide, setIsWide] = useState(false);
+  const [shouldContain, setShouldContain] = useState(false);
 
   return (
     <img
@@ -17,9 +21,10 @@ export default function EntryImage({ src, alt, className }: EntryImageProps) {
       alt={alt}
       onLoad={(e) => {
         const img = e.currentTarget;
-        setIsWide(img.naturalWidth / img.naturalHeight > WIDE_RATIO_THRESHOLD);
+        const ratio = img.naturalWidth / img.naturalHeight;
+        setShouldContain(ratio < MIN_COVER_RATIO || ratio > MAX_COVER_RATIO);
       }}
-      className={`h-full w-full ${isWide ? "bg-slate-100 object-contain" : "object-cover"} ${className ?? ""}`}
+      className={`h-full w-full ${shouldContain ? "bg-slate-100 object-contain" : "object-cover"} ${className ?? ""}`}
     />
   );
 }
