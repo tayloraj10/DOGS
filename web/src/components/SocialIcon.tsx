@@ -69,7 +69,8 @@ export default function SocialIcon({ field, href }: SocialIconProps) {
       target="_blank"
       rel="noreferrer"
       title={LABELS[field]}
-      className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-slate-600 transition-colors hover:bg-emerald-100 hover:text-emerald-700"
+      onClick={(e) => e.stopPropagation()}
+      className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-slate-600 transition-colors hover:bg-emerald-100 hover:text-emerald-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-emerald-900/40 dark:hover:text-emerald-400"
     >
       <svg viewBox={viewBox} fill="currentColor" className="h-4 w-4">
         {content}

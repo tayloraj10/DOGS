@@ -9,27 +9,31 @@ import NeedsPhotoPage from "./pages/NeedsPhotoPage";
 import AdminSyncPage from "./pages/AdminSyncPage";
 import EntryDetailPage from "./pages/EntryDetailPage";
 import EditEntryPage from "./pages/EditEntryPage";
+import ThemeToggle from "./components/ThemeToggle";
 
 const navLinkClasses = ({ isActive }: { isActive: boolean }) =>
   `text-sm font-medium transition-colors ${
-    isActive ? "text-emerald-700" : "text-slate-500 hover:text-slate-800"
+    isActive
+      ? "text-emerald-700 dark:text-emerald-400"
+      : "text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200"
   }`;
 
 function App() {
   return (
-    <div className="min-h-screen bg-slate-50">
-      <header className="border-b border-slate-200 bg-white">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
+      <header className="border-b border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-4">
-          <NavLink to="/" className="text-lg font-semibold text-slate-900">
+          <NavLink to="/" className="text-lg font-semibold text-slate-900 dark:text-slate-100">
             Directory of Good
           </NavLink>
-          <nav className="flex gap-6">
+          <nav className="flex items-center gap-6">
             <NavLink to="/" className={navLinkClasses} end>
               Showcase
             </NavLink>
             <NavLink to="/submit" className={navLinkClasses}>
               Submit an Entry
             </NavLink>
+            <ThemeToggle />
           </nav>
         </div>
       </header>

@@ -40,6 +40,9 @@ const SOCIAL_LABELS: Record<keyof SocialLinks, string> = {
   twitter: "X / Twitter",
 };
 
+const INPUT_CLASSES =
+  "rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder-slate-500 dark:focus:border-emerald-500";
+
 interface DirectoryEntryFormProps {
   initialValues?: Partial<DirectoryEntryInput>;
   onSubmit: (values: DirectoryEntryInput) => Promise<void>;
@@ -172,22 +175,22 @@ export default function DirectoryEntryForm({
       {showUrlExtract && <UrlExtractBox onResult={handleExtractResult} />}
 
       <div>
-        <label className="block text-sm font-medium text-slate-700">Name *</label>
+        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">Name *</label>
         <input
           type="text"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none"
+          className={`mt-1 w-full ${INPUT_CLASSES}`}
         />
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-slate-700">Description</label>
+        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">Description</label>
         <textarea
           value={description ?? ""}
           onChange={(e) => setDescription(e.target.value)}
           rows={3}
-          className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none"
+          className={`mt-1 w-full ${INPUT_CLASSES}`}
         />
       </div>
 
@@ -195,17 +198,17 @@ export default function DirectoryEntryForm({
 
       <div>
         <div className="flex items-center justify-between">
-          <p className="block text-sm font-medium text-slate-700">Location</p>
+          <p className="block text-sm font-medium text-slate-700 dark:text-slate-300">Location</p>
           <button
             type="button"
             onClick={handleLocationLookup}
             disabled={lookingUpLocation || !Object.values(location).some(Boolean)}
-            className="text-sm font-medium text-emerald-700 hover:text-emerald-900 disabled:cursor-not-allowed disabled:text-slate-300"
+            className="text-sm font-medium text-emerald-700 hover:text-emerald-900 disabled:cursor-not-allowed disabled:text-slate-300 dark:text-emerald-400 dark:hover:text-emerald-300 dark:disabled:text-slate-600"
           >
             {lookingUpLocation ? "Looking up..." : "Fill in the rest"}
           </button>
         </div>
-        <p className="mt-1 text-xs text-slate-500">
+        <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
           Fill in whatever you know (e.g. just a zip code) and use "Fill in the rest" to
           look up the rest.
         </p>
@@ -215,48 +218,48 @@ export default function DirectoryEntryForm({
             placeholder="City"
             value={location.city ?? ""}
             onChange={(e) => setLocation((l) => ({ ...l, city: e.target.value || null }))}
-            className="rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none"
+            className={INPUT_CLASSES}
           />
           <input
             type="text"
             placeholder="State (2-letter, US)"
             value={location.state ?? ""}
             onChange={(e) => setLocation((l) => ({ ...l, state: e.target.value || null }))}
-            className="rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none"
+            className={INPUT_CLASSES}
           />
           <input
             type="text"
             placeholder="Zip code"
             value={location.zip_code ?? ""}
             onChange={(e) => setLocation((l) => ({ ...l, zip_code: e.target.value || null }))}
-            className="rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none"
+            className={INPUT_CLASSES}
           />
           <input
             type="text"
             placeholder="Country"
             value={location.country ?? ""}
             onChange={(e) => setLocation((l) => ({ ...l, country: e.target.value || null }))}
-            className="rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none"
+            className={INPUT_CLASSES}
           />
         </div>
-        {lookupError && <p className="mt-1 text-sm text-red-600">{lookupError}</p>}
+        {lookupError && <p className="mt-1 text-sm text-red-600 dark:text-red-400">{lookupError}</p>}
       </div>
 
       <div>
-        <p className="block text-sm font-medium text-slate-700">Social links</p>
-        <p className="mt-1 text-xs text-slate-500">
+        <p className="block text-sm font-medium text-slate-700 dark:text-slate-300">Social links</p>
+        <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
           Just the username, not the full link (e.g. "dogs", not
           instagram.com/dogs) — paste a full link and we'll trim it down for you.
         </p>
         <div className="mt-2 grid grid-cols-1 gap-3 sm:grid-cols-2">
           {SOCIAL_FIELDS.map((field) => (
             <div key={field}>
-              <label className="block text-xs font-medium text-slate-500">
+              <label className="block text-xs font-medium text-slate-500 dark:text-slate-400">
                 {SOCIAL_LABELS[field]}
               </label>
               <div className="relative mt-0.5">
                 {field !== "website" && (
-                  <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-sm text-slate-400">
+                  <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-sm text-slate-400 dark:text-slate-500">
                     @
                   </span>
                 )}
@@ -268,7 +271,7 @@ export default function DirectoryEntryForm({
                     setSocialLinks((s) => ({ ...s, [field]: e.target.value || null }))
                   }
                   onBlur={() => field !== "website" && handleSocialBlur(field)}
-                  className={`w-full rounded-lg border border-slate-300 py-2 text-sm focus:border-emerald-500 focus:outline-none ${field !== "website" ? "pl-7 pr-3" : "px-3"
+                  className={`w-full ${INPUT_CLASSES} ${field !== "website" ? "pl-7 pr-3" : "px-3"
                     }`}
                 />
               </div>
@@ -278,7 +281,7 @@ export default function DirectoryEntryForm({
       </div>
 
       <div>
-        <p className="block text-sm font-medium text-slate-700">Categories</p>
+        <p className="block text-sm font-medium text-slate-700 dark:text-slate-300">Categories</p>
         <div className="mt-1 flex flex-wrap gap-2">
           {categories.map((category) => (
             <button
@@ -287,7 +290,7 @@ export default function DirectoryEntryForm({
               onClick={() => toggleCategory(category.slug)}
               className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${selectedCategories.includes(category.slug)
                   ? "bg-emerald-600 text-white"
-                  : "bg-white text-slate-600 ring-1 ring-slate-200 hover:bg-slate-100"
+                  : "bg-white text-slate-600 ring-1 ring-slate-200 hover:bg-slate-100 dark:bg-slate-900 dark:text-slate-300 dark:ring-slate-700 dark:hover:bg-slate-800"
                 }`}
             >
               {category.name}
@@ -295,7 +298,7 @@ export default function DirectoryEntryForm({
           ))}
         </div>
         <div className="mt-3">
-          <label className="block text-xs font-medium text-slate-500">
+          <label className="block text-xs font-medium text-slate-500 dark:text-slate-400">
             Don't see a category that fits? Suggest one (we'll review and add it)
           </label>
           <input
@@ -303,17 +306,17 @@ export default function DirectoryEntryForm({
             placeholder="e.g. Community gardens"
             value={suggestedCategory}
             onChange={(e) => setSuggestedCategory(e.target.value)}
-            className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none"
+            className={`mt-1 w-full ${INPUT_CLASSES}`}
           />
         </div>
       </div>
 
-      {submitError && <p className="text-sm text-red-600">{submitError}</p>}
+      {submitError && <p className="text-sm text-red-600 dark:text-red-400">{submitError}</p>}
 
       <button
         type="submit"
         disabled={submitting}
-        className="self-start rounded-lg bg-emerald-600 px-6 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-emerald-700 disabled:cursor-not-allowed disabled:bg-emerald-300"
+        className="self-start rounded-lg bg-emerald-600 px-6 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-emerald-700 disabled:cursor-not-allowed disabled:bg-emerald-300 dark:disabled:bg-emerald-800"
       >
         {submitting ? "Saving..." : submitLabel}
       </button>

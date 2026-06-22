@@ -3,7 +3,9 @@ import { NavLink } from "react-router-dom";
 import { listDirectoryEntries, listEntriesNeedingPhoto } from "../api/directory";
 
 const linkClasses = ({ isActive }: { isActive: boolean }) =>
-  isActive ? "text-emerald-700" : "text-slate-500 hover:text-slate-800";
+  isActive
+    ? "text-emerald-700 dark:text-emerald-400"
+    : "text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200";
 
 export default function ReviewNav() {
   const [pendingCount, setPendingCount] = useState<number | null>(null);

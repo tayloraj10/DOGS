@@ -6,8 +6,8 @@ import type { DirectoryEntry } from "../api/types";
 import { CATEGORY_DISPLAY_NAMES } from "../api/types";
 
 const statusClasses: Record<DirectoryEntry["status"], string> = {
-  pending: "bg-amber-50 text-amber-700 ring-amber-200",
-  published: "bg-emerald-50 text-emerald-700 ring-emerald-200",
+  pending: "bg-amber-50 text-amber-700 ring-amber-200 dark:bg-amber-900/20 dark:text-amber-400 dark:ring-amber-800",
+  published: "bg-emerald-50 text-emerald-700 ring-emerald-200 dark:bg-emerald-900/20 dark:text-emerald-400 dark:ring-emerald-800",
 };
 
 export default function AllEntriesPage() {
@@ -55,8 +55,8 @@ export default function AllEntriesPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-semibold text-slate-900">All entries</h1>
-      <p className="mt-2 text-sm text-slate-600">
+      <h1 className="text-2xl font-semibold text-slate-900 dark:text-slate-100">All entries</h1>
+      <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
         Every entry in the directory, regardless of status. Click one to edit it, or copy its
         edit link to share with whoever submitted it.
       </p>
@@ -68,24 +68,24 @@ export default function AllEntriesPage() {
         placeholder="Search by name..."
         value={search}
         onChange={(e) => setSearch(e.target.value)}
-        className="mt-6 w-full max-w-sm rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none"
+        className="mt-6 w-full max-w-sm rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:placeholder-slate-500"
       />
 
-      {loading && <p className="mt-6 text-sm text-slate-400">Loading...</p>}
+      {loading && <p className="mt-6 text-sm text-slate-400 dark:text-slate-500">Loading...</p>}
 
       {!loading && filtered.length === 0 && (
-        <p className="mt-6 text-sm text-slate-400">No entries match that search.</p>
+        <p className="mt-6 text-sm text-slate-400 dark:text-slate-500">No entries match that search.</p>
       )}
 
       <div className="mt-6 flex flex-col gap-3">
         {filtered.map((entry) => (
           <div
             key={entry.id}
-            className="flex items-center gap-4 rounded-xl bg-white p-4 shadow-sm ring-1 ring-slate-200"
+            className="flex items-center gap-4 rounded-xl bg-white p-4 shadow-sm ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800"
           >
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2">
-                <Link to={`/review/${entry.id}`} className="font-medium text-slate-900 hover:underline">
+                <Link to={`/review/${entry.id}`} className="font-medium text-slate-900 hover:underline dark:text-slate-100">
                   {entry.name}
                 </Link>
                 <span
@@ -95,7 +95,7 @@ export default function AllEntriesPage() {
                 </span>
               </div>
               {entry.categories.length > 0 && (
-                <p className="mt-1 truncate text-xs text-slate-400">
+                <p className="mt-1 truncate text-xs text-slate-400 dark:text-slate-500">
                   {entry.categories.map((slug) => CATEGORY_DISPLAY_NAMES[slug]).join(", ")}
                 </p>
               )}
@@ -105,7 +105,7 @@ export default function AllEntriesPage() {
                 type="button"
                 onClick={() => handleCopyEditLink(entry.id)}
                 disabled={copyState[entry.id] === "copying"}
-                className="rounded-lg bg-slate-100 px-3 py-1.5 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-200 disabled:cursor-not-allowed disabled:text-slate-400"
+                className="rounded-lg bg-slate-100 px-3 py-1.5 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-200 disabled:cursor-not-allowed disabled:text-slate-400 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 dark:disabled:text-slate-600"
               >
                 {copyLabel(entry.id)}
               </button>

@@ -19,7 +19,7 @@ export default function CategoryFilterBar({
         className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
           selected === null
             ? "bg-emerald-600 text-white"
-            : "bg-white text-slate-600 ring-1 ring-slate-200 hover:bg-slate-100"
+            : "bg-white text-slate-600 ring-1 ring-slate-200 hover:bg-slate-100 dark:bg-slate-900 dark:text-slate-300 dark:ring-slate-700 dark:hover:bg-slate-800"
         }`}
       >
         All
@@ -32,7 +32,7 @@ export default function CategoryFilterBar({
           className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
             selected === category.slug
               ? "bg-emerald-600 text-white"
-              : "bg-white text-slate-600 ring-1 ring-slate-200 hover:bg-slate-100"
+              : "bg-white text-slate-600 ring-1 ring-slate-200 hover:bg-slate-100 dark:bg-slate-900 dark:text-slate-300 dark:ring-slate-700 dark:hover:bg-slate-800"
           }`}
         >
           {category.name}

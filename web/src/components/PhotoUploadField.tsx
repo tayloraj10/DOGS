@@ -49,15 +49,15 @@ export default function PhotoUploadField({ value, onChange }: PhotoUploadFieldPr
 
   return (
     <div>
-      <label className="block text-sm font-medium text-slate-700">Photo</label>
+      <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">Photo</label>
 
       {value && (
         <div className="mt-2 flex items-center gap-3">
-          <img src={value} alt="" className="h-20 w-20 rounded-lg object-cover ring-1 ring-slate-200" />
+          <img src={value} alt="" className="h-20 w-20 rounded-lg object-cover ring-1 ring-slate-200 dark:ring-slate-700" />
           <button
             type="button"
             onClick={() => onChange(null)}
-            className="text-sm text-slate-500 hover:text-red-600"
+            className="text-sm text-slate-500 hover:text-red-600 dark:text-slate-400 dark:hover:text-red-400"
           >
             Remove
           </button>
@@ -70,31 +70,31 @@ export default function PhotoUploadField({ value, onChange }: PhotoUploadFieldPr
         accept="image/jpeg,image/png,image/gif,image/webp"
         onChange={handleFileSelected}
         disabled={uploading}
-        className="mt-2 block w-full text-sm text-slate-600 file:mr-3 file:rounded-lg file:border-0 file:bg-emerald-50 file:px-3 file:py-2 file:text-sm file:font-medium file:text-emerald-700 hover:file:bg-emerald-100"
+        className="mt-2 block w-full text-sm text-slate-600 file:mr-3 file:rounded-lg file:border-0 file:bg-emerald-50 file:px-3 file:py-2 file:text-sm file:font-medium file:text-emerald-700 hover:file:bg-emerald-100 dark:text-slate-300 dark:file:bg-emerald-900/30 dark:file:text-emerald-400 dark:hover:file:bg-emerald-900/50"
       />
 
       <div className="mt-2 flex items-center gap-2">
-        <span className="text-xs text-slate-400">or</span>
+        <span className="text-xs text-slate-400 dark:text-slate-500">or</span>
         <input
           type="url"
           placeholder="Paste an image URL"
           value={photoUrl}
           onChange={(e) => setPhotoUrl(e.target.value)}
           disabled={uploading}
-          className="flex-1 rounded-lg border border-slate-300 px-3 py-1.5 text-sm focus:border-emerald-500 focus:outline-none"
+          className="flex-1 rounded-lg border border-slate-300 px-3 py-1.5 text-sm focus:border-emerald-500 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder-slate-500"
         />
         <button
           type="button"
           onClick={handleUseUrl}
           disabled={uploading || !photoUrl.trim()}
-          className="rounded-lg bg-slate-100 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-200 disabled:cursor-not-allowed disabled:text-slate-300"
+          className="rounded-lg bg-slate-100 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-200 disabled:cursor-not-allowed disabled:text-slate-300 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 dark:disabled:text-slate-600"
         >
           Use URL
         </button>
       </div>
 
-      {uploading && <p className="mt-1 text-sm text-slate-400">Uploading...</p>}
-      {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
+      {uploading && <p className="mt-1 text-sm text-slate-400 dark:text-slate-500">Uploading...</p>}
+      {error && <p className="mt-1 text-sm text-red-600 dark:text-red-400">{error}</p>}
     </div>
   );
 }

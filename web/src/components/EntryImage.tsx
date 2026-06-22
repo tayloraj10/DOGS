@@ -24,7 +24,7 @@ export default function EntryImage({ src, alt, className }: EntryImageProps) {
         const ratio = img.naturalWidth / img.naturalHeight;
         setShouldContain(ratio < MIN_COVER_RATIO || ratio > MAX_COVER_RATIO);
       }}
-      className={`h-full w-full ${shouldContain ? "bg-slate-100 object-contain" : "object-cover"} ${className ?? ""}`}
+      className={`h-full w-full ${shouldContain ? "bg-slate-100 object-contain dark:bg-slate-800" : "object-cover"} ${className ?? ""}`}
     />
   );
 }

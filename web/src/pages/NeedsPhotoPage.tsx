@@ -84,8 +84,8 @@ export default function NeedsPhotoPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-semibold text-slate-900">Needs photo</h1>
-      <p className="mt-2 text-sm text-slate-600">
+      <h1 className="text-2xl font-semibold text-slate-900 dark:text-slate-100">Needs photo</h1>
+      <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
         Entries with no photo at all, or whose photo is still an external link (e.g. pasted in
         from a sheet sync) instead of one we host ourselves. Re-host the existing image, or
         upload one if there isn't one yet or the link is broken or low quality.
@@ -93,45 +93,45 @@ export default function NeedsPhotoPage() {
 
       <ReviewNav />
 
-      {loading && <p className="mt-6 text-sm text-slate-400">Loading...</p>}
+      {loading && <p className="mt-6 text-sm text-slate-400 dark:text-slate-500">Loading...</p>}
 
       {!loading && entries.length === 0 && (
-        <p className="mt-6 text-sm text-slate-400">Every entry's photo is hosted by us. Nothing to do here.</p>
+        <p className="mt-6 text-sm text-slate-400 dark:text-slate-500">Every entry's photo is hosted by us. Nothing to do here.</p>
       )}
 
       <div className="mt-6 flex flex-col gap-3">
         {entries.map((entry) => (
           <div
             key={entry.id}
-            className="flex items-center gap-4 rounded-xl bg-white p-4 shadow-sm ring-1 ring-slate-200"
+            className="flex items-center gap-4 rounded-xl bg-white p-4 shadow-sm ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800"
           >
             {entry.image_url ? (
               <img
                 src={entry.image_url}
                 alt=""
-                className="h-16 w-16 flex-shrink-0 rounded-lg bg-slate-100 object-cover ring-1 ring-slate-200"
+                className="h-16 w-16 flex-shrink-0 rounded-lg bg-slate-100 object-cover ring-1 ring-slate-200 dark:bg-slate-800 dark:ring-slate-700"
                 onError={(e) => {
                   e.currentTarget.style.visibility = "hidden";
                 }}
               />
             ) : (
-              <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-lg bg-slate-100 text-xs text-slate-400 ring-1 ring-slate-200">
+              <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-lg bg-slate-100 text-xs text-slate-400 ring-1 ring-slate-200 dark:bg-slate-800 dark:text-slate-500 dark:ring-slate-700">
                 No photo
               </div>
             )}
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2">
-                <Link to={`/review/${entry.id}`} className="font-medium text-slate-900 hover:underline">
+                <Link to={`/review/${entry.id}`} className="font-medium text-slate-900 hover:underline dark:text-slate-100">
                   {entry.name}
                 </Link>
-                <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-500">
+                <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-500 dark:bg-slate-800 dark:text-slate-400">
                   {entry.status}
                 </span>
               </div>
-              <p className="mt-0.5 truncate text-xs text-slate-400">
+              <p className="mt-0.5 truncate text-xs text-slate-400 dark:text-slate-500">
                 {entry.image_url ?? "No image link"}
               </p>
-              {errors[entry.id] && <p className="mt-1 text-sm text-red-600">{errors[entry.id]}</p>}
+              {errors[entry.id] && <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors[entry.id]}</p>}
               <div className="mt-2 flex items-center gap-2">
                 <input
                   type="url"
@@ -141,13 +141,13 @@ export default function NeedsPhotoPage() {
                     setUrlInputs((prev) => ({ ...prev, [entry.id]: e.target.value }))
                   }
                   disabled={busyId === entry.id}
-                  className="w-full max-w-xs rounded-lg border border-slate-300 px-2 py-1 text-xs focus:border-emerald-500 focus:outline-none"
+                  className="w-full max-w-xs rounded-lg border border-slate-300 px-2 py-1 text-xs focus:border-emerald-500 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder-slate-500"
                 />
                 <button
                   type="button"
                   onClick={() => handleUseUrl(entry)}
                   disabled={busyId === entry.id || !urlInputs[entry.id]?.trim()}
-                  className="flex-shrink-0 rounded-lg bg-white px-3 py-1 text-xs font-medium text-slate-600 ring-1 ring-slate-300 transition-colors hover:bg-slate-50 disabled:cursor-not-allowed disabled:text-slate-300"
+                  className="flex-shrink-0 rounded-lg bg-white px-3 py-1 text-xs font-medium text-slate-600 ring-1 ring-slate-300 transition-colors hover:bg-slate-50 disabled:cursor-not-allowed disabled:text-slate-300 dark:bg-slate-800 dark:text-slate-300 dark:ring-slate-700 dark:hover:bg-slate-700 dark:disabled:text-slate-600"
                 >
                   Use URL
                 </button>
@@ -159,12 +159,12 @@ export default function NeedsPhotoPage() {
                   type="button"
                   onClick={() => handleRehost(entry)}
                   disabled={busyId === entry.id}
-                  className="rounded-lg bg-emerald-600 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-emerald-700 disabled:cursor-not-allowed disabled:bg-emerald-300"
+                  className="rounded-lg bg-emerald-600 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-emerald-700 disabled:cursor-not-allowed disabled:bg-emerald-300 dark:disabled:bg-emerald-800"
                 >
                   {busyId === entry.id ? "Working..." : "Re-host"}
                 </button>
               )}
-              <label className="cursor-pointer rounded-lg bg-white px-3 py-1.5 text-sm font-medium text-slate-600 ring-1 ring-slate-300 transition-colors hover:bg-slate-50">
+              <label className="cursor-pointer rounded-lg bg-white px-3 py-1.5 text-sm font-medium text-slate-600 ring-1 ring-slate-300 transition-colors hover:bg-slate-50 dark:bg-slate-800 dark:text-slate-300 dark:ring-slate-700 dark:hover:bg-slate-700">
                 Upload
                 <input
                   ref={(el) => {

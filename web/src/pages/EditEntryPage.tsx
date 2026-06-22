@@ -30,8 +30,8 @@ export default function EditEntryPage() {
   if (!id || !token) {
     return (
       <div className="mx-auto max-w-md text-center">
-        <h1 className="text-xl font-semibold text-slate-900">Missing edit link</h1>
-        <p className="mt-2 text-sm text-slate-600">
+        <h1 className="text-xl font-semibold text-slate-900 dark:text-slate-100">Missing edit link</h1>
+        <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
           This page needs a valid edit link to update an entry. Ask whoever manages the
           directory for your entry's edit link.
         </p>
@@ -39,15 +39,15 @@ export default function EditEntryPage() {
     );
   }
 
-  if (loading) return <p className="text-sm text-slate-400">Loading...</p>;
-  if (notFound || !entry) return <p className="text-sm text-slate-400">Entry not found.</p>;
+  if (loading) return <p className="text-sm text-slate-400 dark:text-slate-500">Loading...</p>;
+  if (notFound || !entry) return <p className="text-sm text-slate-400 dark:text-slate-500">Entry not found.</p>;
 
   return (
     <div className="mx-auto max-w-2xl">
-      <h1 className="text-2xl font-semibold text-slate-900">Edit entry</h1>
-      <p className="mt-2 text-sm text-slate-600">Update the details for {entry.name}.</p>
+      <h1 className="text-2xl font-semibold text-slate-900 dark:text-slate-100">Edit entry</h1>
+      <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">Update the details for {entry.name}.</p>
 
-      <div className="mt-6 rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
+      <div className="mt-6 rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800">
         <DirectoryEntryForm
           initialValues={entry}
           onSubmit={handleSubmit}

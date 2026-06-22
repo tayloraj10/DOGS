@@ -22,23 +22,23 @@ export default function EntryDetailPage() {
       .finally(() => setLoading(false));
   }, [id]);
 
-  if (loading) return <p className="text-sm text-slate-400">Loading...</p>;
-  if (notFound || !entry) return <p className="text-sm text-slate-400">Entry not found.</p>;
+  if (loading) return <p className="text-sm text-slate-400 dark:text-slate-500">Loading...</p>;
+  if (notFound || !entry) return <p className="text-sm text-slate-400 dark:text-slate-500">Entry not found.</p>;
 
   const activeSocialFields = SOCIAL_FIELDS.filter((field) => entry.social_links?.[field]);
 
   return (
     <div className="mx-auto max-w-2xl">
-      <Link to="/" className="text-sm font-medium text-emerald-700 hover:text-emerald-900">
+      <Link to="/" className="text-sm font-medium text-emerald-700 hover:text-emerald-900 dark:text-emerald-400 dark:hover:text-emerald-300">
         ← Back to directory
       </Link>
 
-      <div className="mt-4 overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-slate-200">
-        <div className="aspect-[16/9] w-full bg-slate-100">
+      <div className="mt-4 overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800">
+        <div className="aspect-[16/9] w-full bg-slate-100 dark:bg-slate-800">
           {entry.image_url ? (
             <EntryImage src={entry.image_url} alt={entry.name} />
           ) : (
-            <div className="flex h-full w-full items-center justify-center text-slate-300">
+            <div className="flex h-full w-full items-center justify-center text-slate-300 dark:text-slate-600">
               <span className="text-5xl font-semibold">{entry.name.charAt(0).toUpperCase()}</span>
             </div>
           )}
@@ -46,9 +46,9 @@ export default function EntryDetailPage() {
 
         <div className="flex flex-col gap-4 p-6">
           <div>
-            <h1 className="text-2xl font-semibold text-slate-900">{entry.name}</h1>
+            <h1 className="text-2xl font-semibold text-slate-900 dark:text-slate-100">{entry.name}</h1>
             {entry.location?.city && (
-              <p className="mt-1 text-sm text-slate-400">
+              <p className="mt-1 text-sm text-slate-400 dark:text-slate-500">
                 {[entry.location.city, entry.location.state, entry.location.country]
                   .filter(Boolean)
                   .join(", ")}
@@ -57,7 +57,7 @@ export default function EntryDetailPage() {
           </div>
 
           {entry.description && (
-            <p className="text-sm text-slate-600">{entry.description}</p>
+            <p className="text-sm text-slate-600 dark:text-slate-400">{entry.description}</p>
           )}
 
           {entry.categories.length > 0 && (
@@ -65,7 +65,7 @@ export default function EntryDetailPage() {
               {entry.categories.map((slug) => (
                 <span
                   key={slug}
-                  className="rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-medium text-emerald-700"
+                  className="rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-medium text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400"
                 >
                   {CATEGORY_DISPLAY_NAMES[slug]}
                 </span>

@@ -63,10 +63,10 @@ export default function ShowcasePage() {
   return (
     <div>
       <div className="text-center">
-        <h1 className="text-3xl font-semibold text-slate-900">
+        <h1 className="text-3xl font-semibold text-slate-900 dark:text-slate-100">
           The Directory of Good
         </h1>
-        <p className="mx-auto mt-3 max-w-xl text-slate-600">
+        <p className="mx-auto mt-3 max-w-xl text-slate-600 dark:text-slate-400">
           A growing collection of people and groups taking action for good of the world
         </p>
       </div>
@@ -85,12 +85,12 @@ export default function ShowcasePage() {
           placeholder="Search by name or description"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-64 rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none"
+          className="w-64 rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:placeholder-slate-500"
         />
         <select
           value={sort}
           onChange={(e) => setSort(e.target.value as SortOption)}
-          className="rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none"
+          className="rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
         >
           {Object.entries(SORT_LABELS).map(([value, label]) => (
             <option key={value} value={value}>
@@ -102,23 +102,23 @@ export default function ShowcasePage() {
           type="button"
           onClick={handleRandom}
           disabled={visibleEntries.length === 0}
-          className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700 disabled:cursor-not-allowed disabled:bg-emerald-300"
+          className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700 disabled:cursor-not-allowed disabled:bg-emerald-300 dark:disabled:bg-emerald-800"
         >
           Random entry
         </button>
       </div>
 
       {!loading && (
-        <p className="mt-6 text-center text-sm text-slate-500">
+        <p className="mt-6 text-center text-sm text-slate-500 dark:text-slate-400">
           {visibleEntries.length} {visibleEntries.length === 1 ? "entry" : "entries"}
           {selectedCategory ? " in this category" : ""}
         </p>
       )}
 
-      {loading && <p className="mt-10 text-center text-sm text-slate-400">Loading...</p>}
+      {loading && <p className="mt-10 text-center text-sm text-slate-400 dark:text-slate-500">Loading...</p>}
 
       {!loading && visibleEntries.length === 0 && (
-        <p className="mt-10 text-center text-sm text-slate-400">
+        <p className="mt-10 text-center text-sm text-slate-400 dark:text-slate-500">
           No entries match your search.
         </p>
       )}
