@@ -22,6 +22,7 @@ from app.models import Category, DirectoryEntry
 from app.schemas.location import is_us_country, validate_us_state, validate_us_zip
 from app.services.directory_service import find_existing_entry, set_entry_categories
 from app.services.images import sanitize_image_url
+from app.services.storage import is_hosted_image_url
 
 SCOPES = ("https://www.googleapis.com/auth/spreadsheets.readonly",)
 
@@ -246,10 +247,16 @@ def _apply_row_to_entry(
     location: dict[str, str] | None,
     social: dict[str, str],
     categories: list[str],
+    preserve_image: bool = False,
 ) -> None:
     entry.name = name[:255]
     entry.description = description
-    entry.image_url = image_url
+    # Don't let the sheet's Image column clobber a photo we've re-hosted ourselves
+    # (see NeedsPhotoPage) or one that was deliberately cleared out — both are manual
+    # curation decisions the sheet has no idea about. Only applies to existing entries;
+    # brand-new entries have no curated state to protect.
+    if not (preserve_image and (is_hosted_image_url(entry.image_url) or not entry.image_url)):
+        entry.image_url = image_url
     entry.location = location
     entry.social_links = social or None
     if categories:
@@ -315,6 +322,7 @@ def sync_from_sheet_values(db: Session, values: list[list[Any]]) -> SheetSyncRes
                 location=location,
                 social=social,
                 categories=categories,
+                preserve_image=True,
             )
             updated += 1
 
