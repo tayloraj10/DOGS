@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { listDirectoryEntries } from "../api/directory";
 import ReviewNav from "../components/ReviewNav";
+import LoadingState from "../components/LoadingState";
 import type { DirectoryEntry } from "../api/types";
 
 export default function ReviewQueuePage() {
@@ -23,7 +24,7 @@ export default function ReviewQueuePage() {
 
       <ReviewNav />
 
-      {loading && <p className="mt-6 text-sm text-slate-400 dark:text-slate-500">Loading...</p>}
+      {loading && <LoadingState />}
 
       {!loading && entries.length === 0 && (
         <p className="mt-6 text-sm text-slate-400 dark:text-slate-500">Nothing waiting for review.</p>

@@ -4,6 +4,7 @@ import { listDirectoryEntries } from "../api/directory";
 import { useCategories } from "../hooks/useCategories";
 import CategoryFilterBar from "../components/CategoryFilterBar";
 import EntryCard from "../components/EntryCard";
+import LoadingState from "../components/LoadingState";
 import type { CategorySlug, DirectoryEntry } from "../api/types";
 
 type SortOption = "name" | "newest";
@@ -115,7 +116,7 @@ export default function ShowcasePage() {
         </p>
       )}
 
-      {loading && <p className="mt-10 text-center text-sm text-slate-400 dark:text-slate-500">Loading...</p>}
+      {loading && <LoadingState />}
 
       {!loading && visibleEntries.length === 0 && (
         <p className="mt-10 text-center text-sm text-slate-400 dark:text-slate-500">

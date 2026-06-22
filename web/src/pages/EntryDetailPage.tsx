@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import EntryImage from "../components/EntryImage";
 import SocialIcon, { SOCIAL_FIELDS } from "../components/SocialIcon";
+import LoadingState from "../components/LoadingState";
 import { getDirectoryEntry } from "../api/directory";
 import type { DirectoryEntry } from "../api/types";
 import { CATEGORY_DISPLAY_NAMES } from "../api/types";
@@ -22,7 +23,7 @@ export default function EntryDetailPage() {
       .finally(() => setLoading(false));
   }, [id]);
 
-  if (loading) return <p className="text-sm text-slate-400 dark:text-slate-500">Loading...</p>;
+  if (loading) return <LoadingState />;
   if (notFound || !entry) return <p className="text-sm text-slate-400 dark:text-slate-500">Entry not found.</p>;
 
   const activeSocialFields = SOCIAL_FIELDS.filter((field) => entry.social_links?.[field]);

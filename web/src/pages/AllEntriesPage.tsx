@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { getDirectoryEntryEditLink, listDirectoryEntries } from "../api/directory";
 import ReviewNav from "../components/ReviewNav";
+import LoadingState from "../components/LoadingState";
 import type { DirectoryEntry } from "../api/types";
 import { CATEGORY_DISPLAY_NAMES } from "../api/types";
 
@@ -71,7 +72,7 @@ export default function AllEntriesPage() {
         className="mt-6 w-full max-w-sm rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:placeholder-slate-500"
       />
 
-      {loading && <p className="mt-6 text-sm text-slate-400 dark:text-slate-500">Loading...</p>}
+      {loading && <LoadingState />}
 
       {!loading && filtered.length === 0 && (
         <p className="mt-6 text-sm text-slate-400 dark:text-slate-500">No entries match that search.</p>

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import DirectoryEntryForm from "../components/DirectoryEntryForm";
+import LoadingState from "../components/LoadingState";
 import { getDirectoryEntry, updateDirectoryEntryPublic } from "../api/directory";
 import type { DirectoryEntry, DirectoryEntryInput } from "../api/types";
 
@@ -39,7 +40,7 @@ export default function EditEntryPage() {
     );
   }
 
-  if (loading) return <p className="text-sm text-slate-400 dark:text-slate-500">Loading...</p>;
+  if (loading) return <LoadingState />;
   if (notFound || !entry) return <p className="text-sm text-slate-400 dark:text-slate-500">Entry not found.</p>;
 
   return (

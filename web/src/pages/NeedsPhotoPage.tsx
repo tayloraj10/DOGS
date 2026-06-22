@@ -4,6 +4,7 @@ import { listEntriesNeedingPhoto, updateDirectoryEntry } from "../api/directory"
 import { uploadDirectoryPhoto, uploadDirectoryPhotoFromUrl } from "../api/photos";
 import { ApiError } from "../api/client";
 import ReviewNav from "../components/ReviewNav";
+import LoadingState from "../components/LoadingState";
 import type { DirectoryEntry } from "../api/types";
 
 export default function NeedsPhotoPage() {
@@ -93,7 +94,7 @@ export default function NeedsPhotoPage() {
 
       <ReviewNav />
 
-      {loading && <p className="mt-6 text-sm text-slate-400 dark:text-slate-500">Loading...</p>}
+      {loading && <LoadingState />}
 
       {!loading && entries.length === 0 && (
         <p className="mt-6 text-sm text-slate-400 dark:text-slate-500">Every entry's photo is hosted by us. Nothing to do here.</p>
