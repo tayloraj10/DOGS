@@ -4,6 +4,7 @@ import SubmitPage from "./pages/SubmitPage";
 import CapturePage from "./pages/CapturePage";
 import ReviewQueuePage from "./pages/ReviewQueuePage";
 import ReviewEntryPage from "./pages/ReviewEntryPage";
+import AllEntriesPage from "./pages/AllEntriesPage";
 import NeedsPhotoPage from "./pages/NeedsPhotoPage";
 import AdminSyncPage from "./pages/AdminSyncPage";
 import EntryDetailPage from "./pages/EntryDetailPage";
@@ -41,6 +42,7 @@ function App() {
           <Route path="/entry/:id/edit" element={<EditEntryPage />} />
           <Route path="/capture" element={<CapturePage />} />
           <Route path="/review" element={<ReviewQueuePage />} />
+          <Route path="/review/all" element={<AllEntriesPage />} />
           <Route path="/review/photos" element={<NeedsPhotoPage />} />
           <Route path="/admin/sync" element={<AdminSyncPage />} />
           <Route path="/review/:id" element={<ReviewEntryPage />} />

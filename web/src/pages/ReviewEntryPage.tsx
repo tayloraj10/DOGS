@@ -46,10 +46,13 @@ export default function ReviewEntryPage() {
     <div className="mx-auto max-w-2xl">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-semibold text-slate-900">Review submission</h1>
+          <h1 className="text-2xl font-semibold text-slate-900">
+            {entry.status === "pending" ? "Review submission" : "Edit entry"}
+          </h1>
           <p className="mt-2 text-sm text-slate-600">
-            Fill in any missing gaps, then publish to make this entry live on the
-            showcase.
+            {entry.status === "pending"
+              ? "Fill in any missing gaps, then publish to make this entry live on the showcase."
+              : "Update the details for this entry."}
           </p>
         </div>
         <button
@@ -79,7 +82,7 @@ export default function ReviewEntryPage() {
         <DirectoryEntryForm
           initialValues={entry}
           onSubmit={handleSubmit}
-          submitLabel="Publish to directory"
+          submitLabel={entry.status === "pending" ? "Publish to directory" : "Save changes"}
           showUrlExtract
         />
       </div>

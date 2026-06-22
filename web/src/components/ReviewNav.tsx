@@ -19,6 +19,9 @@ export default function ReviewNav() {
       <NavLink to="/review" className={linkClasses}>
         Pending review{pendingCount !== null && ` (${pendingCount})`}
       </NavLink>
+      <NavLink to="/review/all" className={linkClasses}>
+        All entries
+      </NavLink>
       <NavLink to="/review/photos" className={linkClasses}>
         Needs photo{needsPhotoCount !== null && ` (${needsPhotoCount})`}
       </NavLink>
