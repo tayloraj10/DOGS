@@ -55,13 +55,28 @@ const LABELS: Record<SocialField, string> = {
   twitter: "X / Twitter",
 };
 
+const PROFILE_URL_BUILDERS: Record<Exclude<SocialField, "website">, (username: string) => string> = {
+  instagram: (username) => `https://instagram.com/${username}`,
+  tiktok: (username) => `https://tiktok.com/@${username}`,
+  youtube: (username) => `https://youtube.com/@${username}`,
+  facebook: (username) => `https://facebook.com/${username}`,
+  twitter: (username) => `https://x.com/${username}`,
+};
+
 interface SocialIconProps {
   field: SocialField;
   href: string;
 }
 
 export default function SocialIcon({ field, href }: SocialIconProps) {
-  const url = href.startsWith("http") ? href : `https://${href}`;
+  let url: string;
+  if (href.startsWith("http")) {
+    url = href;
+  } else if (field === "website") {
+    url = `https://${href}`;
+  } else {
+    url = PROFILE_URL_BUILDERS[field](href);
+  }
   const { viewBox, content } = ICONS[field];
   return (
     <a
