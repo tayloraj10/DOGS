@@ -116,8 +116,16 @@ export default function ShowcasePage() {
           type="button"
           onClick={handleRandom}
           disabled={visibleEntries.length === 0}
-          className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700 disabled:cursor-not-allowed disabled:bg-emerald-300 dark:disabled:bg-emerald-800"
+          className="flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700 disabled:cursor-not-allowed disabled:bg-emerald-300 dark:disabled:bg-emerald-800"
         >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className="h-4 w-4">
+            <rect x="3.5" y="3.5" width="17" height="17" rx="3" />
+            <circle cx="8.25" cy="8.25" r="1.25" fill="currentColor" stroke="none" />
+            <circle cx="15.75" cy="8.25" r="1.25" fill="currentColor" stroke="none" />
+            <circle cx="12" cy="12" r="1.25" fill="currentColor" stroke="none" />
+            <circle cx="8.25" cy="15.75" r="1.25" fill="currentColor" stroke="none" />
+            <circle cx="15.75" cy="15.75" r="1.25" fill="currentColor" stroke="none" />
+          </svg>
           Random entry
         </button>
       </div>
