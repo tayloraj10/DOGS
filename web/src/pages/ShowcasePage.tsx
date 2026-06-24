@@ -7,14 +7,27 @@ import EntryCard from "../components/EntryCard";
 import LoadingState from "../components/LoadingState";
 import type { CategorySlug, DirectoryEntry } from "../api/types";
 
-type SortOption = "name" | "newest";
+type SortOption = "newest" | "name" | "random";
 
 const SORT_LABELS: Record<SortOption, string> = {
-  name: "Name (A-Z)",
   newest: "Newest first",
+  name: "Name (A-Z)",
+  random: "Random",
 };
 
+function shuffle<T>(items: T[]): T[] {
+  const shuffled = [...items];
+  for (let i = shuffled.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+}
+
 function sortEntries(entries: DirectoryEntry[], sort: SortOption): DirectoryEntry[] {
+  if (sort === "random") {
+    return entries;
+  }
   const sorted = [...entries];
   if (sort === "newest") {
     sorted.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
@@ -31,11 +44,11 @@ export default function ShowcasePage() {
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState<CategorySlug | null>(null);
   const [search, setSearch] = useState("");
-  const [sort, setSort] = useState<SortOption>("name");
+  const [sort, setSort] = useState<SortOption>("random");
 
   useEffect(() => {
     listDirectoryEntries("published", 500)
-      .then(setEntries)
+      .then((data) => setEntries(shuffle(data)))
       .finally(() => setLoading(false));
   }, []);
 
