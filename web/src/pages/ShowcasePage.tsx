@@ -81,7 +81,7 @@ export default function ShowcasePage() {
           The Directory of Good
         </h1>
         <p className="mx-auto mt-3 max-w-xl text-slate-600 dark:text-slate-400">
-          A growing collection of people and groups taking action for good of the world
+          A growing collection of people and groups taking action for the good of the world
         </p>
       </div>
 
