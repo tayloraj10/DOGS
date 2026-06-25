@@ -1,5 +1,7 @@
 import { NavLink, Route, Routes } from "react-router-dom";
 import ShowcasePage from "./pages/ShowcasePage";
+import MapPage from "./pages/MapPage";
+import NetworkPage from "./pages/NetworkPage";
 import SubmitPage from "./pages/SubmitPage";
 import CapturePage from "./pages/CapturePage";
 import ReviewQueuePage from "./pages/ReviewQueuePage";
@@ -30,6 +32,12 @@ function App() {
             <NavLink to="/" className={navLinkClasses} end>
               Showcase
             </NavLink>
+            <NavLink to="/map" className={navLinkClasses}>
+              Map
+            </NavLink>
+            <NavLink to="/network" className={navLinkClasses}>
+              Network
+            </NavLink>
             <NavLink to="/submit" className={navLinkClasses}>
               Submit an Entry
             </NavLink>
@@ -41,6 +49,8 @@ function App() {
       <main className="mx-auto max-w-5xl px-6 py-10">
         <Routes>
           <Route path="/" element={<ShowcasePage />} />
+          <Route path="/map" element={<MapPage />} />
+          <Route path="/network" element={<NetworkPage />} />
           <Route path="/submit" element={<SubmitPage />} />
           <Route path="/entry/:id" element={<EntryDetailPage />} />
           <Route path="/entry/:id/edit" element={<EditEntryPage />} />

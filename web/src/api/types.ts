@@ -15,6 +15,15 @@ export const CATEGORY_DISPLAY_NAMES: Record<CategorySlug, string> = {
   water: "Water",
 };
 
+export const CATEGORY_COLORS: Record<CategorySlug, string> = {
+  animals: "#f59e0b",
+  environment: "#22c55e",
+  fitness: "#ec4899",
+  nature: "#84cc16",
+  trash: "#ef4444",
+  water: "#3b82f6",
+};
+
 export type DirectoryEntryStatus = "pending" | "published";
 
 export interface StructuredLocation {
