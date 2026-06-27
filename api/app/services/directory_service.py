@@ -1,3 +1,4 @@
+import re
 import secrets
 from uuid import UUID
 
@@ -15,7 +16,7 @@ from app.schemas import (
 from sqlalchemy import func
 from sqlalchemy.orm import Session, selectinload
 
-from app.models import Category, DirectoryEntry as DirectoryEntryModel
+from app.models import Category as CategoryModel, DirectoryEntry as DirectoryEntryModel
 from app.services.storage import gcs_storage, hosted_image_url_prefix, is_hosted_image_url
 
 
@@ -82,7 +83,7 @@ def list_entries(
 ) -> list[DirectoryEntryModel]:
     q = db.query(DirectoryEntryModel).options(selectinload(DirectoryEntryModel.categories))
     if category_slug:
-        q = q.join(DirectoryEntryModel.categories).filter(Category.slug == category_slug.value)
+        q = q.join(DirectoryEntryModel.categories).filter(CategoryModel.slug == category_slug)
     if status:
         q = q.filter(DirectoryEntryModel.status == status.value)
     if needs_photo:
@@ -97,19 +98,18 @@ def count_entries(
 ) -> int:
     q = db.query(DirectoryEntryModel)
     if category_slug:
-        q = q.join(DirectoryEntryModel.categories).filter(Category.slug == category_slug.value)
+        q = q.join(DirectoryEntryModel.categories).filter(CategoryModel.slug == category_slug)
     if status:
         q = q.filter(DirectoryEntryModel.status == status.value)
     return q.count()
 
 
-def resolve_categories(db: Session, slugs: list[CategorySlug]) -> list[Category]:
+def resolve_categories(db: Session, slugs: list[CategorySlug]) -> list[CategoryModel]:
     if not slugs:
         return []
-    slug_values = [s.value for s in slugs]
-    categories = db.query(Category).filter(Category.slug.in_(slug_values)).all()
+    categories = db.query(CategoryModel).filter(CategoryModel.slug.in_(slugs)).all()
     found = {c.slug for c in categories}
-    missing = set(slug_values) - found
+    missing = set(slugs) - found
     if missing:
         raise ValueError(f"Unknown categories: {', '.join(sorted(missing))}")
     return categories
@@ -197,6 +197,41 @@ def find_existing_entry(
         .order_by(DirectoryEntryModel.created_at.asc())
         .first()
     )
+
+
+def slugify_category(name: str) -> str:
+    slug = name.lower().strip()
+    slug = re.sub(r"[^\w\s-]", "", slug)
+    slug = re.sub(r"[\s_]+", "-", slug)
+    slug = re.sub(r"-+", "-", slug)
+    return slug.strip("-")[:50]
+
+
+def approve_suggested_category(db: Session, entry: DirectoryEntryModel) -> DirectoryEntryModel:
+    """Create a category from the entry's suggested_category, assign it, and clear the field."""
+    if not entry.suggested_category:
+        raise ValueError("Entry has no suggested category")
+
+    name = entry.suggested_category.strip()
+    slug = slugify_category(name)
+    if not slug:
+        raise ValueError("Suggested category name produces an invalid slug")
+
+    category = db.query(CategoryModel).filter(CategoryModel.slug == slug).first()
+    if not category:
+        category = CategoryModel(slug=slug, name=name)
+        db.add(category)
+        db.flush()
+
+    if category not in entry.categories:
+        entry.categories.append(category)
+
+    entry.suggested_category = None
+    db.commit()
+    db.refresh(entry)
+    refreshed = get_entry(db, entry.id)
+    assert refreshed is not None
+    return refreshed
 
 
 def find_orphaned_images(db: Session) -> list:

@@ -164,17 +164,22 @@ def _build_location(
     return loc or None
 
 
-def _resolve_categories(category_cell: str | None, errors: list[str], row_num: int) -> list[str]:
+def _resolve_categories(
+    category_cell: str | None,
+    valid_slugs: set[str],
+    errors: list[str],
+    row_num: int,
+) -> list[str]:
     if not category_cell or not category_cell.strip():
         return []
     parts = [p.strip() for p in category_cell.split("|") if p.strip()]
     slugs: list[str] = []
     for part in parts:
         slug = category_slug_from_label(part)
-        if slug is None:
+        if slug is None or slug not in valid_slugs:
             errors.append(f"Row {row_num}: unknown category '{part}'")
         else:
-            slugs.append(slug.value)
+            slugs.append(slug)
     return slugs
 
 
@@ -287,7 +292,7 @@ def sync_from_sheet_values(db: Session, values: list[list[Any]]) -> SheetSyncRes
         social = _build_social_links(parsed)
         instagram = social.get("instagram")
         location = _build_location(parsed, errors, row_num)
-        categories = _resolve_categories(parsed.get("category"), errors, row_num)
+        categories = _resolve_categories(parsed.get("category"), set(slug_to_category), errors, row_num)
 
         raw_image = (parsed.get("image") or "").strip() or None
         image_url, skip_reason = sanitize_image_url(raw_image)

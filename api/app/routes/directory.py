@@ -26,6 +26,7 @@ from app.models import DirectoryEntry as DirectoryEntryModel
 from app.services.directory_service import (
     apply_create_data,
     apply_update_data,
+    approve_suggested_category,
     entry_to_schema,
     get_entry,
     get_or_create_edit_token,
@@ -246,6 +247,19 @@ async def update_directory_entry_public(
     db.refresh(entry)
     entry = get_entry(db, entry.id)
     assert entry is not None
+    return entry_to_schema(entry)
+
+
+@router.post("/{entry_id}/approve-suggested-category", response_model=DirectoryEntry)
+def approve_suggested_category_endpoint(entry_id: UUID, db: Session = Depends(get_db)):
+    """Create a category from the entry's suggested_category, assign it, and clear the field."""
+    entry = get_entry(db, entry_id)
+    if not entry:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Entry not found")
+    try:
+        entry = approve_suggested_category(db, entry)
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
     return entry_to_schema(entry)
 
 

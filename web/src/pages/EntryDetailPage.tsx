@@ -5,7 +5,7 @@ import SocialIcon, { SOCIAL_FIELDS } from "../components/SocialIcon";
 import LoadingState from "../components/LoadingState";
 import { getDirectoryEntry } from "../api/directory";
 import type { DirectoryEntry } from "../api/types";
-import { CATEGORY_DISPLAY_NAMES } from "../api/types";
+import { slugToLabel } from "../api/types";
 
 export default function EntryDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -68,7 +68,7 @@ export default function EntryDetailPage() {
                   key={slug}
                   className="rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-medium text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400"
                 >
-                  {CATEGORY_DISPLAY_NAMES[slug]}
+                  {slugToLabel(slug)}
                 </span>
               ))}
             </div>

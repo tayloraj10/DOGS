@@ -4,7 +4,7 @@ import { getDirectoryEntryEditLink, listDirectoryEntries } from "../api/director
 import ReviewNav from "../components/ReviewNav";
 import LoadingState from "../components/LoadingState";
 import type { DirectoryEntry } from "../api/types";
-import { CATEGORY_DISPLAY_NAMES } from "../api/types";
+import { slugToLabel } from "../api/types";
 
 const statusClasses: Record<DirectoryEntry["status"], string> = {
   pending: "bg-amber-50 text-amber-700 ring-amber-200 dark:bg-amber-900/20 dark:text-amber-400 dark:ring-amber-800",
@@ -97,7 +97,7 @@ export default function AllEntriesPage() {
               </div>
               {entry.categories.length > 0 && (
                 <p className="mt-1 truncate text-xs text-slate-400 dark:text-slate-500">
-                  {entry.categories.map((slug) => CATEGORY_DISPLAY_NAMES[slug]).join(", ")}
+                  {entry.categories.map(slugToLabel).join(", ")}
                 </p>
               )}
             </div>

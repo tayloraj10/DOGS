@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import DirectoryEntryForm from "../components/DirectoryEntryForm";
 import LoadingState from "../components/LoadingState";
-import { getDirectoryEntry, getDirectoryEntryEditLink, updateDirectoryEntry } from "../api/directory";
+import { approveSuggestedCategory, getDirectoryEntry, getDirectoryEntryEditLink, updateDirectoryEntry } from "../api/directory";
 import type { DirectoryEntry, DirectoryEntryInput } from "../api/types";
 
 export default function ReviewEntryPage() {
@@ -12,6 +12,7 @@ export default function ReviewEntryPage() {
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
   const [copyState, setCopyState] = useState<"idle" | "copying" | "copied" | "error">("idle");
+  const [approvingCategory, setApprovingCategory] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -25,6 +26,17 @@ export default function ReviewEntryPage() {
     if (!id) return;
     await updateDirectoryEntry(id, { ...values, status: "published" });
     navigate("/review");
+  }
+
+  async function handleApproveCategory() {
+    if (!id) return;
+    setApprovingCategory(true);
+    try {
+      const updated = await approveSuggestedCategory(id);
+      setEntry(updated);
+    } finally {
+      setApprovingCategory(false);
+    }
   }
 
   async function handleCopyEditLink() {
@@ -73,10 +85,19 @@ export default function ReviewEntryPage() {
       </div>
 
       {entry.suggested_category && (
-        <p className="mt-4 rounded-lg bg-amber-50 px-4 py-2 text-sm text-amber-800 ring-1 ring-amber-200 dark:bg-amber-900/20 dark:text-amber-300 dark:ring-amber-800">
-          They suggested a new category: <span className="font-medium">{entry.suggested_category}</span>.
-          If it's worth adding, create it and assign it below before publishing.
-        </p>
+        <div className="mt-4 flex items-center justify-between gap-4 rounded-lg bg-amber-50 px-4 py-3 text-sm text-amber-800 ring-1 ring-amber-200 dark:bg-amber-900/20 dark:text-amber-300 dark:ring-amber-800">
+          <span>
+            Suggested new category: <span className="font-medium">{entry.suggested_category}</span>
+          </span>
+          <button
+            type="button"
+            onClick={handleApproveCategory}
+            disabled={approvingCategory}
+            className="shrink-0 rounded-md bg-amber-100 px-3 py-1 text-xs font-medium text-amber-900 hover:bg-amber-200 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-amber-800/40 dark:text-amber-200 dark:hover:bg-amber-800/60"
+          >
+            {approvingCategory ? "Adding..." : "Create & assign"}
+          </button>
+        </div>
       )}
 
       <div className="mt-6 rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800">

@@ -1,19 +1,8 @@
-export type CategorySlug =
-  | "animals"
-  | "environment"
-  | "fitness"
-  | "nature"
-  | "trash"
-  | "water";
+export type CategorySlug = string;
 
-export const CATEGORY_DISPLAY_NAMES: Record<CategorySlug, string> = {
-  animals: "Animals",
-  environment: "Environment",
-  fitness: "Fitness",
-  nature: "Nature",
-  trash: "Trash",
-  water: "Water",
-};
+export function slugToLabel(slug: string): string {
+  return slug.replace(/[-_]/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+}
 
 export type DirectoryEntryStatus = "pending" | "published";
 
