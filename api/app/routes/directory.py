@@ -166,6 +166,7 @@ async def create_directory_entry(body: DirectoryEntryCreate, db: Session = Depen
     apply_create_data(entry, body)
     db.add(entry)
     db.flush()
+    get_or_create_edit_token(db, entry)
 
     if body.categories:
         set_entry_categories(db, entry, body.categories)
