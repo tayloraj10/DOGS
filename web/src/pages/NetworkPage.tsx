@@ -98,6 +98,14 @@ function drawRingSegments(
   }
 }
 
+function withAlpha(color: string, hexAlpha: string): string {
+  const opacity = parseInt(hexAlpha, 16) / 255;
+  if (color.startsWith("#")) return color + hexAlpha;
+  if (color.startsWith("hsl("))
+    return color.replace(/^hsl\(/, "hsla(").replace(/\)$/, `, ${opacity.toFixed(3)})`);
+  return color;
+}
+
 // Hub positions weighted by entry count so large categories get proportionally more arc.
 // Ring radius also scales with total entries so hubs spread farther as the directory grows.
 function hubPositions(
@@ -341,12 +349,6 @@ export default function NetworkPage() {
     return () => clearTimeout(timer);
   }, [loading]);
 
-  const withAlpha = (color: string, hexAlpha: string): string => {
-    if (color.startsWith("#")) return color + hexAlpha;
-    const opacity = parseInt(hexAlpha, 16) / 255;
-    return color.replace(/^hsl\(/, "hsla(").replace(/\)$/, `, ${opacity.toFixed(3)})`);
-  };
-
   const nodeCanvasObject = useCallback(
     (node: unknown, ctx: CanvasRenderingContext2D, globalScale: number) => {
       const n = node as GraphNode & { x: number; y: number };
@@ -443,7 +445,7 @@ export default function NetworkPage() {
   const linkColor = useCallback(
     (link: unknown) => {
       const c = (link as GraphLink).color ?? "#94a3b8";
-      return isDark ? `${c}55` : `${c}40`;
+      return withAlpha(c, isDark ? "55" : "40");
     },
     [isDark],
   );
