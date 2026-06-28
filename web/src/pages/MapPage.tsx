@@ -343,7 +343,13 @@ export default function MapPage() {
               radius={8}
               pathOptions={{ color, fillColor: color, fillOpacity: 0.9, weight: 2 }}
               eventHandlers={{ click: () => setSelectedEntry(entry) }}
-            />
+            >
+              {zoom >= 11 && (
+                <Tooltip permanent direction="top" offset={[0, -10]} className="leaflet-label">
+                  {entry.name}
+                </Tooltip>
+              )}
+            </CircleMarker>
           );
         })}
       </MapContainer>
