@@ -1,36 +1,15 @@
-from enum import StrEnum
+import re
+
+# CategorySlug is a plain str — slugs are DB-defined, not code-defined
+CategorySlug = str
 
 
-class CategorySlug(StrEnum):
-    animals = "animals"
-    environment = "environment"
-    fitness = "fitness"
-    nature = "nature"
-    trash = "trash"
-    water = "water"
-
-
-CATEGORY_DISPLAY_NAMES: dict[CategorySlug, str] = {
-    CategorySlug.animals: "Animals",
-    CategorySlug.environment: "Environment",
-    CategorySlug.fitness: "Fitness",
-    CategorySlug.nature: "Nature",
-    CategorySlug.trash: "Trash",
-    CategorySlug.water: "Water",
-}
-
-_NAME_TO_SLUG: dict[str, CategorySlug] = {
-    name.lower(): slug for slug, name in CATEGORY_DISPLAY_NAMES.items()
-}
-
-
-def category_slug_from_label(label: str) -> CategorySlug | None:
-    """Map a display name (e.g. 'Trash') or slug to CategorySlug."""
-    normalized = label.strip().lower()
-    if not normalized:
+def category_slug_from_label(label: str) -> str | None:
+    """Convert a free-text category label to a slug (no DB validation)."""
+    s = label.strip().lower()
+    if not s:
         return None
-    try:
-        return CategorySlug(normalized)
-    except ValueError:
-        pass
-    return _NAME_TO_SLUG.get(normalized)
+    s = re.sub(r"[^\w\s-]", "", s)
+    s = re.sub(r"[\s_]+", "-", s)
+    s = re.sub(r"-+", "-", s)
+    return s.strip("-")[:50] or None

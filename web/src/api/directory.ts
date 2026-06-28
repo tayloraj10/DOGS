@@ -50,6 +50,10 @@ export function deleteDirectoryEntry(id: string) {
   return apiClient.delete<void>(`/directory/${id}`);
 }
 
+export function approveSuggestedCategory(id: string) {
+  return apiClient.post<DirectoryEntry>(`/directory/${id}/approve-suggested-category`, {});
+}
+
 export function extractFromUrl(url: string) {
   return apiClient.post<DirectoryExtractResponse>("/directory/extract", { url });
 }

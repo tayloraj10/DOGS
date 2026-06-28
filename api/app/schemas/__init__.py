@@ -1,5 +1,4 @@
 from app.schemas.categories import (
-    CATEGORY_DISPLAY_NAMES,
     CategorySlug,
     category_slug_from_label,
 )
@@ -25,7 +24,6 @@ from app.schemas.trash_report import (
 )
 
 __all__ = [
-    "CATEGORY_DISPLAY_NAMES",
     "ActivityStatus",
     "Category",
     "CategorySlug",

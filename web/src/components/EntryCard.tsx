@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import type { DirectoryEntry } from "../api/types";
-import { CATEGORY_DISPLAY_NAMES } from "../api/types";
+import { slugToLabel } from "../api/types";
 import EntryImage from "./EntryImage";
 import SocialIcon, { SOCIAL_FIELDS } from "./SocialIcon";
 
@@ -59,7 +59,7 @@ export default function EntryCard({ entry }: EntryCardProps) {
                 key={slug}
                 className="rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-medium text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400"
               >
-                {CATEGORY_DISPLAY_NAMES[slug]}
+                {slugToLabel(slug)}
               </span>
             ))}
           </div>
