@@ -224,7 +224,9 @@ def _social_links_from_ldjson(soup: BeautifulSoup) -> dict[str, str]:
     return found
 
 
-def _parse_page(html: str, base_url: str) -> tuple[dict[str, str | None], dict[str, str], list[str]]:
+def _parse_page(
+    html: str, base_url: str
+) -> tuple[dict[str, str | None], dict[str, str], list[str]]:
     soup = BeautifulSoup(html, "lxml")
     base_domain = _registrable_domain(urlparse(base_url).netloc)
 
@@ -235,7 +237,9 @@ def _parse_page(html: str, base_url: str) -> tuple[dict[str, str | None], dict[s
                 return tag["content"].strip()
         return None
 
-    title = meta("og:title") or (soup.title.string.strip() if soup.title and soup.title.string else None)
+    title = meta("og:title") or (
+        soup.title.string.strip() if soup.title and soup.title.string else None
+    )
     title = _clean_title(title)
     description = meta("og:description", "description")
     image = meta("og:image")
@@ -290,7 +294,11 @@ async def extract_from_url(url: str) -> DirectoryExtractResponse:
                 description = profile.get("biography") or None
                 image_url = profile.get("profile_pic_url_hd") or profile.get("profile_pic_url")
                 bio_link = next(
-                    (link.get("url") for link in (profile.get("bio_links") or []) if link.get("url")),
+                    (
+                        link.get("url")
+                        for link in (profile.get("bio_links") or [])
+                        if link.get("url")
+                    ),
                     None,
                 ) or profile.get("external_url")
                 if bio_link:
@@ -310,7 +318,11 @@ async def extract_from_url(url: str) -> DirectoryExtractResponse:
                 # Profile JSON layout may have changed or the account is private/banned;
                 # fall back to whatever the generic page parse can still salvage.
                 fields, page_social, page_other = _parse_page(html, url)
-                name, description, image_url = fields["name"], fields["description"], fields["image_url"]
+                name, description, image_url = (
+                    fields["name"],
+                    fields["description"],
+                    fields["image_url"],
+                )
                 social_links.update(page_social)
                 other_links.extend(page_other)
                 frontier.extend(page_other)
@@ -319,7 +331,11 @@ async def extract_from_url(url: str) -> DirectoryExtractResponse:
             fetches_used += 1
             if html:
                 fields, page_social, page_other = _parse_page(html, url)
-                name, description, image_url = fields["name"], fields["description"], fields["image_url"]
+                name, description, image_url = (
+                    fields["name"],
+                    fields["description"],
+                    fields["image_url"],
+                )
                 social_links.update(page_social)
                 other_links.extend(page_other)
                 frontier.extend(page_other)

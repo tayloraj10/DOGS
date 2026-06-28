@@ -129,7 +129,9 @@ def apply_create_data(entry: DirectoryEntryModel, body: DirectoryEntryCreate) ->
     entry.social_links = (
         body.social_links.model_dump(exclude_none=True) if body.social_links else None
     )
-    entry.suggested_category = body.suggested_category.strip()[:255] if body.suggested_category else None
+    entry.suggested_category = (
+        body.suggested_category.strip()[:255] if body.suggested_category else None
+    )
     entry.featured = body.featured
     entry.status = body.status.value
     entry.user_ids = _serialize_user_ids(body.user_ids)
@@ -170,7 +172,9 @@ def apply_update_data(
         entry.user_ids = _serialize_user_ids(body.user_ids)
 
 
-def set_entry_categories(db: Session, entry: DirectoryEntryModel, slugs: list[CategorySlug]) -> None:
+def set_entry_categories(
+    db: Session, entry: DirectoryEntryModel, slugs: list[CategorySlug]
+) -> None:
     entry.categories = resolve_categories(db, slugs)
 
 
@@ -243,7 +247,8 @@ def find_orphaned_images(db: Session) -> list:
     if not gcs_storage:
         return []
     referenced = {
-        url for (url,) in db.query(DirectoryEntryModel.image_url).filter(
+        url
+        for (url,) in db.query(DirectoryEntryModel.image_url).filter(
             DirectoryEntryModel.image_url.isnot(None)
         )
     }

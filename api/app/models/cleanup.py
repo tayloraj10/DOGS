@@ -24,7 +24,9 @@ class Cleanup(Base):
     status: Mapped[str | None] = mapped_column(String(50), nullable=True)
     photo_urls: Mapped[list | None] = mapped_column(JSON, nullable=True)
     metrics: Mapped[dict | None] = mapped_column(JSON, nullable=True)
-    submitted_by_user_id: Mapped[uuid.UUID | None] = mapped_column(Uuid(as_uuid=True), nullable=True)
+    submitted_by_user_id: Mapped[uuid.UUID | None] = mapped_column(
+        Uuid(as_uuid=True), nullable=True
+    )
     organizer_user_ids: Mapped[list | None] = mapped_column(JSON, nullable=True)
     rsvp_user_ids: Mapped[list | None] = mapped_column(JSON, nullable=True)
     attended_user_ids: Mapped[list | None] = mapped_column(JSON, nullable=True)
