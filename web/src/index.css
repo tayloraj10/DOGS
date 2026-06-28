@@ -5,3 +5,30 @@
 body {
   margin: 0;
 }
+
+.leaflet-popup-content-wrapper {
+  padding: 0 !important;
+  border-radius: 12px !important;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18) !important;
+  border: none !important;
+}
+
+.leaflet-popup-content {
+  margin: 0 !important;
+  width: auto !important;
+}
+
+.leaflet-popup-close-button {
+  color: rgba(255, 255, 255, 0.75) !important;
+  top: 6px !important;
+  right: 8px !important;
+  font-size: 20px !important;
+  font-weight: 300 !important;
+  line-height: 1 !important;
+}
+
+.leaflet-popup-close-button:hover {
+  color: white !important;
+  background: transparent !important;
+}
