@@ -14,6 +14,8 @@ interface GraphNode {
   id: string;
   label: string;
   color: string;
+  colors?: string[];
+  hubPositions?: { x: number; y: number }[];
   val: number;
   isHub: boolean;
   entryId?: string;
@@ -35,6 +37,66 @@ interface GraphLink {
 const HUB_RADIUS = 38;
 const ENTRY_RADIUS = 13;
 const ORBIT_SPEED = 0.35;
+
+function drawRingSegments(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  radius: number,
+  colors: string[],
+  lineWidth: number,
+  hubPositions?: { x: number; y: number }[],
+) {
+  const n = colors.length;
+  ctx.lineWidth = lineWidth;
+
+  if (n === 1) {
+    ctx.beginPath();
+    ctx.arc(x, y, radius, 0, Math.PI * 2);
+    ctx.strokeStyle = colors[0];
+    ctx.stroke();
+    return;
+  }
+
+  // When hub positions are available, orient each segment toward its hub.
+  // Compute the angle from this entry to each hub, sort by angle, then place
+  // each color's arc so its midpoint faces its hub.
+  if (hubPositions && hubPositions.length === n) {
+    const norm = (a: number) => ((a % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
+    const indexed = colors.map((color, i) => ({
+      color,
+      angle: norm(Math.atan2(hubPositions[i].y - y, hubPositions[i].x - x)),
+    })).sort((a, b) => a.angle - b.angle);
+
+    // Boundary between segment i and i+1 = clockwise midpoint between their hub angles
+    const boundaries = indexed.map((seg, i) => {
+      const next = indexed[(i + 1) % n];
+      let diff = next.angle - seg.angle;
+      if (diff <= 0) diff += Math.PI * 2;
+      return seg.angle + diff / 2;
+    });
+
+    const gap = 0.06;
+    for (let i = 0; i < n; i++) {
+      ctx.beginPath();
+      ctx.arc(x, y, radius, boundaries[(i - 1 + n) % n] + gap, boundaries[i] - gap);
+      ctx.strokeStyle = indexed[i].color;
+      ctx.stroke();
+    }
+    return;
+  }
+
+  // Fallback: equal arc segments starting from top
+  const segAngle = (Math.PI * 2) / n;
+  const gap = n > 2 ? 0.08 : 0.05;
+  const start = -Math.PI / 2;
+  for (let i = 0; i < n; i++) {
+    ctx.beginPath();
+    ctx.arc(x, y, radius, start + i * segAngle + gap, start + (i + 1) * segAngle - gap);
+    ctx.strokeStyle = colors[i];
+    ctx.stroke();
+  }
+}
 
 // Hub positions weighted by entry count so large categories get proportionally more arc.
 // Ring radius also scales with total entries so hubs spread farther as the directory grows.
@@ -209,11 +271,16 @@ export default function NetworkPage() {
         id: `entry:${entry.id}`,
         label: entry.name,
         color: primaryColor,
+        colors: knownSlugs.map(getCategoryColor),
+        hubPositions: knownSlugs.map((slug) => {
+          const h = nodes.find((n) => n.id === `category:${slug}`);
+          return { x: h?.x ?? 0, y: h?.y ?? 0 };
+        }),
         val: 3,
         isHub: false,
         entryId: entry.id,
-        x: (hub?.x ?? 0) + Math.cos(angle) * ringR,
-        y: (hub?.y ?? 0) + Math.sin(angle) * ringR,
+        x: hub?.x ?? 0,
+        y: hub?.y ?? 0,
       });
       for (const slug of knownSlugs) {
         links.push({
@@ -270,11 +337,20 @@ export default function NetworkPage() {
     });
   }, [graphData]);
 
+  // Auto-zoom once the graph finishes loading and the bloom has started
+  useEffect(() => {
+    if (loading) return;
+    const timer = setTimeout(() => {
+      graphRef.current?.zoomToFit(600, 80);
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, [loading]);
 
   const nodeCanvasObject = useCallback(
     (node: unknown, ctx: CanvasRenderingContext2D, globalScale: number) => {
       const n = node as GraphNode & { x: number; y: number };
-      const { x, y, isHub, color, label, entryId } = n;
+      const { x, y, isHub, color, colors, hubPositions, label, entryId } = n;
+      const ringColors = colors ?? [color];
 
       if (isHub) {
         // Soft glow halo
@@ -328,21 +404,15 @@ export default function NetworkPage() {
             ctx.fill();
           }
           ctx.restore();
-          // Category-color ring border
-          ctx.beginPath();
-          ctx.arc(x, y, ENTRY_RADIUS, 0, Math.PI * 2);
-          ctx.strokeStyle = color;
-          ctx.lineWidth = 2;
-          ctx.stroke();
+          // Category-color ring border (multi-segment for multi-category entries)
+          drawRingSegments(ctx, x, y, ENTRY_RADIUS, ringColors, 2.5, hubPositions);
         } else {
-          // Solid colored dot with white outline
+          // Solid colored dot with multi-color ring
           ctx.beginPath();
           ctx.arc(x, y, ENTRY_RADIUS, 0, Math.PI * 2);
           ctx.fillStyle = color;
           ctx.fill();
-          ctx.strokeStyle = isDark ? "rgba(255,255,255,0.25)" : "rgba(255,255,255,0.8)";
-          ctx.lineWidth = 1.5;
-          ctx.stroke();
+          drawRingSegments(ctx, x, y, ENTRY_RADIUS, ringColors, 2.5, hubPositions);
         }
 
         // Name label below node — clamps with zoom so it's always legible when zoomed in
@@ -403,7 +473,7 @@ export default function NetworkPage() {
         linkWidth={1.2}
         backgroundColor={isDark ? "#0f172a" : "#f8fafc"}
         d3AlphaDecay={0}
-        d3VelocityDecay={0.25}
+        d3VelocityDecay={.9}
         nodeCanvasObject={nodeCanvasObject}
         nodeCanvasObjectMode={() => "replace"}
         nodePointerAreaPaint={nodePointerAreaPaint}
@@ -417,8 +487,20 @@ export default function NetworkPage() {
         height={dimensions.height}
       />
 
-      <div className="absolute bottom-4 left-4 text-xs px-3 py-1.5 rounded-full pointer-events-none select-none bg-black/30 backdrop-blur-sm text-white/90">
-        {entryCount} entries · {hubCount} categories
+      <div className="absolute bottom-4 left-4 flex flex-col gap-2 items-start">
+        <button
+          onClick={() => graphRef.current?.zoomToFit(600, 80)}
+          className="flex items-center justify-center h-9 w-9 rounded-full bg-black/30 backdrop-blur-sm text-white/90 hover:bg-black/50 transition-colors"
+          aria-label="Zoom to fit"
+          title="Zoom to fit"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
+            <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" />
+          </svg>
+        </button>
+        <div className="text-xs px-3 py-1.5 rounded-full pointer-events-none select-none bg-black/30 backdrop-blur-sm text-white/90">
+          {entryCount} entries · {hubCount} categories
+        </div>
       </div>
 
       {selectedEntry && (
