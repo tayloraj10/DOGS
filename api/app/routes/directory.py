@@ -118,7 +118,12 @@ async def list_directory(
     db: Session = Depends(get_db),
 ):
     entries = list_entries(
-        db, limit=limit, offset=offset, category_slug=category, status=status, needs_photo=needs_photo
+        db,
+        limit=limit,
+        offset=offset,
+        category_slug=category,
+        status=status,
+        needs_photo=needs_photo,
     )
     return [entry_to_schema(e) for e in entries]
 
@@ -228,7 +233,9 @@ async def update_directory_entry_public(
     if not entry:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Entry not found")
     if not entry.edit_token or not secrets.compare_digest(entry.edit_token, token):
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Invalid or missing edit link")
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, detail="Invalid or missing edit link"
+        )
 
     location_before = dict(entry.location) if entry.location else None
     apply_update_data(entry, body)

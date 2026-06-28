@@ -5,23 +5,76 @@ from pydantic import BaseModel, ConfigDict, field_validator
 _FOLLOWER_COUNT_RE = re.compile(r"^[\d.,]+[KkMm]?$")
 _MAX_HANDLE_LEN = 200
 
-_US_COUNTRY_ALIASES = {"", "us", "usa", "u.s.", "u.s.a.", "united states", "united states of america"}
+_US_COUNTRY_ALIASES = {
+    "",
+    "us",
+    "usa",
+    "u.s.",
+    "u.s.a.",
+    "united states",
+    "united states of america",
+}
 
 _US_STATE_NAME_TO_ABBR = {
-    "alabama": "AL", "alaska": "AK", "arizona": "AZ", "arkansas": "AR", "california": "CA",
-    "colorado": "CO", "connecticut": "CT", "delaware": "DE", "florida": "FL", "georgia": "GA",
-    "hawaii": "HI", "idaho": "ID", "illinois": "IL", "indiana": "IN", "iowa": "IA",
-    "kansas": "KS", "kentucky": "KY", "louisiana": "LA", "maine": "ME", "maryland": "MD",
-    "massachusetts": "MA", "michigan": "MI", "minnesota": "MN", "mississippi": "MS",
-    "missouri": "MO", "montana": "MT", "nebraska": "NE", "nevada": "NV",
-    "new hampshire": "NH", "new jersey": "NJ", "new mexico": "NM", "new york": "NY",
-    "north carolina": "NC", "north dakota": "ND", "ohio": "OH", "oklahoma": "OK",
-    "oregon": "OR", "pennsylvania": "PA", "rhode island": "RI", "south carolina": "SC",
-    "south dakota": "SD", "tennessee": "TN", "texas": "TX", "utah": "UT", "vermont": "VT",
-    "virginia": "VA", "washington": "WA", "west virginia": "WV", "wisconsin": "WI",
-    "wyoming": "WY", "district of columbia": "DC", "washington dc": "DC", "washington d.c.": "DC",
-    "puerto rico": "PR", "guam": "GU", "american samoa": "AS", "u.s. virgin islands": "VI",
-    "virgin islands": "VI", "northern mariana islands": "MP",
+    "alabama": "AL",
+    "alaska": "AK",
+    "arizona": "AZ",
+    "arkansas": "AR",
+    "california": "CA",
+    "colorado": "CO",
+    "connecticut": "CT",
+    "delaware": "DE",
+    "florida": "FL",
+    "georgia": "GA",
+    "hawaii": "HI",
+    "idaho": "ID",
+    "illinois": "IL",
+    "indiana": "IN",
+    "iowa": "IA",
+    "kansas": "KS",
+    "kentucky": "KY",
+    "louisiana": "LA",
+    "maine": "ME",
+    "maryland": "MD",
+    "massachusetts": "MA",
+    "michigan": "MI",
+    "minnesota": "MN",
+    "mississippi": "MS",
+    "missouri": "MO",
+    "montana": "MT",
+    "nebraska": "NE",
+    "nevada": "NV",
+    "new hampshire": "NH",
+    "new jersey": "NJ",
+    "new mexico": "NM",
+    "new york": "NY",
+    "north carolina": "NC",
+    "north dakota": "ND",
+    "ohio": "OH",
+    "oklahoma": "OK",
+    "oregon": "OR",
+    "pennsylvania": "PA",
+    "rhode island": "RI",
+    "south carolina": "SC",
+    "south dakota": "SD",
+    "tennessee": "TN",
+    "texas": "TX",
+    "utah": "UT",
+    "vermont": "VT",
+    "virginia": "VA",
+    "washington": "WA",
+    "west virginia": "WV",
+    "wisconsin": "WI",
+    "wyoming": "WY",
+    "district of columbia": "DC",
+    "washington dc": "DC",
+    "washington d.c.": "DC",
+    "puerto rico": "PR",
+    "guam": "GU",
+    "american samoa": "AS",
+    "u.s. virgin islands": "VI",
+    "virgin islands": "VI",
+    "northern mariana islands": "MP",
 }
 
 _VALID_US_STATE_ABBRS = frozenset(_US_STATE_NAME_TO_ABBR.values()) | {"DC"}
@@ -36,7 +89,18 @@ _PLATFORM_URL_PATTERNS: dict[str, re.Pattern[str]] = {
 }
 
 # Path segments that look like a username but aren't one (e.g. instagram.com/p/<post-id>).
-_RESERVED_PATH_SEGMENTS = {"p", "reel", "tv", "explore", "status", "i", "share", "watch", "video", "home"}
+_RESERVED_PATH_SEGMENTS = {
+    "p",
+    "reel",
+    "tv",
+    "explore",
+    "status",
+    "i",
+    "share",
+    "watch",
+    "video",
+    "home",
+}
 
 
 def _clean_social_value(value: str | None) -> str | None:

@@ -134,9 +134,7 @@ def _build_social_links(row: dict[str, str]) -> dict[str, str]:
     return out
 
 
-def _build_location(
-    row: dict[str, str], errors: list[str], row_num: int
-) -> dict[str, str] | None:
+def _build_location(row: dict[str, str], errors: list[str], row_num: int) -> dict[str, str] | None:
     city = (row.get("city") or "").strip() or None
     state = (row.get("state") or "").strip() or None
     country = (row.get("country") or "").strip() or None
@@ -292,7 +290,9 @@ def sync_from_sheet_values(db: Session, values: list[list[Any]]) -> SheetSyncRes
         social = _build_social_links(parsed)
         instagram = social.get("instagram")
         location = _build_location(parsed, errors, row_num)
-        categories = _resolve_categories(parsed.get("category"), set(slug_to_category), errors, row_num)
+        categories = _resolve_categories(
+            parsed.get("category"), set(slug_to_category), errors, row_num
+        )
 
         raw_image = (parsed.get("image") or "").strip() or None
         image_url, skip_reason = sanitize_image_url(raw_image)
@@ -362,7 +362,12 @@ def sync_from_google_sheet(
         return SheetSyncResult(0, 0, 0, 0, 0, [f"Google Sheets API error: {e!s}"])
     except DefaultCredentialsError as e:
         return SheetSyncResult(
-            0, 0, 0, 0, 0, [f"No Google credentials (set GOOGLE_APPLICATION_CREDENTIALS or ADC): {e!s}"],
+            0,
+            0,
+            0,
+            0,
+            0,
+            [f"No Google credentials (set GOOGLE_APPLICATION_CREDENTIALS or ADC): {e!s}"],
         )
     except OSError as e:
         return SheetSyncResult(0, 0, 0, 0, 0, [f"Credentials or IO error: {e!s}"])

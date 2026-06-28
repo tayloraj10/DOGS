@@ -1,4 +1,4 @@
-from app.schemas import Category as CategorySchema, CategorySlug
+from app.schemas import Category as CategorySchema
 from app.services.directory_service import slugify_category
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel
@@ -17,10 +17,7 @@ class CategoryCreate(BaseModel):
 @router.get("", response_model=list[CategorySchema])
 def list_categories(db: Session = Depends(get_db)):
     categories = db.query(Category).order_by(Category.name).all()
-    return [
-        CategorySchema(id=c.id, slug=c.slug, name=c.name)
-        for c in categories
-    ]
+    return [CategorySchema(id=c.id, slug=c.slug, name=c.name) for c in categories]
 
 
 @router.post("", response_model=CategorySchema, status_code=status.HTTP_201_CREATED)
