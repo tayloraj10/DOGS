@@ -339,6 +339,12 @@ export default function NetworkPage() {
     return () => clearTimeout(timer);
   }, [loading]);
 
+  const withAlpha = (color: string, hexAlpha: string): string => {
+    if (color.startsWith("#")) return color + hexAlpha;
+    const opacity = parseInt(hexAlpha, 16) / 255;
+    return color.replace(/^hsl\(/, "hsla(").replace(/\)$/, `, ${opacity.toFixed(3)})`);
+  };
+
   const nodeCanvasObject = useCallback(
     (node: unknown, ctx: CanvasRenderingContext2D, globalScale: number) => {
       const n = node as GraphNode & { x: number; y: number };
@@ -348,8 +354,8 @@ export default function NetworkPage() {
       if (isHub) {
         // Soft glow halo
         const glow = ctx.createRadialGradient(x, y, HUB_RADIUS * 0.5, x, y, HUB_RADIUS * 1.6);
-        glow.addColorStop(0, color + "55");
-        glow.addColorStop(1, color + "00");
+        glow.addColorStop(0, withAlpha(color, "55"));
+        glow.addColorStop(1, withAlpha(color, "00"));
         ctx.beginPath();
         ctx.arc(x, y, HUB_RADIUS * 1.6, 0, Math.PI * 2);
         ctx.fillStyle = glow;
