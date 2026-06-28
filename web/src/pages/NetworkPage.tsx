@@ -250,7 +250,7 @@ export default function NetworkPage() {
     // Staggered orbit rings per hub using golden angle for angular placement.
     // Large categories (>22 entries) get 3 rings to avoid overcrowding and reduce jitter.
     const hubIndex: Record<string, number> = {};
-    const PHI = Math.PI * (3 - Math.sqrt(5)); // ~137.5° golden angle
+
 
     for (const entry of entries) {
       if (entry.categories.length === 0) continue;
@@ -261,11 +261,6 @@ export default function NetworkPage() {
       const hub = nodes.find((n) => n.id === `category:${primarySlug}`);
       const idx = hubIndex[primarySlug] ?? 0;
       hubIndex[primarySlug] = idx + 1;
-
-      const count = entryCounts[primarySlug] ?? 1;
-      const rings = count > 22 ? [130, 210, 280] : count > 8 ? [120, 185] : [110, 160];
-      const ringR = rings[idx % rings.length];
-      const angle = idx * PHI;
 
       nodes.push({
         id: `entry:${entry.id}`,
