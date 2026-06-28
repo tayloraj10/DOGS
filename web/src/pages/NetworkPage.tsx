@@ -5,6 +5,7 @@ import { listDirectoryEntries } from "../api/directory";
 import { useCategories } from "../hooks/useCategories";
 import LoadingState from "../components/LoadingState";
 import EntryModal from "../components/EntryModal";
+import CategoryGuideModal from "../components/CategoryGuideModal";
 import type { DirectoryEntry } from "../api/types";
 import { getCategoryColor } from "../api/types";
 import { useTheme } from "../hooks/useTheme";
@@ -168,6 +169,7 @@ export default function NetworkPage() {
   const [entries, setEntries] = useState<DirectoryEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedEntry, setSelectedEntry] = useState<DirectoryEntry | null>(null);
+  const [showCategoryGuide, setShowCategoryGuide] = useState(false);
 
   const imagesRef = useRef<Record<string, HTMLImageElement>>({});
   const linksRef = useRef<GraphLink[]>([]);
@@ -497,12 +499,24 @@ export default function NetworkPage() {
             <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" />
           </svg>
         </button>
+        <button
+          onClick={() => setShowCategoryGuide(true)}
+          className="flex items-center gap-1.5 h-9 px-3 rounded-full bg-black/30 backdrop-blur-sm text-white/90 hover:bg-black/50 transition-colors text-xs font-medium"
+          title="Category guide"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="h-3.5 w-3.5">
+            <circle cx="12" cy="12" r="10" />
+            <path d="M12 16v-4M12 8h.01" />
+          </svg>
+          Categories
+        </button>
         <div className="text-xs px-3 py-1.5 rounded-full pointer-events-none select-none bg-black/30 backdrop-blur-sm text-white/90">
           {entryCount} entries · {hubCount} categories
         </div>
       </div>
 
       <EntryModal entry={selectedEntry} onClose={() => setSelectedEntry(null)} />
+      {showCategoryGuide && <CategoryGuideModal onClose={() => setShowCategoryGuide(false)} />}
     </div>
   );
 }
