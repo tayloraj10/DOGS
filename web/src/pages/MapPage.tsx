@@ -1,13 +1,13 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { CircleMarker, MapContainer, Popup, Tooltip, TileLayer, useMap, useMapEvents } from "react-leaflet";
+import { CircleMarker, MapContainer, Tooltip, TileLayer, useMap, useMapEvents } from "react-leaflet";
 import type { Map as LeafletMap } from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { listDirectoryEntries } from "../api/directory";
 import { useCategories } from "../hooks/useCategories";
 import LoadingState from "../components/LoadingState";
+import EntryModal from "../components/EntryModal";
 import type { CategorySlug, DirectoryEntry } from "../api/types";
-import { getCategoryColor, slugToLabel } from "../api/types";
+import { getCategoryColor } from "../api/types";
 
 const US_CENTER: [number, number] = [39.5, -98.35];
 const US_ZOOM = window.innerWidth >= 640 ? 4 : 3;
@@ -76,7 +76,6 @@ function ControlBtn({
 }
 
 export default function MapPage() {
-  const navigate = useNavigate();
   const { categories } = useCategories();
   const [entries, setEntries] = useState<DirectoryEntry[]>([]);
   const [loading, setLoading] = useState(true);
@@ -85,6 +84,7 @@ export default function MapPage() {
   const [basemap, setBasemap] = useState<BasemapKey>("light");
   const [showBasemapMenu, setShowBasemapMenu] = useState(false);
   const [zoom, setZoom] = useState(US_ZOOM);
+  const [selectedEntry, setSelectedEntry] = useState<DirectoryEntry | null>(null);
   const mapRef = useRef<LeafletMap | null>(null);
 
   useEffect(() => {
@@ -342,55 +342,13 @@ export default function MapPage() {
               center={[entry.coordinates!.latitude, entry.coordinates!.longitude]}
               radius={8}
               pathOptions={{ color, fillColor: color, fillOpacity: 0.9, weight: 2 }}
-            >
-              <Popup>
-                <div className="min-w-[190px]">
-                  {entry.image_url ? (
-                    <div className="relative h-28 overflow-hidden">
-                      <img
-                        src={entry.image_url}
-                        alt={entry.name}
-                        className="w-full h-full object-cover"
-                      />
-                      <div
-                        className="absolute inset-0"
-                        style={{ background: `linear-gradient(to top, ${color}ee 0%, transparent 55%)` }}
-                      />
-                      <p className="absolute bottom-0 left-0 right-0 px-4 py-2 font-bold text-white text-sm leading-tight drop-shadow">
-                        {entry.name}
-                      </p>
-                    </div>
-                  ) : (
-                    <div style={{ backgroundColor: color }} className="px-4 py-2.5">
-                      <p className="font-bold text-white text-sm leading-tight">{entry.name}</p>
-                    </div>
-                  )}
-                  <div className="px-4 py-3 bg-white">
-                    {(entry.location?.city || entry.location?.state) && (
-                      <p className="text-xs text-slate-500 mb-1.5">
-                        {[entry.location.city, entry.location.state].filter(Boolean).join(", ")}
-                      </p>
-                    )}
-                    {entry.categories.length > 0 && (
-                      <p className="text-xs font-medium mb-3" style={{ color }}>
-                        {entry.categories.map((s) => slugToLabel(s)).join(" · ")}
-                      </p>
-                    )}
-                    <button
-                      type="button"
-                      onClick={() => navigate(`/entry/${entry.id}`)}
-                      className="text-xs font-semibold px-3 py-1.5 rounded-full text-white transition-opacity hover:opacity-80"
-                      style={{ backgroundColor: color }}
-                    >
-                      View entry →
-                    </button>
-                  </div>
-                </div>
-              </Popup>
-            </CircleMarker>
+              eventHandlers={{ click: () => setSelectedEntry(entry) }}
+            />
           );
         })}
       </MapContainer>
+
+      <EntryModal entry={selectedEntry} onClose={() => setSelectedEntry(null)} />
     </div>
   );
 }
