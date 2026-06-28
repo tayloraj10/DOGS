@@ -6,6 +6,7 @@ import { listDirectoryEntries } from "../api/directory";
 import { useCategories } from "../hooks/useCategories";
 import LoadingState from "../components/LoadingState";
 import EntryModal from "../components/EntryModal";
+import CategoryGuideModal from "../components/CategoryGuideModal";
 import type { CategorySlug, DirectoryEntry } from "../api/types";
 import { getCategoryColor } from "../api/types";
 
@@ -85,6 +86,7 @@ export default function MapPage() {
   const [showBasemapMenu, setShowBasemapMenu] = useState(false);
   const [zoom, setZoom] = useState(US_ZOOM);
   const [selectedEntry, setSelectedEntry] = useState<DirectoryEntry | null>(null);
+  const [showCategoryGuide, setShowCategoryGuide] = useState(false);
   const mapRef = useRef<LeafletMap | null>(null);
 
   useEffect(() => {
@@ -158,7 +160,7 @@ export default function MapPage() {
   return (
     <div className="flex-1 relative min-h-0">
       {/* Category filter bar */}
-      <div className="absolute top-3 left-1/2 -translate-x-1/2 z-[1000] flex gap-1.5 bg-black/55 backdrop-blur-md rounded-full px-3 pt-2 pb-1.5 overflow-x-auto [&::-webkit-scrollbar]:h-1 [&::-webkit-scrollbar]:block [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-white/60 [&::-webkit-scrollbar-track]:bg-white/10 [&::-webkit-scrollbar-track]:rounded-full" style={{ maxWidth: "calc(100vw - 120px)" }}>
+      <div className="absolute top-3 left-1/2 -translate-x-1/2 z-[1000] flex items-center gap-1.5 bg-black/55 backdrop-blur-md rounded-full px-3 pt-2 pb-1.5 overflow-x-auto [&::-webkit-scrollbar]:h-1 [&::-webkit-scrollbar]:block [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-white/60 [&::-webkit-scrollbar-track]:bg-white/10 [&::-webkit-scrollbar-track]:rounded-full" style={{ maxWidth: "calc(100vw - 120px)" }}>
         <button
           type="button"
           onClick={() => setSelectedCategories(new Set())}
@@ -170,6 +172,18 @@ export default function MapPage() {
         >
           All
         </button>
+        <button
+          type="button"
+          onClick={() => setShowCategoryGuide(true)}
+          title="Category guide"
+          className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full text-white/60 hover:text-white hover:bg-white/10 transition-colors"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="h-3.5 w-3.5">
+            <circle cx="12" cy="12" r="10" />
+            <path d="M12 16v-4M12 8h.01" />
+          </svg>
+        </button>
+        <div className="w-px h-4 bg-white/20 flex-shrink-0" />
         {categoriesWithEntries.map((cat) => {
           const color = getCategoryColor(cat.slug);
           const isActive = selectedCategories.has(cat.slug);
@@ -355,6 +369,7 @@ export default function MapPage() {
       </MapContainer>
 
       <EntryModal entry={selectedEntry} onClose={() => setSelectedEntry(null)} />
+      {showCategoryGuide && <CategoryGuideModal onClose={() => setShowCategoryGuide(false)} />}
     </div>
   );
 }

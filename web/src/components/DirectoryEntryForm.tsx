@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useCategories } from "../hooks/useCategories";
+import CategoryGuideModal from "./CategoryGuideModal";
 import { lookupLocation } from "../api/directory";
 import { uploadDirectoryPhotoFromUrl } from "../api/photos";
 import { ApiError } from "../api/client";
@@ -75,6 +76,7 @@ export default function DirectoryEntryForm({
   const [suggestedCategory, setSuggestedCategory] = useState(
     initialValues?.suggested_category ?? "",
   );
+  const [showCategoryGuide, setShowCategoryGuide] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [lookingUpLocation, setLookingUpLocation] = useState(false);
@@ -280,8 +282,23 @@ export default function DirectoryEntryForm({
         </div>
       </div>
 
+      {showCategoryGuide && <CategoryGuideModal onClose={() => setShowCategoryGuide(false)} />}
+
       <div>
-        <p className="block text-sm font-medium text-slate-700 dark:text-slate-300">Categories</p>
+        <div className="flex items-center gap-2">
+          <p className="block text-sm font-medium text-slate-700 dark:text-slate-300">Categories</p>
+          <button
+            type="button"
+            onClick={() => setShowCategoryGuide(true)}
+            title="What do these categories mean?"
+            className="flex h-5 w-5 items-center justify-center rounded-full text-slate-400 ring-1 ring-slate-300 hover:bg-slate-100 hover:text-slate-600 transition-colors dark:ring-slate-600 dark:text-slate-500 dark:hover:bg-slate-700 dark:hover:text-slate-300"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="h-3 w-3">
+              <circle cx="12" cy="12" r="10" />
+              <path d="M12 16v-4M12 8h.01" />
+            </svg>
+          </button>
+        </div>
         <div className="mt-1 flex flex-wrap gap-2">
           {categories.map((category) => (
             <button

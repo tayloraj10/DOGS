@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { listDirectoryEntries } from "../api/directory";
 import { useCategories } from "../hooks/useCategories";
 import CategoryFilterBar from "../components/CategoryFilterBar";
+import CategoryGuideModal from "../components/CategoryGuideModal";
 import EntryCard from "../components/EntryCard";
 import LoadingState from "../components/LoadingState";
 import type { CategorySlug, DirectoryEntry } from "../api/types";
@@ -43,6 +44,7 @@ export default function ShowcasePage() {
   const [entries, setEntries] = useState<DirectoryEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState<CategorySlug | null>(null);
+  const [showCategoryGuide, setShowCategoryGuide] = useState(false);
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState<SortOption>("random");
 
@@ -90,6 +92,7 @@ export default function ShowcasePage() {
           categories={categories}
           selected={selectedCategory}
           onSelect={setSelectedCategory}
+          onGuideClick={() => setShowCategoryGuide(true)}
         />
       </div>
 
@@ -144,6 +147,8 @@ export default function ShowcasePage() {
           No entries match your search.
         </p>
       )}
+
+      {showCategoryGuide && <CategoryGuideModal onClose={() => setShowCategoryGuide(false)} />}
 
       <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {visibleEntries.map((entry) => (
