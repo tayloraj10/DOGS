@@ -7,11 +7,23 @@ export function slugToLabel(slug: string): string {
 export const CATEGORY_COLORS: Record<CategorySlug, string> = {
   animals: "#f59e0b",
   environment: "#22c55e",
+  "ethical-marketplace": "#f97316",
   fitness: "#ec4899",
+  media: "#8b5cf6",
+  "mutual-aid": "#06b6d4",
   nature: "#84cc16",
   trash: "#ef4444",
   water: "#3b82f6",
 };
+
+export function getCategoryColor(slug: string): string {
+  if (CATEGORY_COLORS[slug]) return CATEGORY_COLORS[slug];
+  let hash = 0;
+  for (let i = 0; i < slug.length; i++) {
+    hash = (hash * 31 + slug.charCodeAt(i)) & 0xffff;
+  }
+  return `hsl(${hash % 360}, 60%, 48%)`;
+}
 
 export type DirectoryEntryStatus = "pending" | "published";
 

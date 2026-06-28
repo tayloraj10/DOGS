@@ -31,14 +31,14 @@ const mobileNavClasses = ({ isActive }: { isActive: boolean }) =>
 function App() {
   const location = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
-  const isMapPage = location.pathname === "/map";
+  const isFullPage = location.pathname === "/map" || location.pathname === "/network";
 
   const closeMenu = () => setMenuOpen(false);
 
   return (
     <div
       className={`flex flex-col bg-slate-50 dark:bg-slate-950 ${
-        isMapPage ? "h-screen" : "min-h-screen"
+        isFullPage ? "h-screen" : "min-h-screen"
       }`}
     >
       <header className="flex-none border-b border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
@@ -103,7 +103,7 @@ function App() {
 
       <main
         className={
-          isMapPage
+          isFullPage
             ? "flex-1 flex flex-col overflow-hidden min-h-0"
             : "mx-auto max-w-5xl px-6 py-10"
         }

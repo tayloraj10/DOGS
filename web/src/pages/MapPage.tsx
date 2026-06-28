@@ -7,7 +7,7 @@ import { listDirectoryEntries } from "../api/directory";
 import { useCategories } from "../hooks/useCategories";
 import LoadingState from "../components/LoadingState";
 import type { CategorySlug, DirectoryEntry } from "../api/types";
-import { CATEGORY_COLORS, CATEGORY_DISPLAY_NAMES } from "../api/types";
+import { getCategoryColor, slugToLabel } from "../api/types";
 
 const US_CENTER: [number, number] = [39.5, -98.35];
 const US_ZOOM = window.innerWidth >= 640 ? 4 : 3;
@@ -171,7 +171,7 @@ export default function MapPage() {
           All
         </button>
         {categoriesWithEntries.map((cat) => {
-          const color = CATEGORY_COLORS[cat.slug] ?? "#64748b";
+          const color = getCategoryColor(cat.slug);
           const isActive = selectedCategories.has(cat.slug);
           return (
             <button
@@ -335,7 +335,7 @@ export default function MapPage() {
           </>
         )}
         {visibleEntries.map((entry) => {
-          const color = CATEGORY_COLORS[entry.categories[0]] ?? "#64748b";
+          const color = getCategoryColor(entry.categories[0]);
           return (
             <CircleMarker
               key={entry.id}
@@ -373,7 +373,7 @@ export default function MapPage() {
                     )}
                     {entry.categories.length > 0 && (
                       <p className="text-xs font-medium mb-3" style={{ color }}>
-                        {entry.categories.map((s) => CATEGORY_DISPLAY_NAMES[s] ?? s).join(" · ")}
+                        {entry.categories.map((s) => slugToLabel(s)).join(" · ")}
                       </p>
                     )}
                     <button
