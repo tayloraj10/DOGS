@@ -1,13 +1,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import ForceGraph2D from "react-force-graph-2d";
 import { forceCollide } from "d3-force-3d";
 import { listDirectoryEntries } from "../api/directory";
 import { useCategories } from "../hooks/useCategories";
 import LoadingState from "../components/LoadingState";
-import SocialIcon, { SOCIAL_FIELDS } from "../components/SocialIcon";
+import EntryModal from "../components/EntryModal";
 import type { DirectoryEntry } from "../api/types";
-import { getCategoryColor, slugToLabel } from "../api/types";
+import { getCategoryColor } from "../api/types";
 import { useTheme } from "../hooks/useTheme";
 
 interface GraphNode {
@@ -163,7 +162,6 @@ function orderByCooccurrence<T extends { slug: string }>(
 }
 
 export default function NetworkPage() {
-  const navigate = useNavigate();
   const { theme } = useTheme();
   const isDark = theme === "dark";
   const { categories } = useCategories();
@@ -498,93 +496,7 @@ export default function NetworkPage() {
         </div>
       </div>
 
-      {selectedEntry && (
-        <div
-          className="absolute inset-0 z-10 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm"
-          onClick={() => setSelectedEntry(null)}
-        >
-          <div
-            className="relative w-full max-w-sm rounded-2xl overflow-hidden shadow-2xl bg-white dark:bg-slate-900 ring-1 ring-slate-200 dark:ring-slate-800"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="aspect-[4/3] w-full bg-slate-100 dark:bg-slate-800">
-              {selectedEntry.image_url ? (
-                <img
-                  src={selectedEntry.image_url}
-                  alt={selectedEntry.name}
-                  className="h-full w-full object-cover"
-                />
-              ) : (
-                <div className="flex h-full items-center justify-center">
-                  <span className="text-6xl font-semibold text-slate-300 dark:text-slate-600">
-                    {selectedEntry.name.charAt(0).toUpperCase()}
-                  </span>
-                </div>
-              )}
-            </div>
-
-            <button
-              onClick={() => setSelectedEntry(null)}
-              className="absolute top-3 right-3 flex h-8 w-8 items-center justify-center rounded-full bg-black/50 text-white hover:bg-black/70 transition-colors"
-              aria-label="Close"
-            >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" className="h-4 w-4">
-                <path d="M18 6 6 18M6 6l12 12" />
-              </svg>
-            </button>
-
-            <div className="flex flex-col gap-3 p-5">
-              <div>
-                <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100 leading-tight">
-                  {selectedEntry.name}
-                </h2>
-                {selectedEntry.location?.city && (
-                  <p className="mt-0.5 text-sm text-slate-400 dark:text-slate-500">
-                    {[selectedEntry.location.city, selectedEntry.location.state, selectedEntry.location.country]
-                      .filter(Boolean)
-                      .join(", ")}
-                  </p>
-                )}
-              </div>
-
-              {selectedEntry.description && (
-                <p className="text-sm leading-relaxed text-slate-600 dark:text-slate-400 line-clamp-3">
-                  {selectedEntry.description}
-                </p>
-              )}
-
-              {selectedEntry.categories.length > 0 && (
-                <div className="flex flex-wrap gap-1.5">
-                  {selectedEntry.categories.map((slug) => (
-                    <span
-                      key={slug}
-                      className="rounded-full px-2.5 py-0.5 text-xs font-medium text-white"
-                      style={{ backgroundColor: getCategoryColor(slug) }}
-                    >
-                      {slugToLabel(slug)}
-                    </span>
-                  ))}
-                </div>
-              )}
-
-              {SOCIAL_FIELDS.filter((f) => selectedEntry.social_links?.[f]).length > 0 && (
-                <div className="flex flex-wrap gap-2">
-                  {SOCIAL_FIELDS.filter((f) => selectedEntry.social_links?.[f]).map((field) => (
-                    <SocialIcon key={field} field={field} href={selectedEntry.social_links![field]!} />
-                  ))}
-                </div>
-              )}
-
-              <button
-                onClick={() => navigate(`/entry/${selectedEntry.id}`)}
-                className="mt-1 w-full rounded-xl bg-emerald-600 py-2.5 text-sm font-semibold text-white hover:bg-emerald-700 transition-colors"
-              >
-                View full profile →
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <EntryModal entry={selectedEntry} onClose={() => setSelectedEntry(null)} />
     </div>
   );
 }
