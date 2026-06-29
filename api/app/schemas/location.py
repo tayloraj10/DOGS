@@ -15,6 +15,37 @@ _US_COUNTRY_ALIASES = {
     "united states of america",
 }
 
+# Maps lowercased aliases to canonical country names.
+_COUNTRY_ALIAS_TO_CANONICAL: dict[str, str] = {
+    alias: "United States"
+    for alias in [
+        "us",
+        "usa",
+        "u.s.",
+        "u.s.a.",
+        "united states",
+        "united states of america",
+        "america",
+    ]
+}
+_COUNTRY_ALIAS_TO_CANONICAL.update(
+    {
+        alias: "United Kingdom"
+        for alias in [
+            "uk",
+            "gb",
+            "gbr",
+            "great britain",
+            "united kingdom",
+            "britain",
+            "england",
+            "scotland",
+            "wales",
+            "northern ireland",
+        ]
+    }
+)
+
 _US_STATE_NAME_TO_ABBR = {
     "alabama": "AL",
     "alaska": "AK",
@@ -159,6 +190,13 @@ def validate_us_zip(zip_code: str) -> str:
     return normalized
 
 
+def normalize_country(country: str) -> str:
+    """Returns the canonical country name for common aliases (e.g. 'US' → 'United States').
+    Returns the original value unchanged if no alias matches."""
+    canonical = _COUNTRY_ALIAS_TO_CANONICAL.get(country.strip().lower())
+    return canonical if canonical is not None else country.strip()
+
+
 def validate_us_state(state: str) -> str:
     """Accepts a 2-letter US state/territory code or a full state name and
     returns the canonical full name (e.g. 'Pennsylvania')."""
@@ -182,7 +220,9 @@ class StructuredLocation(BaseModel):
     model_config = ConfigDict(extra="ignore")
 
     @model_validator(mode="after")
-    def _normalize_state(self) -> "StructuredLocation":
+    def _normalize_location(self) -> "StructuredLocation":
+        if self.country:
+            self.country = normalize_country(self.country)
         if is_us_country(self.country) and self.state:
             try:
                 self.state = validate_us_state(self.state)

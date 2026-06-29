@@ -25,3 +25,4 @@ Thumbs.db
 .vscode/
 *.swp
 .claude/settings.local.json
+scripts/migrate_location_names.sql
