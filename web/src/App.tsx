@@ -10,6 +10,7 @@ import ReviewEntryPage from "./pages/ReviewEntryPage";
 import AllEntriesPage from "./pages/AllEntriesPage";
 import NeedsPhotoPage from "./pages/NeedsPhotoPage";
 import AdminSyncPage from "./pages/AdminSyncPage";
+import AdminPage from "./pages/AdminPage";
 import EntryDetailPage from "./pages/EntryDetailPage";
 import EditEntryPage from "./pages/EditEntryPage";
 import ThemeToggle from "./components/ThemeToggle";
@@ -119,6 +120,7 @@ function App() {
           <Route path="/review" element={<ReviewQueuePage />} />
           <Route path="/review/all" element={<AllEntriesPage />} />
           <Route path="/review/photos" element={<NeedsPhotoPage />} />
+          <Route path="/admin" element={<AdminPage />} />
           <Route path="/admin/sync" element={<AdminSyncPage />} />
           <Route path="/review/:id" element={<ReviewEntryPage />} />
         </Routes>
