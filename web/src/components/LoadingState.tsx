@@ -14,8 +14,13 @@ export default function LoadingState({ label = "Loading..." }: { label?: string 
 
   useEffect(() => {
     if (!coldStart) return;
+    // Kick off the first grow immediately (after initial scale-50 renders)
+    const initial = setTimeout(() => setBreathingIn(true), 10);
     const interval = setInterval(() => setBreathingIn((prev) => !prev), BREATH_PHASE_MS);
-    return () => clearInterval(interval);
+    return () => {
+      clearTimeout(initial);
+      clearInterval(interval);
+    };
   }, [coldStart]);
 
   if (!coldStart) {
@@ -46,7 +51,7 @@ export default function LoadingState({ label = "Loading..." }: { label?: string 
         </div>
 
         <p className="mt-4 text-sm font-semibold text-slate-800 dark:text-slate-200">
-          {breathingIn ? "Breathe out..." : "Breathe in..."}
+          {breathingIn ? "Breathe in..." : "Breathe out..."}
         </p>
 
         <p className="mt-4 text-xs text-slate-400 dark:text-slate-500">
