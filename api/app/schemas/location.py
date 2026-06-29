@@ -83,11 +83,13 @@ _US_STATE_ABBR_TO_NAME: dict[str, str] = {
     if name not in {"washington dc", "washington d.c.", "u.s. virgin islands", "virgin islands"}
 }
 # Fix title-case edge cases
-_US_STATE_ABBR_TO_NAME.update({
-    "DC": "District of Columbia",
-    "VI": "U.S. Virgin Islands",
-    "MP": "Northern Mariana Islands",
-})
+_US_STATE_ABBR_TO_NAME.update(
+    {
+        "DC": "District of Columbia",
+        "VI": "U.S. Virgin Islands",
+        "MP": "Northern Mariana Islands",
+    }
+)
 
 _VALID_US_STATE_ABBRS = frozenset(_US_STATE_NAME_TO_ABBR.values()) | {"DC"}
 
