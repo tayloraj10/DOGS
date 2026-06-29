@@ -5,7 +5,7 @@ const BREATH_PHASE_MS = 4000;
 
 export default function LoadingState({ label = "Loading..." }: { label?: string }) {
   const [coldStart, setColdStart] = useState(false);
-  const [breathingIn, setBreathingIn] = useState(true);
+  const [breathingIn, setBreathingIn] = useState(false);
 
   useEffect(() => {
     const timer = setTimeout(() => setColdStart(true), COLD_START_DELAY_MS);
@@ -46,7 +46,7 @@ export default function LoadingState({ label = "Loading..." }: { label?: string 
         </div>
 
         <p className="mt-4 text-sm font-semibold text-slate-800 dark:text-slate-200">
-          {breathingIn ? "Breathe in..." : "Breathe out..."}
+          {breathingIn ? "Breathe out..." : "Breathe in..."}
         </p>
 
         <p className="mt-4 text-xs text-slate-400 dark:text-slate-500">
