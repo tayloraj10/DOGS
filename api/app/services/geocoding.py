@@ -5,7 +5,7 @@ import re
 import httpx
 
 from app.config import settings
-from app.schemas.location import is_us_country, validate_us_state
+from app.schemas.location import is_us_country, normalize_country, validate_us_state
 
 _GEOCODING_URL = "https://maps.googleapis.com/maps/api/geocode/json"
 _US_ZIP_RE = re.compile(r"^\d{5}$")
@@ -79,6 +79,8 @@ async def lookup_location(partial: dict | None) -> dict | None:
             if not merged.get(key):
                 merged[key] = value
 
+        if merged.get("country"):
+            merged["country"] = normalize_country(merged["country"])
         if is_us_country(merged.get("country")) and merged.get("state"):
             try:
                 merged["state"] = validate_us_state(merged["state"])
