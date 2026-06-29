@@ -19,7 +19,12 @@ _US_COUNTRY_ALIASES = {
 _COUNTRY_ALIAS_TO_CANONICAL: dict[str, str] = {
     alias: "United States"
     for alias in [
-        "us", "usa", "u.s.", "u.s.a.", "united states", "united states of america",
+        "us",
+        "usa",
+        "u.s.",
+        "u.s.a.",
+        "united states",
+        "united states of america",
         "america",
     ]
 }
@@ -27,8 +32,16 @@ _COUNTRY_ALIAS_TO_CANONICAL.update(
     {
         alias: "United Kingdom"
         for alias in [
-            "uk", "gb", "gbr", "great britain", "united kingdom",
-            "britain", "england", "scotland", "wales", "northern ireland",
+            "uk",
+            "gb",
+            "gbr",
+            "great britain",
+            "united kingdom",
+            "britain",
+            "england",
+            "scotland",
+            "wales",
+            "northern ireland",
         ]
     }
 )
