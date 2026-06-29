@@ -124,12 +124,15 @@ export default function DirectoryEntryForm({
     setLookupError(null);
     try {
       const result = await lookupLocation(location);
-      setLocation((l) => ({
-        city: l.city || result.city,
-        state: l.state || result.state,
-        zip_code: l.zip_code || result.zip_code,
-        country: l.country || result.country,
-      }));
+      setLocation((l) => {
+        const isAbbr = (s: string | null) => s !== null && /^[A-Z]{2}$/.test(s);
+        return {
+          city: l.city || result.city,
+          state: (isAbbr(l.state) && result.state) ? result.state : (l.state || result.state),
+          zip_code: l.zip_code || result.zip_code,
+          country: l.country || result.country,
+        };
+      });
     } catch (err) {
       setLookupError(
         err instanceof ApiError
@@ -224,7 +227,7 @@ export default function DirectoryEntryForm({
           />
           <input
             type="text"
-            placeholder="State (2-letter, US)"
+            placeholder="State / Province"
             value={location.state ?? ""}
             onChange={(e) => setLocation((l) => ({ ...l, state: e.target.value || null }))}
             className={INPUT_CLASSES}

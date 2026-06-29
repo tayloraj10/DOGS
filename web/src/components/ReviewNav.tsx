@@ -27,8 +27,8 @@ export default function ReviewNav() {
       <NavLink to="/review/photos" className={linkClasses}>
         Needs photo{needsPhotoCount !== null && ` (${needsPhotoCount})`}
       </NavLink>
-      <NavLink to="/admin/sync" className={linkClasses}>
-        Sync sheet
+      <NavLink to="/admin" className={linkClasses}>
+        Admin
       </NavLink>
     </div>
   );

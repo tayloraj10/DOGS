@@ -1,6 +1,6 @@
 import re
 
-from pydantic import BaseModel, ConfigDict, field_validator
+from pydantic import BaseModel, ConfigDict, field_validator, model_validator
 
 _FOLLOWER_COUNT_RE = re.compile(r"^[\d.,]+[KkMm]?$")
 _MAX_HANDLE_LEN = 200
@@ -77,6 +77,18 @@ _US_STATE_NAME_TO_ABBR = {
     "northern mariana islands": "MP",
 }
 
+_US_STATE_ABBR_TO_NAME: dict[str, str] = {
+    abbr: name.title()
+    for name, abbr in _US_STATE_NAME_TO_ABBR.items()
+    if name not in {"washington dc", "washington d.c.", "u.s. virgin islands", "virgin islands"}
+}
+# Fix title-case edge cases
+_US_STATE_ABBR_TO_NAME.update({
+    "DC": "District of Columbia",
+    "VI": "U.S. Virgin Islands",
+    "MP": "Northern Mariana Islands",
+})
+
 _VALID_US_STATE_ABBRS = frozenset(_US_STATE_NAME_TO_ABBR.values()) | {"DC"}
 
 # Matches a profile URL on each platform and captures the username segment.
@@ -147,13 +159,13 @@ def validate_us_zip(zip_code: str) -> str:
 
 def validate_us_state(state: str) -> str:
     """Accepts a 2-letter US state/territory code or a full state name and
-    returns the canonical 2-letter abbreviation."""
+    returns the canonical full name (e.g. 'Pennsylvania')."""
     normalized = state.strip().upper()
     if len(normalized) == 2 and normalized.isalpha() and normalized in _VALID_US_STATE_ABBRS:
-        return normalized
-    by_name = _US_STATE_NAME_TO_ABBR.get(state.strip().lower())
-    if by_name:
-        return by_name
+        return _US_STATE_ABBR_TO_NAME[normalized]
+    by_abbr = _US_STATE_NAME_TO_ABBR.get(state.strip().lower())
+    if by_abbr:
+        return _US_STATE_ABBR_TO_NAME[by_abbr]
     raise ValueError(
         "State must be a 2-letter US state code or full state name (e.g. CA or California)."
     )
@@ -166,6 +178,15 @@ class StructuredLocation(BaseModel):
     country: str | None = None
 
     model_config = ConfigDict(extra="ignore")
+
+    @model_validator(mode="after")
+    def _normalize_state(self) -> "StructuredLocation":
+        if is_us_country(self.country) and self.state:
+            try:
+                self.state = validate_us_state(self.state)
+            except ValueError:
+                pass
+        return self
 
 
 class Coordinates(BaseModel):

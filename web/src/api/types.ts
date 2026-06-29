@@ -118,3 +118,17 @@ export interface SheetSyncResponse {
   images_skipped: number;
   errors: string[];
 }
+
+export interface OrphanedImage {
+  name: string;
+  url: string;
+  size_bytes: number;
+}
+
+export interface OrphanedImagesResponse {
+  orphans: OrphanedImage[];
+}
+
+export interface DeleteOrphanedImagesResponse {
+  deleted: number;
+}
