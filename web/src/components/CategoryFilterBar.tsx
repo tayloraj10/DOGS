@@ -1,3 +1,4 @@
+import { getCategoryColor } from "../api/types";
 import type { Category, CategorySlug } from "../api/types";
 
 interface CategoryFilterBarProps {
@@ -31,10 +32,15 @@ export default function CategoryFilterBar({
           key={category.id}
           type="button"
           onClick={() => onSelect(category.slug)}
-          className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
+          style={
             selected === category.slug
-              ? "bg-emerald-600 text-white"
-              : "bg-white text-slate-600 ring-1 ring-slate-200 hover:bg-slate-100 dark:bg-slate-900 dark:text-slate-300 dark:ring-slate-700 dark:hover:bg-slate-800"
+              ? { backgroundColor: getCategoryColor(category.slug), borderColor: getCategoryColor(category.slug) }
+              : { borderColor: getCategoryColor(category.slug), color: getCategoryColor(category.slug) }
+          }
+          className={`rounded-full border-2 px-4 py-1.5 text-sm font-medium transition-colors ${
+            selected === category.slug
+              ? "text-white"
+              : "bg-white hover:opacity-75 dark:bg-slate-900"
           }`}
         >
           {category.name}

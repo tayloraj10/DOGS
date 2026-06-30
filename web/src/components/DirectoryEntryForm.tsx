@@ -7,6 +7,7 @@ import { ApiError } from "../api/client";
 import { extractSocialUsername } from "../utils/socialLinks";
 import UrlExtractBox from "./UrlExtractBox";
 import PhotoUploadField from "./PhotoUploadField";
+import { getCategoryColor } from "../api/types";
 import type {
   CategorySlug,
   DirectoryEntryInput,
@@ -308,10 +309,16 @@ export default function DirectoryEntryForm({
               key={category.id}
               type="button"
               onClick={() => toggleCategory(category.slug)}
-              className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${selectedCategories.includes(category.slug)
-                  ? "bg-emerald-600 text-white"
-                  : "bg-white text-slate-600 ring-1 ring-slate-200 hover:bg-slate-100 dark:bg-slate-900 dark:text-slate-300 dark:ring-slate-700 dark:hover:bg-slate-800"
-                }`}
+              style={
+                selectedCategories.includes(category.slug)
+                  ? { backgroundColor: getCategoryColor(category.slug), borderColor: getCategoryColor(category.slug) }
+                  : { borderColor: getCategoryColor(category.slug), color: getCategoryColor(category.slug) }
+              }
+              className={`rounded-full border-2 px-4 py-1.5 text-sm font-medium transition-colors ${
+                selectedCategories.includes(category.slug)
+                  ? "text-white"
+                  : "bg-white hover:opacity-75 dark:bg-slate-900"
+              }`}
             >
               {category.name}
             </button>
