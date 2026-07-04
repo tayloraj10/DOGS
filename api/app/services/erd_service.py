@@ -18,18 +18,21 @@ from sqlalchemy import Table
 
 import app.models  # noqa: F401  (registers all tables on Base.metadata)
 from app.database import Base
-from app.schemas.categories import CategorySlug
 from app.schemas.cleanup import CleanupMetrics
 from app.schemas.location import SocialLinks, StructuredLocation
+from app.schemas.project import ProjectStage
 from app.schemas.status import ActivityStatus
 from app.schemas.trash_report import TrashReportSeverity
 
 # (table_name, column_name) -> enum class
+# NOTE: CategorySlug used to be a real StrEnum (hence the erd.mmd entry for
+# categories.slug below in git history); it's now `= str` (slugs are DB-defined,
+# not code-defined), so there's no enum class left to annotate that column with.
 ENUM_COLUMNS: dict[tuple[str, str], EnumMeta] = {
-    ("categories", "slug"): CategorySlug,
     ("trash_reports", "severity"): TrashReportSeverity,
     ("trash_reports", "status"): ActivityStatus,
     ("cleanups", "status"): ActivityStatus,
+    ("projects", "stage"): ProjectStage,
 }
 
 # (table_name, column_name) -> Pydantic model describing the JSONB shape
@@ -39,6 +42,8 @@ JSON_SCHEMA_COLUMNS: dict[tuple[str, str], type[BaseModel]] = {
     ("trash_reports", "location"): StructuredLocation,
     ("cleanups", "location"): StructuredLocation,
     ("cleanups", "metrics"): CleanupMetrics,
+    ("projects", "location"): StructuredLocation,
+    ("projects", "social_links"): SocialLinks,
 }
 
 # (table_name, column_name) -> plain description for JSONB columns that hold a
@@ -50,6 +55,7 @@ JSON_LIST_COLUMNS: dict[tuple[str, str], str] = {
     ("cleanups", "organizer_user_ids"): "list of UUID",
     ("cleanups", "rsvp_user_ids"): "list of UUID",
     ("cleanups", "attended_user_ids"): "list of UUID",
+    ("projects", "user_ids"): "list of UUID",
 }
 
 SQL_TYPE_LABELS = {

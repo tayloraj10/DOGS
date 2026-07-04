@@ -1,6 +1,7 @@
 from app.models.category import Category
 from app.models.cleanup import Cleanup
 from app.models.directory import DirectoryEntry, DirectoryEntryCategory
+from app.models.project import Project, ProjectCategory, ProjectDirectoryEntry
 from app.models.trash_report import TrashReport
 
 __all__ = [
@@ -8,5 +9,8 @@ __all__ = [
     "Cleanup",
     "DirectoryEntry",
     "DirectoryEntryCategory",
+    "Project",
+    "ProjectCategory",
+    "ProjectDirectoryEntry",
     "TrashReport",
 ]

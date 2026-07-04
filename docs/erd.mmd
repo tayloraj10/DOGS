@@ -1,7 +1,7 @@
 erDiagram
     CATEGORIES {
         uuid id PK
-        string slug "CategorySlug enum - animals | environment | fitness | nature | trash | water"
+        string slug
         string name
     }
 
@@ -31,8 +31,11 @@ erDiagram
         jsonb location "StructuredLocation - city: str?, state: str?, zip_code: str?, country: str?"
         float latitude
         float longitude
-        jsonb social_links "SocialLinks - website: str?, instagram: str?, tiktok: str?, youtube: str?, facebook: str?, twitter: str?"
+        jsonb social_links "SocialLinks - website: str?, instagram: str?, tiktok: str?, youtube: str?, facebook: str?, twitter: str?, app_store: str?, google_play: str?, github: str?"
+        string suggested_category
+        string edit_token
         boolean featured
+        string status
         jsonb user_ids "list of UUID"
         timestamptz created_at
         timestamptz updated_at
@@ -41,6 +44,35 @@ erDiagram
     DIRECTORY_ENTRY_CATEGORIES {
         uuid directory_entry_id PK,FK
         uuid category_id PK,FK
+    }
+
+    PROJECTS {
+        uuid id PK
+        string name
+        text description
+        text image_url
+        jsonb location "StructuredLocation - city: str?, state: str?, zip_code: str?, country: str?"
+        float latitude
+        float longitude
+        jsonb social_links "SocialLinks - website: str?, instagram: str?, tiktok: str?, youtube: str?, facebook: str?, twitter: str?, app_store: str?, google_play: str?, github: str?"
+        string stage "ProjectStage enum - active | in_development | beta | sunset"
+        string status
+        string suggested_category
+        string edit_token
+        boolean featured
+        jsonb user_ids "list of UUID"
+        timestamptz created_at
+        timestamptz updated_at
+    }
+
+    PROJECT_CATEGORIES {
+        uuid project_id PK,FK
+        uuid category_id PK,FK
+    }
+
+    PROJECT_DIRECTORY_ENTRIES {
+        uuid project_id PK,FK
+        uuid directory_entry_id PK,FK
     }
 
     TRASH_REPORTS {
@@ -62,3 +94,7 @@ erDiagram
 
     CATEGORIES ||--o{ DIRECTORY_ENTRY_CATEGORIES : has
     DIRECTORY_ENTRIES ||--o{ DIRECTORY_ENTRY_CATEGORIES : has
+    PROJECTS ||--o{ PROJECT_CATEGORIES : has
+    CATEGORIES ||--o{ PROJECT_CATEGORIES : has
+    DIRECTORY_ENTRIES ||--o{ PROJECT_DIRECTORY_ENTRIES : has
+    PROJECTS ||--o{ PROJECT_DIRECTORY_ENTRIES : has

@@ -10,6 +10,7 @@ from app.database import DOGS_SCHEMA, Base
 
 if TYPE_CHECKING:
     from app.models.directory import DirectoryEntry
+    from app.models.project import Project
 
 
 class Category(Base):
@@ -22,5 +23,9 @@ class Category(Base):
 
     directory_entries: Mapped[list["DirectoryEntry"]] = relationship(
         secondary=f"{DOGS_SCHEMA}.directory_entry_categories",
+        back_populates="categories",
+    )
+    projects: Mapped[list["Project"]] = relationship(
+        secondary=f"{DOGS_SCHEMA}.project_categories",
         back_populates="categories",
     )
