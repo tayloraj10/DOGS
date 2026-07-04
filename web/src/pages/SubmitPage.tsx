@@ -1,23 +1,25 @@
 import { useState } from "react";
-import DirectoryEntryForm from "../components/DirectoryEntryForm";
-import { createDirectoryEntry } from "../api/directory";
 import type { DirectoryEntryInput } from "../api/types";
+import { KIND_ACCENT, KIND_DESCRIPTIONS, KIND_LABELS, configForKind } from "../lib/entryKind";
+import type { EntryKind } from "../lib/entryKind";
+import KindIcon from "../components/KindIcon";
 
 export default function SubmitPage() {
+  const [kind, setKind] = useState<EntryKind>("directory");
   const [submitted, setSubmitted] = useState(false);
+  const config = configForKind(kind);
 
   async function handleSubmit(values: DirectoryEntryInput) {
-    await createDirectoryEntry({ ...values, status: "pending" });
+    await config.api.create({ ...values, status: "pending" });
     setSubmitted(true);
   }
 
   if (submitted) {
     return (
       <div className="mx-auto max-w-lg rounded-2xl bg-white p-8 text-center shadow-sm ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800">
-        <h1 className="text-xl font-semibold text-slate-900 dark:text-slate-100">Thanks for submitting!</h1>
+        <h1 className="text-xl font-semibold text-slate-900 dark:text-slate-100">{config.labels.submitThanksHeading}</h1>
         <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
-          We'll review your submission and reach out if we need anything else before
-          it's added to the Directory of Good.
+          {config.labels.submitThanksBody}
         </p>
       </div>
     );
@@ -25,13 +27,32 @@ export default function SubmitPage() {
 
   return (
     <div className="mx-auto max-w-2xl">
-      <h1 className="text-2xl font-semibold text-slate-900 dark:text-slate-100">Submit an entry</h1>
+      <h1 className="text-2xl font-semibold text-slate-900 dark:text-slate-100">{config.labels.submitHeading}</h1>
       <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
-        Tell us about yourself or your group. We'll review what you share and follow
-        up before it goes live on the Directory of Good.
+        {config.labels.submitSubheading}
       </p>
+
+      <div className="mt-4 inline-flex rounded-lg bg-slate-100 p-1 dark:bg-slate-800">
+        {(["directory", "project"] as EntryKind[]).map((k) => (
+          <button
+            key={k}
+            type="button"
+            title={KIND_DESCRIPTIONS[k]}
+            onClick={() => setKind(k)}
+            className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
+              kind === k
+                ? `${KIND_ACCENT[k].active} shadow`
+                : "text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
+            }`}
+          >
+            <KindIcon kind={k} />
+            {KIND_LABELS[k]}
+          </button>
+        ))}
+      </div>
+
       <div className="mt-6 rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800">
-        <DirectoryEntryForm onSubmit={handleSubmit} submitLabel="Submit for review" />
+        {config.renderForm({ formKey: kind, onSubmit: handleSubmit, submitLabel: "Submit for review" })}
       </div>
     </div>
   );

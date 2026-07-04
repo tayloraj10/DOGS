@@ -1,14 +1,17 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import ForceGraph2D from "react-force-graph-2d";
 import { forceCollide } from "d3-force-3d";
-import { listDirectoryEntries } from "../api/directory";
 import { useCategories } from "../hooks/useCategories";
+import { useTypeFilter } from "../hooks/useTypeFilter";
 import LoadingState from "../components/LoadingState";
 import EntryModal from "../components/EntryModal";
 import CategoryGuideModal from "../components/CategoryGuideModal";
-import type { DirectoryEntry } from "../api/types";
 import { getCategoryColor } from "../api/types";
 import { useTheme } from "../hooks/useTheme";
+import { directoryConfig, projectsConfig } from "../config/entityConfig";
+import { KIND_ACCENT, KIND_DESCRIPTIONS, KIND_LABELS, excludeLinkedDirectoryEntries, tagKind } from "../lib/entryKind";
+import type { EntryKind, MergedEntry } from "../lib/entryKind";
+import KindIcon from "../components/KindIcon";
 
 interface GraphNode {
   id: string;
@@ -19,6 +22,7 @@ interface GraphNode {
   val: number;
   isHub: boolean;
   entryId?: string;
+  entryKind?: EntryKind;
   x?: number;
   y?: number;
   vx?: number;
@@ -174,10 +178,16 @@ export default function NetworkPage() {
   const { theme } = useTheme();
   const isDark = theme === "dark";
   const { categories } = useCategories();
-  const [entries, setEntries] = useState<DirectoryEntry[]>([]);
+  const { selected: selectedKinds, toggle: toggleKind } = useTypeFilter();
+  const [allEntries, setAllEntries] = useState<MergedEntry[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedEntry, setSelectedEntry] = useState<DirectoryEntry | null>(null);
+  const [selectedEntry, setSelectedEntry] = useState<MergedEntry | null>(null);
   const [showCategoryGuide, setShowCategoryGuide] = useState(false);
+
+  const entries = useMemo(
+    () => excludeLinkedDirectoryEntries(allEntries.filter((e) => selectedKinds.has(e.kind))),
+    [allEntries, selectedKinds],
+  );
 
   const imagesRef = useRef<Record<string, HTMLImageElement>>({});
   const linksRef = useRef<GraphLink[]>([]);
@@ -190,8 +200,13 @@ export default function NetworkPage() {
   const [dimensions, setDimensions] = useState(initDims);
 
   useEffect(() => {
-    listDirectoryEntries("published", 500)
-      .then(setEntries)
+    Promise.all([
+      directoryConfig.api.list("published", 500),
+      projectsConfig.api.list("published", 500),
+    ])
+      .then(([directoryEntries, projects]) =>
+        setAllEntries([...tagKind(directoryEntries, "directory"), ...tagKind(projects, "project")]),
+      )
       .finally(() => setLoading(false));
   }, []);
 
@@ -212,11 +227,12 @@ export default function NetworkPage() {
   useEffect(() => {
     let mounted = true;
     for (const entry of entries) {
-      if (!entry.image_url || imagesRef.current[entry.id]) continue;
+      const key = `${entry.kind}:${entry.id}`;
+      if (!entry.image_url || imagesRef.current[key]) continue;
       const img = new Image();
       img.src = entry.image_url;
       img.onload = () => {
-        if (mounted) imagesRef.current[entry.id] = img;
+        if (mounted) imagesRef.current[key] = img;
       };
     }
     return () => {
@@ -271,7 +287,7 @@ export default function NetworkPage() {
       hubIndex[primarySlug] = idx + 1;
 
       nodes.push({
-        id: `entry:${entry.id}`,
+        id: `entry:${entry.kind}:${entry.id}`,
         label: entry.name,
         color: primaryColor,
         colors: knownSlugs.map(getCategoryColor),
@@ -282,13 +298,14 @@ export default function NetworkPage() {
         val: 3,
         isHub: false,
         entryId: entry.id,
+        entryKind: entry.kind,
         x: hub?.x ?? 0,
         y: hub?.y ?? 0,
       });
       for (const slug of knownSlugs) {
         links.push({
           source: `category:${slug}`,
-          target: `entry:${entry.id}`,
+          target: `entry:${entry.kind}:${entry.id}`,
           color: getCategoryColor(slug),
         });
       }
@@ -352,7 +369,7 @@ export default function NetworkPage() {
   const nodeCanvasObject = useCallback(
     (node: unknown, ctx: CanvasRenderingContext2D, globalScale: number) => {
       const n = node as GraphNode & { x: number; y: number };
-      const { x, y, isHub, color, colors, hubPositions, label, entryId } = n;
+      const { x, y, isHub, color, colors, hubPositions, label, entryId, entryKind } = n;
       const ringColors = colors ?? [color];
 
       if (isHub) {
@@ -386,7 +403,7 @@ export default function NetworkPage() {
         ctx.textBaseline = "middle";
         ctx.fillText(label, x, y);
       } else {
-        const img = entryId ? imagesRef.current[entryId] : undefined;
+        const img = entryId ? imagesRef.current[`${entryKind}:${entryId}`] : undefined;
 
         if (img) {
           // Circular cropped profile image
@@ -461,6 +478,21 @@ export default function NetworkPage() {
   const entryCount = entries.filter((e) => e.categories.length > 0).length;
   const hubCount = categories.length;
 
+  const kindButtons = (["directory", "project"] as EntryKind[]).map((kind) => (
+    <button
+      key={kind}
+      type="button"
+      title={KIND_DESCRIPTIONS[kind]}
+      onClick={() => toggleKind(kind)}
+      className={`flex items-center gap-1 rounded-full px-3 py-1 text-xs font-semibold whitespace-nowrap transition-all ${
+        selectedKinds.has(kind) ? `${KIND_ACCENT[kind].active} shadow` : KIND_ACCENT[kind].inactive
+      }`}
+    >
+      <KindIcon kind={kind} className="h-3.5 w-3.5" />
+      {KIND_LABELS[kind]}
+    </button>
+  ));
+
   return (
     <div ref={containerRef} className="flex-1 relative min-h-0 overflow-hidden">
       <ForceGraph2D
@@ -483,7 +515,9 @@ export default function NetworkPage() {
         onNodeClick={(node) => {
           const n = node as unknown as GraphNode;
           if (n.entryId) {
-            setSelectedEntry(entries.find((e) => e.id === n.entryId) ?? null);
+            setSelectedEntry(
+              entries.find((e) => e.kind === n.entryKind && e.id === n.entryId) ?? null,
+            );
           }
         }}
         width={dimensions.width}
@@ -491,29 +525,42 @@ export default function NetworkPage() {
       />
 
       <div className="absolute bottom-4 left-4 flex flex-col gap-2 items-start">
-        <button
-          onClick={() => graphRef.current?.zoomToFit(600, 80)}
-          className="flex items-center justify-center h-9 w-9 rounded-full bg-black/30 backdrop-blur-sm text-white/90 hover:bg-black/50 transition-colors"
-          aria-label="Zoom to fit"
-          title="Zoom to fit"
-        >
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
-            <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" />
-          </svg>
-        </button>
-        <button
-          onClick={() => setShowCategoryGuide(true)}
-          className="flex items-center gap-1.5 h-9 px-3 rounded-full bg-black/30 backdrop-blur-sm text-white/90 hover:bg-black/50 transition-colors text-xs font-medium"
-          title="Category guide"
-        >
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="h-3.5 w-3.5">
-            <circle cx="12" cy="12" r="10" />
-            <path d="M12 16v-4M12 8h.01" />
-          </svg>
-          Categories
-        </button>
-        <div className="text-xs px-3 py-1.5 rounded-full pointer-events-none select-none bg-black/30 backdrop-blur-sm text-white/90">
-          {entryCount} entries · {hubCount} categories
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => graphRef.current?.zoomToFit(600, 80)}
+            className="flex items-center justify-center h-9 w-9 rounded-full bg-black/30 backdrop-blur-sm text-white/90 hover:bg-black/50 transition-colors"
+            aria-label="Zoom to fit"
+            title="Zoom to fit"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
+              <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" />
+            </svg>
+          </button>
+          <button
+            onClick={() => setShowCategoryGuide(true)}
+            className="flex items-center gap-1.5 h-9 px-3 rounded-full bg-black/30 backdrop-blur-sm text-white/90 hover:bg-black/50 transition-colors text-xs font-medium"
+            title="Category guide"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="h-3.5 w-3.5">
+              <circle cx="12" cy="12" r="10" />
+              <path d="M12 16v-4M12 8h.01" />
+            </svg>
+            Categories
+          </button>
+          <div className="flex items-center gap-3 rounded-xl px-3 py-1 pointer-events-none select-none bg-black/30 backdrop-blur-sm text-white/90">
+            <div className="flex flex-col items-center leading-tight">
+              <span className="text-sm font-bold">{entryCount}</span>
+              <span className="text-[10px] text-white/60">entries</span>
+            </div>
+            <div className="w-px h-6 bg-white/20" />
+            <div className="flex flex-col items-center leading-tight">
+              <span className="text-sm font-bold">{hubCount}</span>
+              <span className="text-[10px] text-white/60">categories</span>
+            </div>
+          </div>
+        </div>
+        <div className="flex items-center gap-1 rounded-full bg-black/30 backdrop-blur-sm p-1">
+          {kindButtons}
         </div>
       </div>
 

@@ -49,6 +49,9 @@ export interface SocialLinks {
   youtube: string | null;
   facebook: string | null;
   twitter: string | null;
+  app_store: string | null;
+  google_play: string | null;
+  github: string | null;
 }
 
 export interface Category {
@@ -85,6 +88,30 @@ export interface DirectoryEntryInput {
   suggested_category?: string | null;
   featured?: boolean;
   status?: DirectoryEntryStatus;
+}
+
+export type ProjectStage = "active" | "in_development" | "beta" | "sunset";
+
+export const PROJECT_STAGE_LABELS: Record<ProjectStage, string> = {
+  active: "Active",
+  in_development: "In development",
+  beta: "Beta",
+  sunset: "Sunset",
+};
+
+export interface LinkedDirectoryEntry {
+  id: string;
+  name: string;
+}
+
+export interface Project extends DirectoryEntry {
+  stage: ProjectStage | null;
+  directory_entries: LinkedDirectoryEntry[];
+}
+
+export interface ProjectInput extends DirectoryEntryInput {
+  stage?: ProjectStage | null;
+  directory_entry_ids?: string[];
 }
 
 export interface DirectoryExtractResponse {

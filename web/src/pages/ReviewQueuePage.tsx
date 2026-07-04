@@ -1,19 +1,30 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { listDirectoryEntries } from "../api/directory";
 import ReviewNav from "../components/ReviewNav";
 import LoadingState from "../components/LoadingState";
-import type { DirectoryEntry } from "../api/types";
+import TypeFilterBar from "../components/TypeFilterBar";
+import { useTypeFilter } from "../hooks/useTypeFilter";
+import { directoryConfig, projectsConfig } from "../config/entityConfig";
+import { tagKind, toRouteId } from "../lib/entryKind";
+import type { MergedEntry } from "../lib/entryKind";
 
 export default function ReviewQueuePage() {
-  const [entries, setEntries] = useState<DirectoryEntry[]>([]);
+  const { selected: selectedKinds, toggle: toggleKind } = useTypeFilter();
+  const [entries, setEntries] = useState<MergedEntry[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    listDirectoryEntries("pending")
-      .then(setEntries)
+    Promise.all([
+      directoryConfig.api.list("pending"),
+      projectsConfig.api.list("pending"),
+    ])
+      .then(([directoryEntries, projects]) =>
+        setEntries([...tagKind(directoryEntries, "directory"), ...tagKind(projects, "project")]),
+      )
       .finally(() => setLoading(false));
   }, []);
+
+  const visibleEntries = entries.filter((entry) => selectedKinds.has(entry.kind));
 
   return (
     <div>
@@ -24,17 +35,21 @@ export default function ReviewQueuePage() {
 
       <ReviewNav />
 
+      <div className="mt-4">
+        <TypeFilterBar selected={selectedKinds} onToggle={toggleKind} />
+      </div>
+
       {loading && <LoadingState />}
 
-      {!loading && entries.length === 0 && (
+      {!loading && visibleEntries.length === 0 && (
         <p className="mt-6 text-sm text-slate-400 dark:text-slate-500">Nothing waiting for review.</p>
       )}
 
       <div className="mt-6 flex flex-col gap-3">
-        {entries.map((entry) => (
+        {visibleEntries.map((entry) => (
           <Link
-            key={entry.id}
-            to={`/review/${entry.id}`}
+            key={`${entry.kind}-${entry.id}`}
+            to={`/review/${toRouteId(entry.kind, entry.id)}`}
             className="rounded-xl bg-white p-4 shadow-sm ring-1 ring-slate-200 transition-shadow hover:shadow-md dark:bg-slate-900 dark:ring-slate-800 dark:hover:shadow-none"
           >
             <p className="font-medium text-slate-900 dark:text-slate-100">{entry.name}</p>

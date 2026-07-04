@@ -1,14 +1,22 @@
 import { useState } from "react";
-import DirectoryEntryForm from "../components/DirectoryEntryForm";
-import { approveSuggestedCategory, createDirectoryEntry } from "../api/directory";
-import type { DirectoryEntry, DirectoryEntryInput } from "../api/types";
+import type { DirectoryEntry, DirectoryEntryInput, Project } from "../api/types";
+import { KIND_ACCENT, KIND_DESCRIPTIONS, KIND_LABELS, configForKind } from "../lib/entryKind";
+import type { EntryKind } from "../lib/entryKind";
+import KindIcon from "../components/KindIcon";
 
 export default function CapturePage() {
-  const [savedEntry, setSavedEntry] = useState<DirectoryEntry | null>(null);
+  const [kind, setKind] = useState<EntryKind>("directory");
+  const [savedEntry, setSavedEntry] = useState<DirectoryEntry | Project | null>(null);
   const [approving, setApproving] = useState(false);
+  const config = configForKind(kind);
+
+  function handleKindChange(next: EntryKind) {
+    setKind(next);
+    setSavedEntry(null);
+  }
 
   async function handleSubmit(values: DirectoryEntryInput) {
-    const entry = await createDirectoryEntry({ ...values, status: "published" });
+    const entry = await config.api.create({ ...values, status: "published" });
     setSavedEntry(entry);
   }
 
@@ -16,7 +24,7 @@ export default function CapturePage() {
     if (!savedEntry) return;
     setApproving(true);
     try {
-      const updated = await approveSuggestedCategory(savedEntry.id);
+      const updated = await config.api.approveSuggestedCategory(savedEntry.id);
       setSavedEntry(updated);
     } finally {
       setApproving(false);
@@ -25,15 +33,33 @@ export default function CapturePage() {
 
   return (
     <div className="mx-auto max-w-2xl">
-      <h1 className="text-2xl font-semibold text-slate-900 dark:text-slate-100">Capture a new entry</h1>
+      <h1 className="text-2xl font-semibold text-slate-900 dark:text-slate-100">{config.labels.captureHeading}</h1>
       <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
-        Paste a link to pull what we can find, then fill in the rest. Saves straight
-        to the live Directory of Good.
+        {config.labels.captureSubheading}
       </p>
+
+      <div className="mt-4 inline-flex rounded-lg bg-slate-100 p-1 dark:bg-slate-800">
+        {(["directory", "project"] as EntryKind[]).map((k) => (
+          <button
+            key={k}
+            type="button"
+            title={KIND_DESCRIPTIONS[k]}
+            onClick={() => handleKindChange(k)}
+            className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
+              kind === k
+                ? `${KIND_ACCENT[k].active} shadow`
+                : "text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
+            }`}
+          >
+            <KindIcon kind={k} />
+            {KIND_LABELS[k]}
+          </button>
+        ))}
+      </div>
 
       {savedEntry && (
         <div className="mt-4 rounded-lg bg-emerald-50 px-4 py-3 text-sm text-emerald-800 ring-1 ring-emerald-100 dark:bg-emerald-900/20 dark:text-emerald-300 dark:ring-emerald-900">
-          Saved "{savedEntry.name}" to the directory.
+          Saved "{savedEntry.name}" to {config.labels.navLabel}.
         </div>
       )}
 
@@ -54,12 +80,12 @@ export default function CapturePage() {
       )}
 
       <div className="mt-6 rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800">
-        <DirectoryEntryForm
-          key={savedEntry?.id ?? "form"}
-          onSubmit={handleSubmit}
-          submitLabel="Save to directory"
-          showUrlExtract
-        />
+        {config.renderForm({
+          formKey: `${kind}-${savedEntry?.id ?? "form"}`,
+          onSubmit: handleSubmit,
+          submitLabel: `Save to ${config.labels.navLabel}`,
+          showUrlExtract: true,
+        })}
       </div>
     </div>
   );

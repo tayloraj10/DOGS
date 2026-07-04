@@ -54,10 +54,10 @@ function App() {
 
           {/* Desktop nav */}
           <nav className="hidden sm:flex items-center gap-6">
-            <NavLink to="/" className={desktopNavClasses} end>Showcase</NavLink>
+            <NavLink to="/" end className={desktopNavClasses}>Showcase</NavLink>
             <NavLink to="/map" className={desktopNavClasses}>Map</NavLink>
             <NavLink to="/network" className={desktopNavClasses}>Network</NavLink>
-            <NavLink to="/submit" className={desktopNavClasses}>Submit an Entry</NavLink>
+            <NavLink to="/submit" className={desktopNavClasses}>Submit</NavLink>
             <ThemeToggle />
           </nav>
 
@@ -93,10 +93,10 @@ function App() {
           />
           <div className="sm:hidden fixed right-4 top-[57px] z-[1999] bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-slate-100 dark:border-slate-800 py-2 min-w-[190px]">
             <nav className="flex flex-col">
-              <NavLink to="/" className={mobileNavClasses} end onClick={closeMenu}>Showcase</NavLink>
+              <NavLink to="/" end className={mobileNavClasses} onClick={closeMenu}>Showcase</NavLink>
               <NavLink to="/map" className={mobileNavClasses} onClick={closeMenu}>Map</NavLink>
               <NavLink to="/network" className={mobileNavClasses} onClick={closeMenu}>Network</NavLink>
-              <NavLink to="/submit" className={mobileNavClasses} onClick={closeMenu}>Submit an Entry</NavLink>
+              <NavLink to="/submit" className={mobileNavClasses} onClick={closeMenu}>Submit</NavLink>
             </nav>
           </div>
         </>
@@ -116,13 +116,14 @@ function App() {
           <Route path="/submit" element={<SubmitPage />} />
           <Route path="/entry/:id" element={<EntryDetailPage />} />
           <Route path="/entry/:id/edit" element={<EditEntryPage />} />
+          <Route path="/entry/:id/:slug" element={<EntryDetailPage />} />
           <Route path="/capture" element={<CapturePage />} />
           <Route path="/review" element={<ReviewQueuePage />} />
           <Route path="/review/all" element={<AllEntriesPage />} />
           <Route path="/review/photos" element={<NeedsPhotoPage />} />
+          <Route path="/review/:id" element={<ReviewEntryPage />} />
           <Route path="/admin" element={<AdminPage />} />
           <Route path="/admin/sync" element={<AdminSyncPage />} />
-          <Route path="/review/:id" element={<ReviewEntryPage />} />
         </Routes>
       </main>
     </div>

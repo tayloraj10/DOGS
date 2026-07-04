@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { forwardRef, useImperativeHandle, useState } from "react";
+import type { ReactNode } from "react";
 import { useCategories } from "../hooks/useCategories";
 import CategoryGuideModal from "./CategoryGuideModal";
 import { lookupLocation } from "../api/directory";
@@ -10,12 +11,16 @@ import PhotoUploadField from "./PhotoUploadField";
 import { getCategoryColor } from "../api/types";
 import type {
   CategorySlug,
+  DirectoryEntry,
   DirectoryEntryInput,
   DirectoryExtractResponse,
   SocialLinks,
   StructuredLocation,
 } from "../api/types";
-import { SOCIAL_FIELDS } from "./SocialIcon";
+import { CORE_SOCIAL_FIELDS, RAW_URL_FIELDS } from "./SocialIcon";
+import type { SocialField } from "./SocialIcon";
+
+type SocialUsernameField = Exclude<SocialField, "website" | "app_store" | "google_play">;
 
 const EMPTY_LOCATION: StructuredLocation = {
   city: null,
@@ -31,6 +36,9 @@ const EMPTY_SOCIAL: SocialLinks = {
   youtube: null,
   facebook: null,
   twitter: null,
+  app_store: null,
+  google_play: null,
+  github: null,
 };
 
 const SOCIAL_LABELS: Record<keyof SocialLinks, string> = {
@@ -40,6 +48,9 @@ const SOCIAL_LABELS: Record<keyof SocialLinks, string> = {
   youtube: "YouTube",
   facebook: "Facebook",
   twitter: "X / Twitter",
+  app_store: "App Store",
+  google_play: "Google Play",
+  github: "GitHub",
 };
 
 const INPUT_CLASSES =
@@ -50,14 +61,22 @@ interface DirectoryEntryFormProps {
   onSubmit: (values: DirectoryEntryInput) => Promise<void>;
   submitLabel: string;
   showUrlExtract?: boolean;
+  socialFields?: SocialField[];
+  extraFields?: ReactNode;
 }
 
-export default function DirectoryEntryForm({
+export interface DirectoryEntryFormHandle {
+  applyPrefill: (source: Partial<DirectoryEntry>) => void;
+}
+
+const DirectoryEntryForm = forwardRef<DirectoryEntryFormHandle, DirectoryEntryFormProps>(function DirectoryEntryForm({
   initialValues,
   onSubmit,
   submitLabel,
   showUrlExtract = false,
-}: DirectoryEntryFormProps) {
+  socialFields = CORE_SOCIAL_FIELDS,
+  extraFields,
+}, ref) {
   const { categories } = useCategories();
 
   const [name, setName] = useState(initialValues?.name ?? "");
@@ -83,6 +102,38 @@ export default function DirectoryEntryForm({
   const [lookingUpLocation, setLookingUpLocation] = useState(false);
   const [lookupError, setLookupError] = useState<string | null>(null);
 
+  useImperativeHandle(
+    ref,
+    () => ({
+      applyPrefill(source) {
+        const { name, description, image_url } = source;
+        if (name) setName((prev) => (prev.trim() ? prev : name));
+        if (description) setDescription((prev) => (prev ? prev : description));
+        if (image_url) setImageUrl((prev) => (prev ? prev : image_url));
+        if (source.location && Object.values(source.location).some(Boolean)) {
+          setLocation((prev) =>
+            Object.values(prev).some(Boolean) ? prev : { ...EMPTY_LOCATION, ...source.location },
+          );
+        }
+        if (source.social_links) {
+          setSocialLinks((prev) => {
+            const next = { ...prev };
+            for (const field of socialFields) {
+              if (!next[field] && source.social_links![field]) {
+                next[field] = source.social_links![field];
+              }
+            }
+            return next;
+          });
+        }
+        if (source.categories && source.categories.length > 0) {
+          setSelectedCategories((prev) => (prev.length > 0 ? prev : source.categories!));
+        }
+      },
+    }),
+    [socialFields],
+  );
+
   function handleExtractResult(result: DirectoryExtractResponse) {
     if (!name && result.name) setName(result.name);
     if (!description && result.description) setDescription(result.description);
@@ -94,7 +145,7 @@ export default function DirectoryEntryForm({
     if (result.social_links) {
       setSocialLinks((prev) => {
         const next = { ...prev };
-        for (const field of SOCIAL_FIELDS) {
+        for (const field of socialFields) {
           if (!next[field] && result.social_links![field]) {
             next[field] = result.social_links![field];
           }
@@ -110,7 +161,7 @@ export default function DirectoryEntryForm({
     );
   }
 
-  function handleSocialBlur(field: Exclude<keyof SocialLinks, "website">) {
+  function handleSocialBlur(field: SocialUsernameField) {
     setSocialLinks((s) => {
       const value = s[field];
       if (!value) return s;
@@ -258,31 +309,33 @@ export default function DirectoryEntryForm({
           instagram.com/dogs) — paste a full link and we'll trim it down for you.
         </p>
         <div className="mt-2 grid grid-cols-1 gap-3 sm:grid-cols-2">
-          {SOCIAL_FIELDS.map((field) => (
-            <div key={field}>
-              <label className="block text-xs font-medium text-slate-500 dark:text-slate-400">
-                {SOCIAL_LABELS[field]}
-              </label>
-              <div className="relative mt-0.5">
-                {field !== "website" && (
-                  <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-sm text-slate-400 dark:text-slate-500">
-                    @
-                  </span>
-                )}
-                <input
-                  type="text"
-                  placeholder={field === "website" ? "https://example.com" : "username"}
-                  value={socialLinks[field] ?? ""}
-                  onChange={(e) =>
-                    setSocialLinks((s) => ({ ...s, [field]: e.target.value || null }))
-                  }
-                  onBlur={() => field !== "website" && handleSocialBlur(field)}
-                  className={`w-full ${INPUT_CLASSES} ${field !== "website" ? "pl-7 pr-3" : "px-3"
-                    }`}
-                />
+          {socialFields.map((field) => {
+            const isRawUrl = RAW_URL_FIELDS.includes(field);
+            return (
+              <div key={field}>
+                <label className="block text-xs font-medium text-slate-500 dark:text-slate-400">
+                  {SOCIAL_LABELS[field]}
+                </label>
+                <div className="relative mt-0.5">
+                  {!isRawUrl && (
+                    <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-sm text-slate-400 dark:text-slate-500">
+                      @
+                    </span>
+                  )}
+                  <input
+                    type="text"
+                    placeholder={isRawUrl ? "https://example.com" : "username"}
+                    value={socialLinks[field] ?? ""}
+                    onChange={(e) =>
+                      setSocialLinks((s) => ({ ...s, [field]: e.target.value || null }))
+                    }
+                    onBlur={() => !isRawUrl && handleSocialBlur(field as SocialUsernameField)}
+                    className={`w-full ${INPUT_CLASSES} ${isRawUrl ? "px-3" : "pl-7 pr-3"}`}
+                  />
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
 
@@ -338,6 +391,8 @@ export default function DirectoryEntryForm({
         </div>
       </div>
 
+      {extraFields}
+
       {submitError && <p className="text-sm text-red-600 dark:text-red-400">{submitError}</p>}
 
       <button
@@ -349,4 +404,6 @@ export default function DirectoryEntryForm({
       </button>
     </form>
   );
-}
+});
+
+export default DirectoryEntryForm;

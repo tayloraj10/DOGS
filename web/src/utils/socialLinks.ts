@@ -1,6 +1,6 @@
 import type { SocialLinks } from "../api/types";
 
-type SocialUsernameField = Exclude<keyof SocialLinks, "website">;
+type SocialUsernameField = Exclude<keyof SocialLinks, "website" | "app_store" | "google_play">;
 
 const PLATFORM_URL_PATTERNS: Record<SocialUsernameField, RegExp> = {
   instagram: /instagram\.com\/([A-Za-z0-9_.]+)/i,
@@ -8,6 +8,7 @@ const PLATFORM_URL_PATTERNS: Record<SocialUsernameField, RegExp> = {
   youtube: /youtube\.com\/(?:@|c\/|channel\/|user\/)?([A-Za-z0-9_.-]+)/i,
   facebook: /facebook\.com\/(?:pages\/)?([A-Za-z0-9_.-]+)/i,
   twitter: /(?:twitter|x)\.com\/([A-Za-z0-9_]+)/i,
+  github: /github\.com\/([A-Za-z0-9_-]+)/i,
 };
 
 const RESERVED_PATH_SEGMENTS = new Set([

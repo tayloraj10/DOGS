@@ -1,14 +1,15 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import DirectoryEntryForm from "../components/DirectoryEntryForm";
 import LoadingState from "../components/LoadingState";
-import { approveSuggestedCategory, getDirectoryEntry, getDirectoryEntryEditLink, updateDirectoryEntry } from "../api/directory";
-import type { DirectoryEntry, DirectoryEntryInput } from "../api/types";
+import type { DirectoryEntry, DirectoryEntryInput, Project } from "../api/types";
+import { configForKind, parseRouteId, toRouteId } from "../lib/entryKind";
 
 export default function ReviewEntryPage() {
-  const { id } = useParams<{ id: string }>();
+  const { id: routeId } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [entry, setEntry] = useState<DirectoryEntry | null>(null);
+  const { kind, id } = parseRouteId(routeId ?? "");
+  const config = configForKind(kind);
+  const [entry, setEntry] = useState<DirectoryEntry | Project | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
   const [copyState, setCopyState] = useState<"idle" | "copying" | "copied" | "error">("idle");
@@ -16,15 +17,18 @@ export default function ReviewEntryPage() {
 
   useEffect(() => {
     if (!id) return;
-    getDirectoryEntry(id)
+    setLoading(true);
+    setNotFound(false);
+    config.api
+      .get(id)
       .then(setEntry)
       .catch(() => setNotFound(true))
       .finally(() => setLoading(false));
-  }, [id]);
+  }, [id, config]);
 
   async function handleSubmit(values: DirectoryEntryInput) {
     if (!id) return;
-    await updateDirectoryEntry(id, { ...values, status: "published" });
+    await config.api.update(id, { ...values, status: "published" });
     navigate("/review");
   }
 
@@ -32,7 +36,7 @@ export default function ReviewEntryPage() {
     if (!id) return;
     setApprovingCategory(true);
     try {
-      const updated = await approveSuggestedCategory(id);
+      const updated = await config.api.approveSuggestedCategory(id);
       setEntry(updated);
     } finally {
       setApprovingCategory(false);
@@ -43,8 +47,8 @@ export default function ReviewEntryPage() {
     if (!id) return;
     setCopyState("copying");
     try {
-      const { token } = await getDirectoryEntryEditLink(id);
-      const url = `${window.location.origin}/entry/${id}/edit?token=${token}`;
+      const { token } = await config.api.getEditLink(id);
+      const url = `${window.location.origin}/entry/${toRouteId(kind, id)}/edit?token=${token}`;
       await navigator.clipboard.writeText(url);
       setCopyState("copied");
     } catch {
@@ -101,12 +105,13 @@ export default function ReviewEntryPage() {
       )}
 
       <div className="mt-6 rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800">
-        <DirectoryEntryForm
-          initialValues={entry}
-          onSubmit={handleSubmit}
-          submitLabel={entry.status === "pending" ? "Publish to directory" : "Save changes"}
-          showUrlExtract
-        />
+        {config.renderForm({
+          initialValues: entry,
+          onSubmit: handleSubmit,
+          submitLabel:
+            entry.status === "pending" ? `Publish to ${config.labels.navLabel}` : "Save changes",
+          showUrlExtract: true,
+        })}
       </div>
     </div>
   );

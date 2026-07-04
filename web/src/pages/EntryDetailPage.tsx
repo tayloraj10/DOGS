@@ -3,13 +3,15 @@ import { Link, useParams } from "react-router-dom";
 import EntryImage from "../components/EntryImage";
 import SocialIcon, { SOCIAL_FIELDS } from "../components/SocialIcon";
 import LoadingState from "../components/LoadingState";
-import { getDirectoryEntry } from "../api/directory";
-import type { DirectoryEntry } from "../api/types";
-import { slugToLabel } from "../api/types";
+import type { DirectoryEntry, Project } from "../api/types";
+import { PROJECT_STAGE_LABELS, slugToLabel } from "../api/types";
+import { configForKind, parseRouteId } from "../lib/entryKind";
 
 export default function EntryDetailPage() {
-  const { id } = useParams<{ id: string }>();
-  const [entry, setEntry] = useState<DirectoryEntry | null>(null);
+  const { id: routeId } = useParams<{ id: string }>();
+  const { kind, id } = parseRouteId(routeId ?? "");
+  const config = configForKind(kind);
+  const [entry, setEntry] = useState<DirectoryEntry | Project | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
 
@@ -17,21 +19,23 @@ export default function EntryDetailPage() {
     if (!id) return;
     setLoading(true);
     setNotFound(false);
-    getDirectoryEntry(id)
+    config.api
+      .get(id)
       .then(setEntry)
       .catch(() => setNotFound(true))
       .finally(() => setLoading(false));
-  }, [id]);
+  }, [id, config]);
 
   if (loading) return <LoadingState />;
   if (notFound || !entry) return <p className="text-sm text-slate-400 dark:text-slate-500">Entry not found.</p>;
 
   const activeSocialFields = SOCIAL_FIELDS.filter((field) => entry.social_links?.[field]);
+  const stage = "stage" in entry ? entry.stage : null;
 
   return (
     <div className="mx-auto max-w-2xl">
       <Link to="/" className="text-sm font-medium text-emerald-700 hover:text-emerald-900 dark:text-emerald-400 dark:hover:text-emerald-300">
-        ← Back to directory
+        ← Back to Directory of Good
       </Link>
 
       <div className="mt-4 overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800">
@@ -56,6 +60,12 @@ export default function EntryDetailPage() {
               </p>
             )}
           </div>
+
+          {stage && (
+            <span className="w-fit rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+              {PROJECT_STAGE_LABELS[stage]}
+            </span>
+          )}
 
           {entry.description && (
             <p className="text-sm text-slate-600 dark:text-slate-400">{entry.description}</p>
