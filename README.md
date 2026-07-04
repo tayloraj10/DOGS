@@ -141,6 +141,14 @@ Paste the output into [mermaid.live](https://mermaid.live) to render it.
 | POST | `/directory/extract` | Scrape a social/website link for a name, description, image, and social links |
 | POST | `/directory/photos` | Upload a photo file, returns its hosted URL |
 | POST | `/directory/photos/from-url` | Fetch an external image and re-host it, returns its hosted URL |
+| GET | `/projects` | List projects; filter with `?status=pending\|published`, `?category=<slug>`, `?stage=<stage>` |
+| GET | `/projects/{id}` | Get project |
+| POST | `/projects` | Create project |
+| PATCH | `/projects/{id}` | Update project |
+| DELETE | `/projects/{id}` | Delete project |
+| POST | `/projects/extract` | Scrape a project website for a name, description, image, and social links |
+| POST | `/projects/photos` | Upload a photo file, returns its hosted URL |
+| POST | `/projects/photos/from-url` | Fetch an external image and re-host it, returns its hosted URL |
 | GET | `/cleanups` | List cleanups |
 | GET | `/cleanups/{id}` | Get cleanup |
 | POST | `/cleanups` | Create cleanup |
