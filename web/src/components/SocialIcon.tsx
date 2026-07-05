@@ -45,9 +45,9 @@ const ICONS: Record<SocialField, { viewBox: string; content: ReactNode }> = {
     ),
   },
   app_store: {
-    viewBox: "0 0 24 24",
+    viewBox: "0 0 384 512",
     content: (
-      <path d="M16.5 2c.12 1.1-.32 2.15-.94 2.92-.66.8-1.76 1.44-2.8 1.36-.14-1.08.38-2.2 1-2.9.7-.8 1.87-1.38 2.74-1.38zm2.66 8.2c-.05 1.7.98 2.66 1.6 3.2-.32.9-.9 2.02-1.64 2.9-.62.75-1.26 1.5-2.26 1.52-.98.02-1.3-.58-2.42-.58-1.13 0-1.48.56-2.4.6-.96.03-1.7-.8-2.32-1.55-1.26-1.55-2.24-4.38-.93-6.3.65-.94 1.8-1.55 3.04-1.57.94-.02 1.83.63 2.4.63.58 0 1.66-.78 2.8-.66.48.02 1.83.2 2.7 1.5-.07.04-1.6.94-1.57 2.31zM7.5 4h2l-4 8h2.6l.85-2.3h3.1L12.9 12h2.6L11.5 4h-2l-1 2.7L7.5 4z" />
+      <path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76-19.7C63.3 141 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 52.9-13.4 69.5-34.3z" />
     ),
   },
   google_play: {
@@ -112,7 +112,7 @@ export default function SocialIcon({ field, href }: SocialIconProps) {
       rel="noreferrer"
       title={LABELS[field]}
       onClick={(e) => e.stopPropagation()}
-      className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-slate-600 transition-colors hover:bg-emerald-100 hover:text-emerald-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-emerald-900/40 dark:hover:text-emerald-400"
+      className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-600 transition-colors hover:bg-emerald-100 hover:text-emerald-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-emerald-900/40 dark:hover:text-emerald-400"
     >
       <svg viewBox={viewBox} fill="currentColor" className="h-4 w-4">
         {content}

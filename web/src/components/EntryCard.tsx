@@ -74,34 +74,30 @@ export default function EntryCard({ entry }: EntryCardProps) {
           <p className="line-clamp-3 text-sm text-slate-600 dark:text-slate-400">{entry.description}</p>
         )}
 
-        {entry.categories.length > 0 && (
-          <div className="flex flex-wrap gap-1.5">
-            {entry.categories.map((slug) => (
-              <span
-                key={slug}
-                className="rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-medium text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400"
-              >
-                {slugToLabel(slug)}
-              </span>
-            ))}
-          </div>
-        )}
-
-        <div className="mt-auto flex items-center justify-between gap-2 pt-2">
+        <div className="flex flex-wrap items-center gap-1.5">
           <span
-            className={`flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold ${KIND_ACCENT[entry.kind].active}`}
+            className={`flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold ${KIND_ACCENT[entry.kind].active}`}
           >
             <KindIcon kind={entry.kind} className="h-3 w-3" />
             {KIND_LABELS[entry.kind]}
           </span>
-          {activeSocialFields.length > 0 && (
-            <div className="flex gap-2">
-              {activeSocialFields.map((field) => (
-                <SocialIcon key={field} field={field} href={entry.social_links![field]!} />
-              ))}
-            </div>
-          )}
+          {entry.categories.map((slug) => (
+            <span
+              key={slug}
+              className="rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-medium text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400"
+            >
+              {slugToLabel(slug)}
+            </span>
+          ))}
         </div>
+
+        {activeSocialFields.length > 0 && (
+          <div className="mt-auto flex flex-wrap gap-2 pt-2">
+            {activeSocialFields.map((field) => (
+              <SocialIcon key={field} field={field} href={entry.social_links![field]!} />
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
