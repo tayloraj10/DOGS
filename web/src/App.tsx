@@ -43,7 +43,7 @@ function App() {
       }`}
     >
       <header className="flex-none border-b border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
-        <div className="mx-auto flex max-w-5xl items-center justify-between px-4 sm:px-6 py-3 sm:py-4">
+        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 sm:px-6 py-3 sm:py-4">
           <NavLink
             to="/"
             onClick={closeMenu}
@@ -106,7 +106,7 @@ function App() {
         className={
           isFullPage
             ? "flex-1 flex flex-col overflow-hidden min-h-0"
-            : "mx-auto max-w-5xl px-6 py-10"
+            : "mx-auto max-w-6xl px-6 py-10"
         }
       >
         <Routes>
