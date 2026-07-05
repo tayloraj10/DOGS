@@ -15,6 +15,15 @@ from app.schemas.directory import (
 from app.schemas.extract import DirectoryExtractRequest, DirectoryExtractResponse
 from app.schemas.location import Coordinates, SocialLinks, StructuredLocation
 from app.schemas.photo import DirectoryPhotoFromUrlRequest, DirectoryPhotoUploadResponse
+from app.schemas.project import (
+    LinkedDirectoryEntry,
+    Project,
+    ProjectCreate,
+    ProjectEditLink,
+    ProjectPublicUpdate,
+    ProjectStage,
+    ProjectUpdate,
+)
 from app.schemas.status import ActivityStatus
 from app.schemas.trash_report import (
     TrashReport,
@@ -42,6 +51,13 @@ __all__ = [
     "DirectoryExtractResponse",
     "DirectoryPhotoFromUrlRequest",
     "DirectoryPhotoUploadResponse",
+    "LinkedDirectoryEntry",
+    "Project",
+    "ProjectCreate",
+    "ProjectEditLink",
+    "ProjectPublicUpdate",
+    "ProjectStage",
+    "ProjectUpdate",
     "SocialLinks",
     "StructuredLocation",
     "TrashReport",

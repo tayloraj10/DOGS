@@ -71,6 +71,29 @@ class GCSStorage:
         bucket = self.client.bucket(self.bucket_name)
         return list(bucket.list_blobs(prefix=self._path("directory/")))
 
+    def upload_project_photo(
+        self,
+        file: BinaryIO,
+        filename: str,
+        content_type: str = "image/jpeg",
+    ) -> str:
+        try:
+            bucket = self.client.bucket(self.bucket_name)
+            ext = os.path.splitext(filename)[1].lower()
+            blob_name = self._path(f"projects/{uuid.uuid4()}{ext}")
+            blob = bucket.blob(blob_name)
+            blob.content_type = content_type
+            blob.cache_control = "public, max-age=31536000, immutable"
+            file.seek(0)
+            blob.upload_from_file(file, content_type=content_type)
+            return blob.public_url
+        except GoogleCloudError as e:
+            raise Exception(f"Failed to upload photo to GCS: {e}")
+
+    def list_project_photos(self):
+        bucket = self.client.bucket(self.bucket_name)
+        return list(bucket.list_blobs(prefix=self._path("projects/")))
+
     def delete_blob(self, blob_name: str) -> None:
         try:
             self.client.bucket(self.bucket_name).blob(blob_name).delete()

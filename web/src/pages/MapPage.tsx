@@ -2,13 +2,17 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { CircleMarker, MapContainer, Tooltip, TileLayer, useMap, useMapEvents } from "react-leaflet";
 import type { Map as LeafletMap } from "leaflet";
 import "leaflet/dist/leaflet.css";
-import { listDirectoryEntries } from "../api/directory";
 import { useCategories } from "../hooks/useCategories";
+import { useTypeFilter } from "../hooks/useTypeFilter";
 import LoadingState from "../components/LoadingState";
 import EntryModal from "../components/EntryModal";
 import CategoryGuideModal from "../components/CategoryGuideModal";
-import type { CategorySlug, DirectoryEntry } from "../api/types";
+import type { CategorySlug } from "../api/types";
 import { getCategoryColor } from "../api/types";
+import { directoryConfig, projectsConfig } from "../config/entityConfig";
+import { KIND_ACCENT, KIND_DESCRIPTIONS, KIND_LABELS, excludeLinkedDirectoryEntries, tagKind } from "../lib/entryKind";
+import type { EntryKind, MergedEntry } from "../lib/entryKind";
+import KindIcon from "../components/KindIcon";
 
 const US_CENTER: [number, number] = [39.5, -98.35];
 const US_ZOOM = window.innerWidth >= 640 ? 4 : 3;
@@ -78,20 +82,26 @@ function ControlBtn({
 
 export default function MapPage() {
   const { categories } = useCategories();
-  const [entries, setEntries] = useState<DirectoryEntry[]>([]);
+  const { selected: selectedKinds, toggle: toggleKind } = useTypeFilter();
+  const [entries, setEntries] = useState<MergedEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedCategories, setSelectedCategories] = useState<Set<CategorySlug>>(new Set());
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
   const [basemap, setBasemap] = useState<BasemapKey>("light");
   const [showBasemapMenu, setShowBasemapMenu] = useState(false);
   const [zoom, setZoom] = useState(US_ZOOM);
-  const [selectedEntry, setSelectedEntry] = useState<DirectoryEntry | null>(null);
+  const [selectedEntry, setSelectedEntry] = useState<MergedEntry | null>(null);
   const [showCategoryGuide, setShowCategoryGuide] = useState(false);
   const mapRef = useRef<LeafletMap | null>(null);
 
   useEffect(() => {
-    listDirectoryEntries("published", 500)
-      .then(setEntries)
+    Promise.all([
+      directoryConfig.api.list("published", 500),
+      projectsConfig.api.list("published", 500),
+    ])
+      .then(([directoryEntries, projects]) =>
+        setEntries([...tagKind(directoryEntries, "directory"), ...tagKind(projects, "project")]),
+      )
       .finally(() => setLoading(false));
   }, []);
 
@@ -106,8 +116,8 @@ export default function MapPage() {
   }, [showBasemapMenu]);
 
   const mappedEntries = useMemo(
-    () => entries.filter((e) => e.coordinates !== null),
-    [entries],
+    () => excludeLinkedDirectoryEntries(entries.filter((e) => e.coordinates !== null && selectedKinds.has(e.kind))),
+    [entries, selectedKinds],
   );
 
   const categoriesWithEntries = useMemo(() => {
@@ -160,54 +170,74 @@ export default function MapPage() {
   return (
     <div className="flex-1 relative min-h-0">
       {/* Category filter bar */}
-      <div className="absolute top-3 left-1/2 -translate-x-1/2 z-[1000] flex items-center gap-1.5 bg-black/55 backdrop-blur-md rounded-full px-3 pt-2 pb-1.5 overflow-x-auto [&::-webkit-scrollbar]:h-1 [&::-webkit-scrollbar]:block [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-white/60 [&::-webkit-scrollbar-track]:bg-white/10 [&::-webkit-scrollbar-track]:rounded-full" style={{ maxWidth: "calc(100vw - 120px)" }}>
-        <button
-          type="button"
-          onClick={() => setSelectedCategories(new Set())}
-          className={`rounded-full px-3 py-1 text-xs font-semibold whitespace-nowrap transition-all ${
-            selectedCategories.size === 0
-              ? "bg-white text-slate-900 shadow"
-              : "text-white/70 hover:text-white"
-          }`}
-        >
-          All
-        </button>
-        <button
-          type="button"
-          onClick={() => setShowCategoryGuide(true)}
-          title="Category guide"
-          className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full text-white/60 hover:text-white hover:bg-white/10 transition-colors"
-        >
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="h-3.5 w-3.5">
-            <circle cx="12" cy="12" r="10" />
-            <path d="M12 16v-4M12 8h.01" />
-          </svg>
-        </button>
-        <div className="w-px h-4 bg-white/20 flex-shrink-0" />
-        {categoriesWithEntries.map((cat) => {
-          const color = getCategoryColor(cat.slug);
-          const isActive = selectedCategories.has(cat.slug);
-          return (
+      <div className="absolute top-3 left-1/2 -translate-x-1/2 z-[1000] flex flex-col sm:flex-row sm:items-center gap-1.5 bg-black/55 backdrop-blur-md rounded-2xl sm:rounded-full px-3 pt-2 pb-1.5" style={{ maxWidth: "calc(100vw - 120px)" }}>
+        <div className="flex items-center justify-center gap-1.5">
+          {(["directory", "project"] as EntryKind[]).map((kind) => (
             <button
-              key={cat.id}
+              key={kind}
               type="button"
-              onClick={() =>
-                setSelectedCategories((prev) => {
-                  const next = new Set(prev);
-                  if (next.has(cat.slug)) next.delete(cat.slug);
-                  else next.add(cat.slug);
-                  return next;
-                })
-              }
-              style={isActive ? { backgroundColor: color, color: "white" } : { color, borderColor: color }}
-              className={`rounded-full px-3 py-1 text-xs font-semibold whitespace-nowrap border transition-all ${
-                isActive ? "shadow" : "bg-transparent border-current hover:bg-white/10"
+              title={KIND_DESCRIPTIONS[kind]}
+              onClick={() => toggleKind(kind)}
+              className={`flex items-center gap-1 rounded-full px-3 py-1 text-xs font-semibold whitespace-nowrap transition-all ${
+                selectedKinds.has(kind) ? `${KIND_ACCENT[kind].active} shadow` : KIND_ACCENT[kind].inactive
               }`}
             >
-              {cat.name}
+              <KindIcon kind={kind} className="h-3.5 w-3.5" />
+              {KIND_LABELS[kind]}
             </button>
-          );
-        })}
+          ))}
+        </div>
+        <div className="hidden sm:block w-px h-4 bg-white/20 flex-shrink-0" />
+        <div className="sm:hidden h-px w-full bg-white/20" />
+        <div className="flex min-w-0 items-center gap-1.5 overflow-x-auto [&::-webkit-scrollbar]:h-1 [&::-webkit-scrollbar]:block [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-white/60 [&::-webkit-scrollbar-track]:bg-white/10 [&::-webkit-scrollbar-track]:rounded-full">
+          <button
+            type="button"
+            onClick={() => setSelectedCategories(new Set())}
+            className={`rounded-full px-3 py-1 text-xs font-semibold whitespace-nowrap transition-all ${
+              selectedCategories.size === 0
+                ? "bg-white text-slate-900 shadow"
+                : "text-white/70 hover:text-white"
+            }`}
+          >
+            All
+          </button>
+          <button
+            type="button"
+            onClick={() => setShowCategoryGuide(true)}
+            title="Category guide"
+            className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full text-white/60 hover:text-white hover:bg-white/10 transition-colors"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="h-3.5 w-3.5">
+              <circle cx="12" cy="12" r="10" />
+              <path d="M12 16v-4M12 8h.01" />
+            </svg>
+          </button>
+          <div className="w-px h-4 bg-white/20 flex-shrink-0" />
+          {categoriesWithEntries.map((cat) => {
+            const color = getCategoryColor(cat.slug);
+            const isActive = selectedCategories.has(cat.slug);
+            return (
+              <button
+                key={cat.id}
+                type="button"
+                onClick={() =>
+                  setSelectedCategories((prev) => {
+                    const next = new Set(prev);
+                    if (next.has(cat.slug)) next.delete(cat.slug);
+                    else next.add(cat.slug);
+                    return next;
+                  })
+                }
+                style={isActive ? { backgroundColor: color, color: "white" } : { color, borderColor: color }}
+                className={`rounded-full px-3 py-1 text-xs font-semibold whitespace-nowrap border transition-all ${
+                  isActive ? "shadow" : "bg-transparent border-current hover:bg-white/10"
+                }`}
+              >
+                {cat.name}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {/* Right-side controls */}
@@ -352,7 +382,7 @@ export default function MapPage() {
           const color = getCategoryColor(entry.categories[0]);
           return (
             <CircleMarker
-              key={entry.id}
+              key={`${entry.kind}-${entry.id}`}
               center={[entry.coordinates!.latitude, entry.coordinates!.longitude]}
               radius={8}
               pathOptions={{ color, fillColor: color, fillOpacity: 0.9, weight: 2 }}

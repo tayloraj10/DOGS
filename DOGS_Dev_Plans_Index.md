@@ -92,6 +92,23 @@ Overview of all implementation phases. Each phase has a dedicated dev plan with 
 
 ---
 
+## Parallel initiatives
+
+Not part of the numbered phase sequence — can proceed independently.
+
+### Projects Directory
+
+**[DOGS_Projects_Directory_Dev_Plan.md](./DOGS_Projects_Directory_Dev_Plan.md)**
+
+- New `projects` entity: social-good/civic-tech projects (mainly websites) happening in the world
+- Reuses the DOG capture → review → showcase pipeline; shares the `categories` table
+- Links projects back to their originating Directory of Good entry (org/person/group)
+- Frontend pages generalized to a config-driven shape so one page set renders either directory
+
+**Exit criteria:** `/projects` mirrors the DOG showcase/map/network/submit/capture/review flow with zero regressions to existing DOG routes.
+
+---
+
 ## Dependency graph
 
 ```mermaid

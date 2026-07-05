@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import type { SocialLinks } from "../api/types";
 
-type SocialField = keyof SocialLinks;
+export type SocialField = keyof SocialLinks;
 
 const ICONS: Record<SocialField, { viewBox: string; content: ReactNode }> = {
   website: {
@@ -44,6 +44,24 @@ const ICONS: Record<SocialField, { viewBox: string; content: ReactNode }> = {
       <path d="M21 5.3a7.7 7.7 0 01-2.2.9 3.7 3.7 0 00-6.4 2.5v.9A8.8 8.8 0 014 6.6s-2 4.5 2.5 7a4 4 0 01-2.5.2c0 2 1.8 3.8 4 4a8.9 8.9 0 01-5 1.4A12.4 12.4 0 0010 21c8.4 0 11.6-7.3 11.3-12.4A7.8 7.8 0 0021 5.3z" />
     ),
   },
+  app_store: {
+    viewBox: "0 0 24 24",
+    content: (
+      <path d="M16.5 2c.12 1.1-.32 2.15-.94 2.92-.66.8-1.76 1.44-2.8 1.36-.14-1.08.38-2.2 1-2.9.7-.8 1.87-1.38 2.74-1.38zm2.66 8.2c-.05 1.7.98 2.66 1.6 3.2-.32.9-.9 2.02-1.64 2.9-.62.75-1.26 1.5-2.26 1.52-.98.02-1.3-.58-2.42-.58-1.13 0-1.48.56-2.4.6-.96.03-1.7-.8-2.32-1.55-1.26-1.55-2.24-4.38-.93-6.3.65-.94 1.8-1.55 3.04-1.57.94-.02 1.83.63 2.4.63.58 0 1.66-.78 2.8-.66.48.02 1.83.2 2.7 1.5-.07.04-1.6.94-1.57 2.31zM7.5 4h2l-4 8h2.6l.85-2.3h3.1L12.9 12h2.6L11.5 4h-2l-1 2.7L7.5 4z" />
+    ),
+  },
+  google_play: {
+    viewBox: "0 0 24 24",
+    content: (
+      <path d="M4.5 3.5c-.3.3-.5.75-.5 1.3v14.4c0 .55.2 1 .5 1.3l.1.1L13 12.4v-.2L4.6 3.4l-.1.1zM16 15.4l-2.5-2.5v-.2L16 10.2l3.4 2c.9.5.9 1.6 0 2.1l-3.4 2zm-11.4 4.9L13 12.6l2 2-9.5 5.4c-.3.2-.6.2-.9.3zm0-16.6l9.4 5.3-2 2-8.6-5.3c.3 0 .6.1.9.3l.3.1z" />
+    ),
+  },
+  github: {
+    viewBox: "0 0 24 24",
+    content: (
+      <path d="M12 2a10 10 0 00-3.16 19.5c.5.1.68-.22.68-.48v-1.7c-2.78.6-3.37-1.34-3.37-1.34-.46-1.15-1.11-1.46-1.11-1.46-.9-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.9 1.53 2.34 1.1 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.56-1.11-4.56-4.94 0-1.1.39-1.99 1.03-2.7-.1-.25-.45-1.27.1-2.65 0 0 .84-.27 2.75 1.02a9.6 9.6 0 015 0c1.9-1.29 2.74-1.02 2.74-1.02.55 1.38.2 2.4.1 2.65.64.71 1.03 1.6 1.03 2.7 0 3.84-2.34 4.68-4.57 4.93.36.31.68.92.68 1.85v2.74c0 .27.18.58.69.48A10 10 0 0012 2z" />
+    ),
+  },
 };
 
 const LABELS: Record<SocialField, string> = {
@@ -53,14 +71,23 @@ const LABELS: Record<SocialField, string> = {
   youtube: "YouTube",
   facebook: "Facebook",
   twitter: "X / Twitter",
+  app_store: "App Store",
+  google_play: "Google Play",
+  github: "GitHub",
 };
 
-const PROFILE_URL_BUILDERS: Record<Exclude<SocialField, "website">, (username: string) => string> = {
+export const RAW_URL_FIELDS: SocialField[] = ["website", "app_store", "google_play"];
+
+const PROFILE_URL_BUILDERS: Record<
+  Exclude<SocialField, "website" | "app_store" | "google_play">,
+  (username: string) => string
+> = {
   instagram: (username) => `https://instagram.com/${username}`,
   tiktok: (username) => `https://tiktok.com/@${username}`,
   youtube: (username) => `https://youtube.com/@${username}`,
   facebook: (username) => `https://facebook.com/${username}`,
   twitter: (username) => `https://x.com/${username}`,
+  github: (username) => `https://github.com/${username}`,
 };
 
 interface SocialIconProps {
@@ -72,10 +99,10 @@ export default function SocialIcon({ field, href }: SocialIconProps) {
   let url: string;
   if (href.startsWith("http")) {
     url = href;
-  } else if (field === "website") {
+  } else if (RAW_URL_FIELDS.includes(field)) {
     url = `https://${href}`;
   } else {
-    url = PROFILE_URL_BUILDERS[field](href);
+    url = PROFILE_URL_BUILDERS[field as keyof typeof PROFILE_URL_BUILDERS](href);
   }
   const { viewBox, content } = ICONS[field];
   return (
@@ -94,7 +121,23 @@ export default function SocialIcon({ field, href }: SocialIconProps) {
   );
 }
 
+// Full field list — used wherever we just display whichever links happen to be present
+// (falsy fields are filtered out), so it's safe to share across entities.
 export const SOCIAL_FIELDS: SocialField[] = [
+  "website",
+  "instagram",
+  "tiktok",
+  "youtube",
+  "facebook",
+  "twitter",
+  "app_store",
+  "google_play",
+  "github",
+];
+
+// The subset the Directory of Good's own capture/edit form collects. Projects collect the
+// full SOCIAL_FIELDS list via ProjectForm.
+export const CORE_SOCIAL_FIELDS: SocialField[] = [
   "website",
   "instagram",
   "tiktok",

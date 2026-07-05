@@ -4,7 +4,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.openapi_extra import build_openapi_schema
-from app.routes import admin, categories, cleanups, directory, erd, health, trash_reports
+from app.routes import admin, categories, cleanups, directory, erd, health, projects, trash_reports
 
 
 @asynccontextmanager
@@ -30,6 +30,7 @@ app.add_middleware(
 app.include_router(health.router)
 app.include_router(categories.router)
 app.include_router(directory.router)
+app.include_router(projects.router)
 app.include_router(cleanups.router)
 app.include_router(trash_reports.router)
 app.include_router(admin.router)

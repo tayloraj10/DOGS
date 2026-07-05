@@ -1,12 +1,16 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { listDirectoryEntries } from "../api/directory";
 import { useCategories } from "../hooks/useCategories";
+import { useTypeFilter } from "../hooks/useTypeFilter";
 import CategoryFilterBar from "../components/CategoryFilterBar";
 import CategoryGuideModal from "../components/CategoryGuideModal";
+import TypeFilterBar from "../components/TypeFilterBar";
 import EntryCard from "../components/EntryCard";
 import LoadingState from "../components/LoadingState";
-import type { CategorySlug, DirectoryEntry } from "../api/types";
+import type { CategorySlug, Project } from "../api/types";
+import { directoryConfig, projectsConfig } from "../config/entityConfig";
+import { entryHref, excludeLinkedDirectoryEntries, tagKind } from "../lib/entryKind";
+import type { MergedEntry } from "../lib/entryKind";
 
 type SortOption = "newest" | "name" | "random";
 type LocationField = "city" | "state" | "country";
@@ -27,7 +31,7 @@ function shuffle<T>(items: T[]): T[] {
   return shuffled;
 }
 
-function sortEntries(entries: DirectoryEntry[], sort: SortOption): DirectoryEntry[] {
+function sortEntries(entries: MergedEntry[], sort: SortOption): MergedEntry[] {
   if (sort === "random") {
     return entries;
   }
@@ -43,7 +47,8 @@ function sortEntries(entries: DirectoryEntry[], sort: SortOption): DirectoryEntr
 export default function ShowcasePage() {
   const navigate = useNavigate();
   const { categories } = useCategories();
-  const [entries, setEntries] = useState<DirectoryEntry[]>([]);
+  const { selected: selectedKinds, toggle: toggleKind } = useTypeFilter();
+  const [entries, setEntries] = useState<MergedEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState<CategorySlug | null>(null);
   const [showCategoryGuide, setShowCategoryGuide] = useState(false);
@@ -54,8 +59,15 @@ export default function ShowcasePage() {
   const locationMenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    listDirectoryEntries("published", 500)
-      .then((data) => setEntries(shuffle(data)))
+    Promise.all([
+      directoryConfig.api.list("published", 500),
+      projectsConfig.api.list("published", 500),
+    ])
+      .then(([directoryEntries, rawProjects]) => {
+        const projects = rawProjects as Project[];
+        const combined = [...tagKind(directoryEntries, "directory"), ...tagKind(projects, "project")];
+        setEntries(shuffle(excludeLinkedDirectoryEntries(combined)));
+      })
       .finally(() => setLoading(false));
   }, []);
 
@@ -94,7 +106,7 @@ export default function ShowcasePage() {
   const activeLocationFilterCount = Object.values(locationFilters).filter(Boolean).length;
 
   const visibleEntries = useMemo(() => {
-    let result = entries;
+    let result = entries.filter((entry) => selectedKinds.has(entry.kind));
     if (selectedCategory) {
       result = result.filter((entry) => entry.categories.includes(selectedCategory));
     }
@@ -110,12 +122,12 @@ export default function ShowcasePage() {
       );
     }
     return sortEntries(result, sort);
-  }, [entries, selectedCategory, locationFilters, search, sort]);
+  }, [entries, selectedKinds, selectedCategory, locationFilters, search, sort]);
 
   function handleRandom() {
     if (visibleEntries.length === 0) return;
     const entry = visibleEntries[Math.floor(Math.random() * visibleEntries.length)];
-    navigate(`/entry/${entry.id}`);
+    navigate(entryHref(entry.kind, entry.id, entry.name));
   }
 
   return (
@@ -125,11 +137,15 @@ export default function ShowcasePage() {
           The Directory of Good
         </h1>
         <p className="mx-auto mt-3 max-w-xl text-slate-600 dark:text-slate-400">
-          A growing collection of people and groups taking action for the good of the world
+          A growing collection of people, groups, and projects taking action for the good of the world
         </p>
       </div>
 
       <div className="mt-8 flex justify-center">
+        <TypeFilterBar selected={selectedKinds} onToggle={toggleKind} />
+      </div>
+
+      <div className="mt-4 flex justify-center">
         <CategoryFilterBar
           categories={categories}
           selected={selectedCategory}
@@ -237,7 +253,7 @@ export default function ShowcasePage() {
 
       {!loading && (
         <p className="mt-6 text-center text-sm text-slate-500 dark:text-slate-400">
-          {visibleEntries.length} {visibleEntries.length === 1 ? "entry" : "entries"}
+          {visibleEntries.length} {visibleEntries.length === 1 ? "result" : "results"}
           {selectedCategory ? " in this category" : ""}
           {locationFilters.state ? ` in ${locationFilters.state}` : ""}
           {locationFilters.city ? ` in ${locationFilters.city}` : ""}
@@ -257,7 +273,7 @@ export default function ShowcasePage() {
 
       <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {visibleEntries.map((entry) => (
-          <EntryCard key={entry.id} entry={entry} />
+          <EntryCard key={`${entry.kind}-${entry.id}`} entry={entry} />
         ))}
       </div>
     </div>

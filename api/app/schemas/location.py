@@ -236,6 +236,15 @@ class Coordinates(BaseModel):
     longitude: float
 
 
+def validate_location(location: StructuredLocation | None) -> StructuredLocation | None:
+    if location and is_us_country(location.country):
+        if location.state:
+            location.state = validate_us_state(location.state)
+        if location.zip_code:
+            location.zip_code = validate_us_zip(location.zip_code)
+    return location
+
+
 class SocialLinks(BaseModel):
     website: str | None = None
     instagram: str | None = None
@@ -243,6 +252,9 @@ class SocialLinks(BaseModel):
     youtube: str | None = None
     facebook: str | None = None
     twitter: str | None = None
+    app_store: str | None = None
+    google_play: str | None = None
+    github: str | None = None
 
     model_config = ConfigDict(extra="ignore")
 
@@ -253,6 +265,9 @@ class SocialLinks(BaseModel):
         "youtube",
         "facebook",
         "twitter",
+        "app_store",
+        "google_play",
+        "github",
         mode="before",
     )
     @classmethod
@@ -262,6 +277,7 @@ class SocialLinks(BaseModel):
         cleaned = _clean_social_value(str(value))
         if cleaned is None:
             return None
-        if info.field_name == "website":
+        # These are stored as full URLs, not handles — no username to extract.
+        if info.field_name in ("website", "app_store", "google_play", "github"):
             return cleaned
         return _extract_username_from_url(info.field_name, cleaned)

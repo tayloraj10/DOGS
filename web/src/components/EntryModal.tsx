@@ -1,10 +1,12 @@
 import { useNavigate } from "react-router-dom";
 import SocialIcon, { SOCIAL_FIELDS } from "./SocialIcon";
-import type { DirectoryEntry } from "../api/types";
-import { getCategoryColor, slugToLabel } from "../api/types";
+import type { DirectoryEntry, ProjectStage } from "../api/types";
+import { PROJECT_STAGE_LABELS, getCategoryColor, slugToLabel } from "../api/types";
+import { entryHref } from "../lib/entryKind";
+import type { EntryKind } from "../lib/entryKind";
 
 interface EntryModalProps {
-  entry: DirectoryEntry | null;
+  entry: (DirectoryEntry & { stage?: ProjectStage | null; kind: EntryKind }) | null;
   onClose: () => void;
 }
 
@@ -74,6 +76,12 @@ export default function EntryModal({ entry, onClose }: EntryModalProps) {
             )}
           </div>
 
+          {entry.stage && (
+            <span className="w-fit rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+              {PROJECT_STAGE_LABELS[entry.stage]}
+            </span>
+          )}
+
           {entry.description && (
             <p className="text-sm leading-relaxed text-slate-600 dark:text-slate-400 line-clamp-3">
               {entry.description}
@@ -103,7 +111,7 @@ export default function EntryModal({ entry, onClose }: EntryModalProps) {
           )}
 
           <button
-            onClick={() => navigate(`/entry/${entry.id}`)}
+            onClick={() => navigate(entryHref(entry.kind, entry.id, entry.name))}
             className="mt-1 w-full rounded-xl py-2.5 text-sm font-semibold text-white hover:opacity-90 transition-opacity"
             style={{ backgroundColor: color }}
           >

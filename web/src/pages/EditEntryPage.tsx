@@ -1,31 +1,33 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
-import DirectoryEntryForm from "../components/DirectoryEntryForm";
 import LoadingState from "../components/LoadingState";
-import { getDirectoryEntry, updateDirectoryEntryPublic } from "../api/directory";
-import type { DirectoryEntry, DirectoryEntryInput } from "../api/types";
+import type { DirectoryEntry, DirectoryEntryInput, Project } from "../api/types";
+import { configForKind, entryHref, parseRouteId } from "../lib/entryKind";
 
 export default function EditEntryPage() {
-  const { id } = useParams<{ id: string }>();
+  const { id: routeId } = useParams<{ id: string }>();
+  const { kind, id } = parseRouteId(routeId ?? "");
+  const config = configForKind(kind);
   const [searchParams] = useSearchParams();
   const token = searchParams.get("token");
   const navigate = useNavigate();
-  const [entry, setEntry] = useState<DirectoryEntry | null>(null);
+  const [entry, setEntry] = useState<DirectoryEntry | Project | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
 
   useEffect(() => {
     if (!id) return;
-    getDirectoryEntry(id)
+    config.api
+      .get(id)
       .then(setEntry)
       .catch(() => setNotFound(true))
       .finally(() => setLoading(false));
-  }, [id]);
+  }, [id, config]);
 
   async function handleSubmit(values: DirectoryEntryInput) {
     if (!id || !token) return;
-    await updateDirectoryEntryPublic(id, token, values);
-    navigate(`/entry/${id}`);
+    await config.api.updatePublic(id, token, values);
+    navigate(entryHref(kind, id, values.name));
   }
 
   if (!id || !token) {
@@ -49,11 +51,11 @@ export default function EditEntryPage() {
       <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">Update the details for {entry.name}.</p>
 
       <div className="mt-6 rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800">
-        <DirectoryEntryForm
-          initialValues={entry}
-          onSubmit={handleSubmit}
-          submitLabel="Save changes"
-        />
+        {config.renderForm({
+          initialValues: entry,
+          onSubmit: handleSubmit,
+          submitLabel: "Save changes",
+        })}
       </div>
     </div>
   );

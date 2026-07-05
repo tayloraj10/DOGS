@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
-import { listDirectoryEntries, listEntriesNeedingPhoto } from "../api/directory";
+import { directoryConfig, projectsConfig } from "../config/entityConfig";
 
 const linkClasses = ({ isActive }: { isActive: boolean }) =>
   isActive
@@ -12,13 +12,20 @@ export default function ReviewNav() {
   const [needsPhotoCount, setNeedsPhotoCount] = useState<number | null>(null);
 
   useEffect(() => {
-    listDirectoryEntries("pending", 500).then((entries) => setPendingCount(entries.length));
-    listEntriesNeedingPhoto().then((entries) => setNeedsPhotoCount(entries.length));
+    Promise.all([
+      directoryConfig.api.list("pending", 500),
+      projectsConfig.api.list("pending", 500),
+    ]).then(([directoryEntries, projects]) => setPendingCount(directoryEntries.length + projects.length));
+
+    Promise.all([
+      directoryConfig.api.listNeedingPhoto(),
+      projectsConfig.api.listNeedingPhoto(),
+    ]).then(([directoryEntries, projects]) => setNeedsPhotoCount(directoryEntries.length + projects.length));
   }, []);
 
   return (
     <div className="mt-4 flex gap-4 text-sm font-medium">
-      <NavLink to="/review" className={linkClasses}>
+      <NavLink to="/review" end className={linkClasses}>
         Pending review{pendingCount !== null && ` (${pendingCount})`}
       </NavLink>
       <NavLink to="/review/all" className={linkClasses}>

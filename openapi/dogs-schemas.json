@@ -48,6 +48,128 @@
             }
           }
         }
+      },
+      "post": {
+        "tags": [
+          "categories"
+        ],
+        "summary": "Create Category",
+        "operationId": "create_category_categories_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CategoryCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Category"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/directory/photos": {
+      "post": {
+        "tags": [
+          "directory"
+        ],
+        "summary": "Upload Directory Photo",
+        "operationId": "upload_directory_photo_directory_photos_post",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_upload_directory_photo_directory_photos_post"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DirectoryPhotoUploadResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/directory/photos/from-url": {
+      "post": {
+        "tags": [
+          "directory"
+        ],
+        "summary": "Fetch And Upload Directory Photo",
+        "description": "Fetch an image from an external URL (e.g. a scraped og:image) and re-host it in our\nown bucket, since externally-hosted photo URLs are prone to breaking or disappearing.",
+        "operationId": "fetch_and_upload_directory_photo_directory_photos_from_url_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DirectoryPhotoFromUrlRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DirectoryPhotoUploadResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/directory": {
@@ -64,7 +186,7 @@
             "required": false,
             "schema": {
               "type": "integer",
-              "maximum": 200,
+              "maximum": 500,
               "minimum": 1,
               "default": 50,
               "title": "Limit"
@@ -88,13 +210,39 @@
             "schema": {
               "anyOf": [
                 {
-                  "$ref": "#/components/schemas/CategorySlug"
+                  "type": "string"
                 },
                 {
                   "type": "null"
                 }
               ],
               "title": "Category"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/DirectoryEntryStatus"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          },
+          {
+            "name": "needs_photo",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false,
+              "title": "Needs Photo"
             }
           }
         ],
@@ -148,6 +296,89 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/DirectoryEntry"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/directory/extract": {
+      "post": {
+        "tags": [
+          "directory"
+        ],
+        "summary": "Extract Directory Entry",
+        "operationId": "extract_directory_entry_directory_extract_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DirectoryExtractRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DirectoryExtractResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/directory/location/lookup": {
+      "post": {
+        "tags": [
+          "directory"
+        ],
+        "summary": "Lookup Directory Location",
+        "description": "Fill in missing location fields (city/state/zip/country) from whatever's already\nentered, using the Geocoding API. Never overwrites fields the caller already filled in.",
+        "operationId": "lookup_directory_location_directory_location_lookup_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StructuredLocation"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StructuredLocation"
                 }
               }
             }
@@ -293,6 +524,1171 @@
         }
       }
     },
+    "/directory/{entry_id}/edit-link": {
+      "get": {
+        "tags": [
+          "directory"
+        ],
+        "summary": "Get Directory Entry Edit Link",
+        "description": "Returns the secret token for a self-service edit link. Not linked from any public\npage; only meant to be called from admin/review tooling to hand out to an entry's owner.",
+        "operationId": "get_directory_entry_edit_link_directory__entry_id__edit_link_get",
+        "parameters": [
+          {
+            "name": "entry_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Entry Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DirectoryEntryEditLink"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/directory/{entry_id}/public": {
+      "patch": {
+        "tags": [
+          "directory"
+        ],
+        "summary": "Update Directory Entry Public",
+        "description": "Self-service update for an entry's owner, gated by the secret edit-link token\n(handed out via GET /{entry_id}/edit-link). Only allows a safe subset of fields \u2014\nstatus, featured, and user_ids stay admin-only.",
+        "operationId": "update_directory_entry_public_directory__entry_id__public_patch",
+        "parameters": [
+          {
+            "name": "entry_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Entry Id"
+            }
+          },
+          {
+            "name": "token",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DirectoryEntryPublicUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DirectoryEntry"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/directory/{entry_id}/approve-suggested-category": {
+      "post": {
+        "tags": [
+          "directory"
+        ],
+        "summary": "Approve Suggested Category Endpoint",
+        "description": "Create a category from the entry's suggested_category, assign it, and clear the field.",
+        "operationId": "approve_suggested_category_endpoint_directory__entry_id__approve_suggested_category_post",
+        "parameters": [
+          {
+            "name": "entry_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Entry Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DirectoryEntry"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/projects/photos": {
+      "post": {
+        "tags": [
+          "projects"
+        ],
+        "summary": "Upload Project Photo",
+        "operationId": "upload_project_photo_projects_photos_post",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_upload_project_photo_projects_photos_post"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DirectoryPhotoUploadResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/projects/photos/from-url": {
+      "post": {
+        "tags": [
+          "projects"
+        ],
+        "summary": "Fetch And Upload Project Photo",
+        "description": "Fetch an image from an external URL (e.g. a scraped og:image) and re-host it in our\nown bucket, since externally-hosted photo URLs are prone to breaking or disappearing.",
+        "operationId": "fetch_and_upload_project_photo_projects_photos_from_url_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DirectoryPhotoFromUrlRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DirectoryPhotoUploadResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/projects": {
+      "get": {
+        "tags": [
+          "projects"
+        ],
+        "summary": "List Projects Endpoint",
+        "operationId": "list_projects_endpoint_projects_get",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 500,
+              "minimum": 1,
+              "default": 50,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0,
+              "title": "Offset"
+            }
+          },
+          {
+            "name": "category",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Category"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/DirectoryEntryStatus"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          },
+          {
+            "name": "stage",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/ProjectStage"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Stage"
+            }
+          },
+          {
+            "name": "needs_photo",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false,
+              "title": "Needs Photo"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Project"
+                  },
+                  "title": "Response List Projects Endpoint Projects Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "projects"
+        ],
+        "summary": "Create Project",
+        "operationId": "create_project_projects_post",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProjectCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Project"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/projects/extract": {
+      "post": {
+        "tags": [
+          "projects"
+        ],
+        "summary": "Extract Project",
+        "operationId": "extract_project_projects_extract_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DirectoryExtractRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DirectoryExtractResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/projects/{project_id}": {
+      "get": {
+        "tags": [
+          "projects"
+        ],
+        "summary": "Get Project Endpoint",
+        "operationId": "get_project_endpoint_projects__project_id__get",
+        "parameters": [
+          {
+            "name": "project_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Project Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Project"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "projects"
+        ],
+        "summary": "Update Project",
+        "operationId": "update_project_projects__project_id__patch",
+        "parameters": [
+          {
+            "name": "project_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Project Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProjectUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Project"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "projects"
+        ],
+        "summary": "Delete Project",
+        "operationId": "delete_project_projects__project_id__delete",
+        "parameters": [
+          {
+            "name": "project_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Project Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/projects/{project_id}/edit-link": {
+      "get": {
+        "tags": [
+          "projects"
+        ],
+        "summary": "Get Project Edit Link",
+        "description": "Returns the secret token for a self-service edit link. Not linked from any public\npage; only meant to be called from admin/review tooling to hand out to a project's owner.",
+        "operationId": "get_project_edit_link_projects__project_id__edit_link_get",
+        "parameters": [
+          {
+            "name": "project_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Project Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProjectEditLink"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/projects/{project_id}/public": {
+      "patch": {
+        "tags": [
+          "projects"
+        ],
+        "summary": "Update Project Public",
+        "description": "Self-service update for a project's owner, gated by the secret edit-link token\n(handed out via GET /{project_id}/edit-link). Only allows a safe subset of fields \u2014\nstatus, featured, and user_ids stay admin-only.",
+        "operationId": "update_project_public_projects__project_id__public_patch",
+        "parameters": [
+          {
+            "name": "project_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Project Id"
+            }
+          },
+          {
+            "name": "token",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProjectPublicUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Project"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/projects/{project_id}/approve-suggested-category": {
+      "post": {
+        "tags": [
+          "projects"
+        ],
+        "summary": "Approve Suggested Category Endpoint",
+        "description": "Create a category from the project's suggested_category, assign it, and clear the field.",
+        "operationId": "approve_suggested_category_endpoint_projects__project_id__approve_suggested_category_post",
+        "parameters": [
+          {
+            "name": "project_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Project Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Project"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/cleanups": {
+      "get": {
+        "tags": [
+          "cleanups"
+        ],
+        "summary": "List Cleanups",
+        "operationId": "list_cleanups_cleanups_get",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 200,
+              "minimum": 1,
+              "default": 50,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0,
+              "title": "Offset"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Cleanup"
+                  },
+                  "title": "Response List Cleanups Cleanups Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "cleanups"
+        ],
+        "summary": "Create Cleanup",
+        "operationId": "create_cleanup_cleanups_post",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CleanupCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Cleanup"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/cleanups/{entry_id}": {
+      "get": {
+        "tags": [
+          "cleanups"
+        ],
+        "summary": "Get Cleanup",
+        "operationId": "get_cleanup_cleanups__entry_id__get",
+        "parameters": [
+          {
+            "name": "entry_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Entry Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Cleanup"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "cleanups"
+        ],
+        "summary": "Update Cleanup",
+        "operationId": "update_cleanup_cleanups__entry_id__patch",
+        "parameters": [
+          {
+            "name": "entry_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Entry Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CleanupUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Cleanup"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "cleanups"
+        ],
+        "summary": "Delete Cleanup",
+        "operationId": "delete_cleanup_cleanups__entry_id__delete",
+        "parameters": [
+          {
+            "name": "entry_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Entry Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trash-reports": {
+      "get": {
+        "tags": [
+          "trash-reports"
+        ],
+        "summary": "List Trash Reports",
+        "operationId": "list_trash_reports_trash_reports_get",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 200,
+              "minimum": 1,
+              "default": 50,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0,
+              "title": "Offset"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TrashReport"
+                  },
+                  "title": "Response List Trash Reports Trash Reports Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "trash-reports"
+        ],
+        "summary": "Create Trash Report",
+        "operationId": "create_trash_report_trash_reports_post",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TrashReportCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TrashReport"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trash-reports/{entry_id}": {
+      "get": {
+        "tags": [
+          "trash-reports"
+        ],
+        "summary": "Get Trash Report",
+        "operationId": "get_trash_report_trash_reports__entry_id__get",
+        "parameters": [
+          {
+            "name": "entry_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Entry Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TrashReport"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "trash-reports"
+        ],
+        "summary": "Update Trash Report",
+        "operationId": "update_trash_report_trash_reports__entry_id__patch",
+        "parameters": [
+          {
+            "name": "entry_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Entry Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TrashReportUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TrashReport"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "trash-reports"
+        ],
+        "summary": "Delete Trash Report",
+        "operationId": "delete_trash_report_trash_reports__entry_id__delete",
+        "parameters": [
+          {
+            "name": "entry_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Entry Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/admin/sync-from-sheet": {
       "post": {
         "tags": [
@@ -314,10 +1710,151 @@
           }
         }
       }
+    },
+    "/admin/backfill-edit-tokens": {
+      "post": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "Backfill Edit Tokens",
+        "description": "Generate edit tokens for any existing entries that don't have one yet.",
+        "operationId": "backfill_edit_tokens_admin_backfill_edit_tokens_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BackfillEditTokensResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/orphaned-images": {
+      "get": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "List Orphaned Images",
+        "description": "GCS-hosted directory photos no entry references anymore (left behind by re-hosts/replacements).",
+        "operationId": "list_orphaned_images_admin_orphaned_images_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrphanedImagesResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "Delete Orphaned Images",
+        "description": "Delete GCS-hosted directory photos no entry references anymore.",
+        "operationId": "delete_orphaned_images_admin_orphaned_images_delete",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeleteOrphanedImagesResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/erd": {
+      "get": {
+        "tags": [
+          "erd"
+        ],
+        "summary": "Get Erd",
+        "description": "Mermaid ER diagram (erDiagram) of the live schema \u2014 paste into mermaid.live to render.",
+        "operationId": "get_erd_erd_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
     "schemas": {
+      "ActivityStatus": {
+        "type": "string",
+        "enum": [
+          "open",
+          "scheduled",
+          "in_progress",
+          "completed",
+          "addressed",
+          "verified",
+          "cancelled"
+        ],
+        "title": "ActivityStatus",
+        "description": "Shared lifecycle status for cleanups and trash reports."
+      },
+      "BackfillEditTokensResponse": {
+        "properties": {
+          "backfilled": {
+            "type": "integer",
+            "title": "Backfilled"
+          }
+        },
+        "type": "object",
+        "required": [
+          "backfilled"
+        ],
+        "title": "BackfillEditTokensResponse"
+      },
+      "Body_upload_directory_photo_directory_photos_post": {
+        "properties": {
+          "file": {
+            "type": "string",
+            "contentMediaType": "application/octet-stream",
+            "title": "File"
+          }
+        },
+        "type": "object",
+        "required": [
+          "file"
+        ],
+        "title": "Body_upload_directory_photo_directory_photos_post"
+      },
+      "Body_upload_project_photo_projects_photos_post": {
+        "properties": {
+          "file": {
+            "type": "string",
+            "contentMediaType": "application/octet-stream",
+            "title": "File"
+          }
+        },
+        "type": "object",
+        "required": [
+          "file"
+        ],
+        "title": "Body_upload_project_photo_projects_photos_post"
+      },
       "Category": {
         "properties": {
           "id": {
@@ -326,7 +1863,8 @@
             "title": "Id"
           },
           "slug": {
-            "$ref": "#/components/schemas/CategorySlug"
+            "type": "string",
+            "title": "Slug"
           },
           "name": {
             "type": "string",
@@ -341,17 +1879,468 @@
         ],
         "title": "Category"
       },
-      "CategorySlug": {
-        "type": "string",
-        "enum": [
-          "animals",
-          "environment",
-          "fitness",
-          "nature",
-          "trash",
-          "water"
+      "CategoryCreate": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name"
         ],
-        "title": "CategorySlug"
+        "title": "CategoryCreate"
+      },
+      "Cleanup": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "location": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/StructuredLocation"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "coordinates": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Coordinates"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "scheduled_start": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Scheduled Start"
+          },
+          "scheduled_end": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Scheduled End"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ActivityStatus"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "photo_urls": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Photo Urls"
+          },
+          "metrics": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CleanupMetrics"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "submitted_by_user_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Submitted By User Id"
+          },
+          "organizer_user_ids": {
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "type": "array",
+            "title": "Organizer User Ids"
+          },
+          "rsvp_user_ids": {
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "type": "array",
+            "title": "Rsvp User Ids"
+          },
+          "attended_user_ids": {
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "type": "array",
+            "title": "Attended User Ids"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "title"
+        ],
+        "title": "Cleanup"
+      },
+      "CleanupCreate": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "location": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/StructuredLocation"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "scheduled_start": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Scheduled Start"
+          },
+          "scheduled_end": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Scheduled End"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ActivityStatus"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "photo_urls": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Photo Urls"
+          },
+          "metrics": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CleanupMetrics"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "submitted_by_user_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Submitted By User Id"
+          },
+          "organizer_user_ids": {
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "type": "array",
+            "title": "Organizer User Ids"
+          },
+          "rsvp_user_ids": {
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "type": "array",
+            "title": "Rsvp User Ids"
+          },
+          "attended_user_ids": {
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "type": "array",
+            "title": "Attended User Ids"
+          }
+        },
+        "type": "object",
+        "required": [
+          "title"
+        ],
+        "title": "CleanupCreate"
+      },
+      "CleanupMetrics": {
+        "properties": {
+          "small_bags": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Small Bags"
+          },
+          "large_bags": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Large Bags"
+          },
+          "pounds": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pounds"
+          }
+        },
+        "type": "object",
+        "title": "CleanupMetrics"
+      },
+      "CleanupUpdate": {
+        "properties": {
+          "title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Title"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "location": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/StructuredLocation"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "scheduled_start": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Scheduled Start"
+          },
+          "scheduled_end": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Scheduled End"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ActivityStatus"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "photo_urls": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Photo Urls"
+          },
+          "metrics": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CleanupMetrics"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "submitted_by_user_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Submitted By User Id"
+          },
+          "organizer_user_ids": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Organizer User Ids"
+          },
+          "rsvp_user_ids": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rsvp User Ids"
+          },
+          "attended_user_ids": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Attended User Ids"
+          }
+        },
+        "type": "object",
+        "title": "CleanupUpdate"
       },
       "Coordinates": {
         "properties": {
@@ -370,6 +2359,19 @@
           "longitude"
         ],
         "title": "Coordinates"
+      },
+      "DeleteOrphanedImagesResponse": {
+        "properties": {
+          "deleted": {
+            "type": "integer",
+            "title": "Deleted"
+          }
+        },
+        "type": "object",
+        "required": [
+          "deleted"
+        ],
+        "title": "DeleteOrphanedImagesResponse"
       },
       "DirectoryEntry": {
         "properties": {
@@ -404,6 +2406,11 @@
             ],
             "title": "Image Url"
           },
+          "image_is_external": {
+            "type": "boolean",
+            "title": "Image Is External",
+            "default": false
+          },
           "location": {
             "anyOf": [
               {
@@ -436,15 +2443,30 @@
           },
           "categories": {
             "items": {
-              "$ref": "#/components/schemas/CategorySlug"
+              "type": "string"
             },
             "type": "array",
             "title": "Categories"
+          },
+          "suggested_category": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Suggested Category"
           },
           "featured": {
             "type": "boolean",
             "title": "Featured",
             "default": false
+          },
+          "status": {
+            "$ref": "#/components/schemas/DirectoryEntryStatus",
+            "default": "published"
           },
           "user_ids": {
             "items": {
@@ -524,15 +2546,30 @@
           },
           "categories": {
             "items": {
-              "$ref": "#/components/schemas/CategorySlug"
+              "type": "string"
             },
             "type": "array",
             "title": "Categories"
+          },
+          "suggested_category": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Suggested Category"
           },
           "featured": {
             "type": "boolean",
             "title": "Featured",
             "default": false
+          },
+          "status": {
+            "$ref": "#/components/schemas/DirectoryEntryStatus",
+            "default": "published"
           },
           "user_ids": {
             "items": {
@@ -548,6 +2585,112 @@
           "name"
         ],
         "title": "DirectoryEntryCreate"
+      },
+      "DirectoryEntryEditLink": {
+        "properties": {
+          "token": {
+            "type": "string",
+            "title": "Token"
+          }
+        },
+        "type": "object",
+        "required": [
+          "token"
+        ],
+        "title": "DirectoryEntryEditLink"
+      },
+      "DirectoryEntryPublicUpdate": {
+        "properties": {
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "image_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Image Url"
+          },
+          "location": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/StructuredLocation"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "social_links": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SocialLinks"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "categories": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Categories"
+          },
+          "suggested_category": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Suggested Category"
+          }
+        },
+        "type": "object",
+        "title": "DirectoryEntryPublicUpdate",
+        "description": "Fields a self-service edit link is allowed to change. Excludes status, featured,\nand user_ids, which stay admin-only."
+      },
+      "DirectoryEntryStatus": {
+        "type": "string",
+        "enum": [
+          "pending",
+          "published"
+        ],
+        "title": "DirectoryEntryStatus"
       },
       "DirectoryEntryUpdate": {
         "properties": {
@@ -608,7 +2751,7 @@
             "anyOf": [
               {
                 "items": {
-                  "$ref": "#/components/schemas/CategorySlug"
+                  "type": "string"
                 },
                 "type": "array"
               },
@@ -617,6 +2760,17 @@
               }
             ],
             "title": "Categories"
+          },
+          "suggested_category": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Suggested Category"
           },
           "featured": {
             "anyOf": [
@@ -628,6 +2782,16 @@
               }
             ],
             "title": "Featured"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DirectoryEntryStatus"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "user_ids": {
             "anyOf": [
@@ -648,6 +2812,108 @@
         "type": "object",
         "title": "DirectoryEntryUpdate"
       },
+      "DirectoryExtractRequest": {
+        "properties": {
+          "url": {
+            "type": "string",
+            "title": "Url"
+          }
+        },
+        "type": "object",
+        "required": [
+          "url"
+        ],
+        "title": "DirectoryExtractRequest"
+      },
+      "DirectoryExtractResponse": {
+        "properties": {
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "image_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Image Url"
+          },
+          "social_links": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SocialLinks"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "other_links": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Other Links"
+          },
+          "source_url": {
+            "type": "string",
+            "title": "Source Url"
+          }
+        },
+        "type": "object",
+        "required": [
+          "source_url"
+        ],
+        "title": "DirectoryExtractResponse"
+      },
+      "DirectoryPhotoFromUrlRequest": {
+        "properties": {
+          "url": {
+            "type": "string",
+            "title": "Url"
+          }
+        },
+        "type": "object",
+        "required": [
+          "url"
+        ],
+        "title": "DirectoryPhotoFromUrlRequest"
+      },
+      "DirectoryPhotoUploadResponse": {
+        "properties": {
+          "url": {
+            "type": "string",
+            "title": "Url"
+          }
+        },
+        "type": "object",
+        "required": [
+          "url"
+        ],
+        "title": "DirectoryPhotoUploadResponse"
+      },
       "HTTPValidationError": {
         "properties": {
           "detail": {
@@ -660,6 +2926,590 @@
         },
         "type": "object",
         "title": "HTTPValidationError"
+      },
+      "LinkedDirectoryEntry": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name"
+        ],
+        "title": "LinkedDirectoryEntry"
+      },
+      "OrphanedImage": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "url": {
+            "type": "string",
+            "title": "Url"
+          },
+          "size_bytes": {
+            "type": "integer",
+            "title": "Size Bytes"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "url",
+          "size_bytes"
+        ],
+        "title": "OrphanedImage"
+      },
+      "OrphanedImagesResponse": {
+        "properties": {
+          "orphans": {
+            "items": {
+              "$ref": "#/components/schemas/OrphanedImage"
+            },
+            "type": "array",
+            "title": "Orphans"
+          }
+        },
+        "type": "object",
+        "required": [
+          "orphans"
+        ],
+        "title": "OrphanedImagesResponse"
+      },
+      "Project": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "image_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Image Url"
+          },
+          "image_is_external": {
+            "type": "boolean",
+            "title": "Image Is External",
+            "default": false
+          },
+          "location": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/StructuredLocation"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "coordinates": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Coordinates"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "social_links": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SocialLinks"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "categories": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Categories"
+          },
+          "suggested_category": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Suggested Category"
+          },
+          "stage": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ProjectStage"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "featured": {
+            "type": "boolean",
+            "title": "Featured",
+            "default": false
+          },
+          "status": {
+            "$ref": "#/components/schemas/DirectoryEntryStatus",
+            "default": "published"
+          },
+          "user_ids": {
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "type": "array",
+            "title": "User Ids"
+          },
+          "directory_entries": {
+            "items": {
+              "$ref": "#/components/schemas/LinkedDirectoryEntry"
+            },
+            "type": "array",
+            "title": "Directory Entries"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "Project"
+      },
+      "ProjectCreate": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "image_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Image Url"
+          },
+          "location": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/StructuredLocation"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "social_links": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SocialLinks"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "categories": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Categories"
+          },
+          "suggested_category": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Suggested Category"
+          },
+          "stage": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ProjectStage"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "featured": {
+            "type": "boolean",
+            "title": "Featured",
+            "default": false
+          },
+          "status": {
+            "$ref": "#/components/schemas/DirectoryEntryStatus",
+            "default": "published"
+          },
+          "user_ids": {
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "type": "array",
+            "title": "User Ids"
+          },
+          "directory_entry_ids": {
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "type": "array",
+            "title": "Directory Entry Ids"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "ProjectCreate"
+      },
+      "ProjectEditLink": {
+        "properties": {
+          "token": {
+            "type": "string",
+            "title": "Token"
+          }
+        },
+        "type": "object",
+        "required": [
+          "token"
+        ],
+        "title": "ProjectEditLink"
+      },
+      "ProjectPublicUpdate": {
+        "properties": {
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "image_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Image Url"
+          },
+          "location": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/StructuredLocation"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "social_links": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SocialLinks"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "categories": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Categories"
+          },
+          "suggested_category": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Suggested Category"
+          },
+          "stage": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ProjectStage"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "directory_entry_ids": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Directory Entry Ids"
+          }
+        },
+        "type": "object",
+        "title": "ProjectPublicUpdate",
+        "description": "Fields a self-service edit link is allowed to change. Excludes status, featured,\nand user_ids, which stay admin-only."
+      },
+      "ProjectStage": {
+        "type": "string",
+        "enum": [
+          "active",
+          "in_development",
+          "beta",
+          "sunset"
+        ],
+        "title": "ProjectStage"
+      },
+      "ProjectUpdate": {
+        "properties": {
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "image_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Image Url"
+          },
+          "location": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/StructuredLocation"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "social_links": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SocialLinks"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "categories": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Categories"
+          },
+          "suggested_category": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Suggested Category"
+          },
+          "stage": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ProjectStage"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "featured": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Featured"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DirectoryEntryStatus"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "user_ids": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "User Ids"
+          },
+          "directory_entry_ids": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Directory Entry Ids"
+          }
+        },
+        "type": "object",
+        "title": "ProjectUpdate"
       },
       "SheetSyncResponse": {
         "properties": {
@@ -779,6 +3629,39 @@
               }
             ],
             "title": "Twitter"
+          },
+          "app_store": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "App Store"
+          },
+          "google_play": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Google Play"
+          },
+          "github": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Github"
           }
         },
         "type": "object",
@@ -834,6 +3717,369 @@
         "type": "object",
         "title": "StructuredLocation"
       },
+      "TrashReport": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "location": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/StructuredLocation"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "coordinates": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Coordinates"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "image_urls": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Image Urls"
+          },
+          "severity": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/TrashReportSeverity"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "status": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ActivityStatus"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "reported_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reported At"
+          },
+          "submitted_by_user_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Submitted By User Id"
+          },
+          "resolved_by_user_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Resolved By User Id"
+          },
+          "resolved_by_cleanup_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Resolved By Cleanup Id"
+          },
+          "resolved_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Resolved At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "title"
+        ],
+        "title": "TrashReport"
+      },
+      "TrashReportCreate": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "location": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/StructuredLocation"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "image_urls": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Image Urls"
+          },
+          "severity": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/TrashReportSeverity"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "status": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ActivityStatus"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "reported_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reported At"
+          },
+          "submitted_by_user_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Submitted By User Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "title"
+        ],
+        "title": "TrashReportCreate"
+      },
+      "TrashReportSeverity": {
+        "type": "string",
+        "enum": [
+          "low",
+          "medium",
+          "high"
+        ],
+        "title": "TrashReportSeverity"
+      },
+      "TrashReportUpdate": {
+        "properties": {
+          "title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Title"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "location": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/StructuredLocation"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "image_urls": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Image Urls"
+          },
+          "severity": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/TrashReportSeverity"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "status": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ActivityStatus"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "reported_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reported At"
+          },
+          "submitted_by_user_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Submitted By User Id"
+          },
+          "resolved_by_user_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Resolved By User Id"
+          },
+          "resolved_by_cleanup_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Resolved By Cleanup Id"
+          },
+          "resolved_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Resolved At"
+          }
+        },
+        "type": "object",
+        "title": "TrashReportUpdate"
+      },
       "ValidationError": {
         "properties": {
           "loc": {
@@ -857,6 +4103,13 @@
           "type": {
             "type": "string",
             "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
           }
         },
         "type": "object",
@@ -866,307 +4119,6 @@
           "type"
         ],
         "title": "ValidationError"
-      },
-      "ActivityStatus": {
-        "type": "string",
-        "enum": [
-          "open",
-          "scheduled",
-          "in_progress",
-          "completed",
-          "addressed",
-          "verified",
-          "cancelled"
-        ],
-        "title": "ActivityStatus"
-      },
-      "TrashReportSeverity": {
-        "type": "string",
-        "enum": [
-          "low",
-          "medium",
-          "high"
-        ],
-        "title": "TrashReportSeverity"
-      },
-      "CleanupMetrics": {
-        "properties": {
-          "small_bags": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "default": null,
-            "title": "Small Bags"
-          },
-          "large_bags": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "default": null,
-            "title": "Large Bags"
-          },
-          "pounds": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "default": null,
-            "title": "Pounds"
-          },
-          "value": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "default": null,
-            "title": "Value"
-          }
-        },
-        "type": "object"
-      },
-      "Cleanup": {
-        "properties": {
-          "id": {
-            "format": "uuid",
-            "title": "Id",
-            "type": "string"
-          },
-          "title": {
-            "title": "Title",
-            "type": "string"
-          },
-          "description": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "default": null,
-            "title": "Description"
-          },
-          "location": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/StructuredLocation"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "default": null
-          },
-          "coordinates": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/Coordinates"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "default": null
-          },
-          "scheduled_start": {
-            "anyOf": [
-              {
-                "format": "date-time",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "default": null,
-            "title": "Scheduled Start"
-          },
-          "scheduled_end": {
-            "anyOf": [
-              {
-                "format": "date-time",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "default": null,
-            "title": "Scheduled End"
-          },
-          "status": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/ActivityStatus"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "default": null
-          },
-          "photo_urls": {
-            "items": {
-              "type": "string"
-            },
-            "title": "Photo Urls",
-            "type": "array"
-          },
-          "metrics": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/CleanupMetrics"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "default": null
-          },
-          "organizer_user_ids": {
-            "items": {
-              "format": "uuid",
-              "type": "string"
-            },
-            "title": "Organizer User Ids",
-            "type": "array"
-          },
-          "rsvp_user_ids": {
-            "items": {
-              "format": "uuid",
-              "type": "string"
-            },
-            "title": "Rsvp User Ids",
-            "type": "array"
-          },
-          "attended_user_ids": {
-            "items": {
-              "format": "uuid",
-              "type": "string"
-            },
-            "title": "Attended User Ids",
-            "type": "array"
-          }
-        },
-        "required": [
-          "id",
-          "title"
-        ],
-        "type": "object"
-      },
-      "TrashReport": {
-        "properties": {
-          "id": {
-            "format": "uuid",
-            "title": "Id",
-            "type": "string"
-          },
-          "title": {
-            "title": "Title",
-            "type": "string"
-          },
-          "description": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "default": null,
-            "title": "Description"
-          },
-          "location_text": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "default": null,
-            "title": "Location Text"
-          },
-          "coordinates": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/Coordinates"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "default": null
-          },
-          "image_urls": {
-            "items": {
-              "type": "string"
-            },
-            "title": "Image Urls",
-            "type": "array"
-          },
-          "severity": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/TrashReportSeverity"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "default": null
-          },
-          "status": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/ActivityStatus"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "default": null
-          },
-          "reported_at": {
-            "anyOf": [
-              {
-                "format": "date-time",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "default": null,
-            "title": "Reported At"
-          }
-        },
-        "required": [
-          "id",
-          "title"
-        ],
-        "type": "object"
       }
     }
   }
