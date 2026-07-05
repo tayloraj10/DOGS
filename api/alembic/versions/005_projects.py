@@ -26,9 +26,7 @@ def upgrade() -> None:
         sa.Column("longitude", sa.Double(), nullable=True),
         sa.Column("social_links", postgresql.JSONB(astext_type=sa.Text()), nullable=True),
         sa.Column("stage", sa.String(20), nullable=True),
-        sa.Column(
-            "status", sa.String(20), nullable=False, server_default=sa.text("'published'")
-        ),
+        sa.Column("status", sa.String(20), nullable=False, server_default=sa.text("'published'")),
         sa.Column("suggested_category", sa.String(255), nullable=True),
         sa.Column("edit_token", sa.String(64), nullable=True),
         sa.Column("featured", sa.Boolean(), nullable=False, server_default=sa.text("false")),

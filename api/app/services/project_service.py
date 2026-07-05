@@ -188,15 +188,11 @@ def set_project_categories(db: Session, project: ProjectModel, slugs: list[Categ
     project.categories = resolve_categories(db, slugs)
 
 
-def set_project_directory_links(
-    db: Session, project: ProjectModel, entry_ids: list[UUID]
-) -> None:
+def set_project_directory_links(db: Session, project: ProjectModel, entry_ids: list[UUID]) -> None:
     if not entry_ids:
         project.directory_entries = []
         return
-    entries = (
-        db.query(DirectoryEntryModel).filter(DirectoryEntryModel.id.in_(entry_ids)).all()
-    )
+    entries = db.query(DirectoryEntryModel).filter(DirectoryEntryModel.id.in_(entry_ids)).all()
     found = {e.id for e in entries}
     missing = set(entry_ids) - found
     if missing:
