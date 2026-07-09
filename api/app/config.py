@@ -40,6 +40,7 @@ class Settings(BaseSettings):
     GOOGLE_MAPS_GEOCODING_API_KEY: str = ""
 
     GCS_DIRECTORY_IMAGES_BUCKET: str = ""
+    GCS_USER_IMAGES_BUCKET: str = ""
     GCS_PROJECT_ID: str = ""
 
     @property

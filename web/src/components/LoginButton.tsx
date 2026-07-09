@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import { firebaseEnabled } from "../lib/firebase";
@@ -7,6 +7,10 @@ import LoginModal from "./LoginModal";
 export default function LoginButton() {
   const { user, loading } = useAuth();
   const [modalOpen, setModalOpen] = useState(false);
+
+  useEffect(() => {
+    if (!user) setModalOpen(false);
+  }, [user]);
 
   if (!firebaseEnabled) {
     return null;
