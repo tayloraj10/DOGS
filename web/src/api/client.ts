@@ -1,3 +1,5 @@
+import { auth } from "../lib/firebase";
+
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8080";
 
 export class ApiError extends Error {
@@ -9,11 +11,17 @@ export class ApiError extends Error {
   }
 }
 
+async function authHeaders(): Promise<Record<string, string>> {
+  const token = await auth?.currentUser?.getIdToken();
+  return token ? { Authorization: `Bearer ${token}` } : {};
+}
+
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const response = await fetch(`${API_BASE_URL}${path}`, {
     ...init,
     headers: {
       "Content-Type": "application/json",
+      ...(await authHeaders()),
       ...init?.headers,
     },
   });
@@ -34,6 +42,7 @@ async function requestForm<T>(path: string, formData: FormData): Promise<T> {
   const response = await fetch(`${API_BASE_URL}${path}`, {
     method: "POST",
     body: formData,
+    headers: await authHeaders(),
   });
 
   if (!response.ok) {

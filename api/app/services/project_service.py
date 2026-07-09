@@ -149,6 +149,17 @@ def apply_create_data(project: ProjectModel, body: ProjectCreate) -> None:
     project.user_ids = _serialize_user_ids(body.user_ids)
 
 
+def stamp_creator(project: ProjectModel, user_id: UUID | None) -> None:
+    """Adds a signed-in creator's local user id to user_ids, alongside the anonymous
+    edit_token flow. No-op if signed out — anonymous creation is unaffected."""
+    if user_id is None:
+        return
+    ids = _parse_user_ids(project.user_ids)
+    if user_id not in ids:
+        ids.append(user_id)
+    project.user_ids = _serialize_user_ids(ids)
+
+
 def get_or_create_edit_token(db: Session, project: ProjectModel) -> str:
     if not project.edit_token:
         project.edit_token = secrets.token_urlsafe(24)

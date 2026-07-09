@@ -114,6 +114,21 @@ export interface ProjectInput extends DirectoryEntryInput {
   directory_entry_ids?: string[];
 }
 
+export interface UserProfile {
+  id: string;
+  email: string;
+  name: string | null;
+  photo_url: string | null;
+  admin: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface UserProfileUpdate {
+  name?: string | null;
+  photo_url?: string | null;
+}
+
 export interface DirectoryExtractResponse {
   name: string | null;
   description: string | null;
@@ -147,6 +162,7 @@ export interface SheetSyncResponse {
 }
 
 export interface OrphanedImage {
+  source: "directory" | "project" | "user";
   name: string;
   url: string;
   size_bytes: number;

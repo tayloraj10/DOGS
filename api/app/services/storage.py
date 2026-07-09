@@ -18,11 +18,11 @@ ALLOWED_CONTENT_TYPES = {"image/jpeg", "image/jpg", "image/png", "image/gif", "i
 
 
 class GCSStorage:
-    def __init__(self):
-        if not settings.GCS_DIRECTORY_IMAGES_BUCKET:
-            raise ValueError("GCS_DIRECTORY_IMAGES_BUCKET is not configured")
+    def __init__(self, bucket_name: str):
+        if not bucket_name:
+            raise ValueError("bucket_name is not configured")
 
-        self.bucket_name = settings.GCS_DIRECTORY_IMAGES_BUCKET
+        self.bucket_name = bucket_name
 
         # In dev/testing, prefix all paths so test uploads are easy to find and delete
         if settings.ENVIRONMENT and settings.ENVIRONMENT.lower() != "production":
@@ -94,6 +94,29 @@ class GCSStorage:
         bucket = self.client.bucket(self.bucket_name)
         return list(bucket.list_blobs(prefix=self._path("projects/")))
 
+    def upload_user_photo(
+        self,
+        file: BinaryIO,
+        filename: str,
+        content_type: str = "image/jpeg",
+    ) -> str:
+        try:
+            bucket = self.client.bucket(self.bucket_name)
+            ext = os.path.splitext(filename)[1].lower()
+            blob_name = self._path(f"users/{uuid.uuid4()}{ext}")
+            blob = bucket.blob(blob_name)
+            blob.content_type = content_type
+            blob.cache_control = "public, max-age=31536000, immutable"
+            file.seek(0)
+            blob.upload_from_file(file, content_type=content_type)
+            return blob.public_url
+        except GoogleCloudError as e:
+            raise Exception(f"Failed to upload photo to GCS: {e}")
+
+    def list_user_photos(self):
+        bucket = self.client.bucket(self.bucket_name)
+        return list(bucket.list_blobs(prefix=self._path("users/")))
+
     def delete_blob(self, blob_name: str) -> None:
         try:
             self.client.bucket(self.bucket_name).blob(blob_name).delete()
@@ -101,7 +124,14 @@ class GCSStorage:
             raise Exception(f"Failed to delete blob from GCS: {e}")
 
 
-gcs_storage = GCSStorage() if settings.GCS_DIRECTORY_IMAGES_BUCKET else None
+gcs_storage = (
+    GCSStorage(settings.GCS_DIRECTORY_IMAGES_BUCKET)
+    if settings.GCS_DIRECTORY_IMAGES_BUCKET
+    else None
+)
+user_images_storage = (
+    GCSStorage(settings.GCS_USER_IMAGES_BUCKET) if settings.GCS_USER_IMAGES_BUCKET else None
+)
 
 
 def hosted_image_url_prefix() -> str | None:

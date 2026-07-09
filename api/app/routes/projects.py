@@ -8,7 +8,7 @@ from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile, 
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.models import Project as ProjectModel
+from app.models import Project as ProjectModel, User as UserModel
 from app.schemas import (
     CategorySlug,
     DirectoryExtractRequest,
@@ -23,6 +23,7 @@ from app.schemas import (
     ProjectStage,
     ProjectUpdate,
 )
+from app.services.auth import get_current_user_optional
 from app.services.geocoding import geocode_location
 from app.services.project_service import (
     apply_create_data,
@@ -34,6 +35,7 @@ from app.services.project_service import (
     project_to_schema,
     set_project_categories,
     set_project_directory_links,
+    stamp_creator,
 )
 from app.services.scraping import extract_from_url
 from app.services.storage import ALLOWED_CONTENT_TYPES, gcs_storage
@@ -157,9 +159,17 @@ def get_project_edit_link(project_id: UUID, db: Session = Depends(get_db)):
 
 
 @router.post("", response_model=Project, status_code=status.HTTP_201_CREATED)
-async def create_project(body: ProjectCreate, db: Session = Depends(get_db)):
+async def create_project(
+    body: ProjectCreate,
+    db: Session = Depends(get_db),
+    current_user: UserModel | None = Depends(get_current_user_optional),
+):
+    """Auth is optional here: a valid `Authorization: Bearer <idToken>` stamps the signed-in
+    user's id into `user_ids`; an anonymous request works exactly as before, falling back to the
+    `edit_token` flow. An invalid/expired token is treated the same as no token — never a 401."""
     project = ProjectModel()
     apply_create_data(project, body)
+    stamp_creator(project, current_user.id if current_user else None)
     db.add(project)
     db.flush()
     get_or_create_edit_token(db, project)

@@ -109,6 +109,25 @@ Not part of the numbered phase sequence — can proceed independently.
 
 ---
 
+### Auth
+
+**[DOGS_Auth_Dev_Plan.md](./DOGS_Auth_Dev_Plan.md)**
+
+- Firebase Auth on the frontend, reusing CAN's Firebase project (`collective-action-fd893`);
+  backend verifies signed ID tokens via `firebase-admin` (unlike CAN, which trusts a
+  client-supplied `firebase_user_id` with no verification)
+- New `users` table in the `dogs` schema, keyed by verified Firebase UID, with an `admin` flag
+- **Additive only** — the app stays fully usable signed out. No route starts requiring auth in
+  this pass; it just makes a verified identity available (and stamps `user_ids` when present) so
+  future features have something to build on. Enforcement (ownership/admin gating) is deferred
+- Supersedes the Phase 2 "API key" MVP and pulls forward the Firebase middleware earmarked for
+  Phase 3
+
+**Exit criteria:** working sign-in/sign-out flow; backend verifies tokens correctly; zero
+regressions to the current unauthenticated experience.
+
+---
+
 ## Dependency graph
 
 ```mermaid

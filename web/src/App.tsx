@@ -13,7 +13,9 @@ import AdminSyncPage from "./pages/AdminSyncPage";
 import AdminPage from "./pages/AdminPage";
 import EntryDetailPage from "./pages/EntryDetailPage";
 import EditEntryPage from "./pages/EditEntryPage";
+import ProfilePage from "./pages/ProfilePage";
 import ThemeToggle from "./components/ThemeToggle";
+import LoginButton from "./components/LoginButton";
 
 const desktopNavClasses = ({ isActive }: { isActive: boolean }) =>
   `text-sm font-medium transition-colors ${
@@ -59,11 +61,13 @@ function App() {
             <NavLink to="/network" className={desktopNavClasses}>Network</NavLink>
             <NavLink to="/submit" className={desktopNavClasses}>Submit</NavLink>
             <ThemeToggle />
+            <LoginButton />
           </nav>
 
           {/* Mobile: theme toggle + hamburger */}
           <div className="flex sm:hidden items-center gap-2">
             <ThemeToggle />
+            <LoginButton />
             <button
               type="button"
               onClick={() => setMenuOpen((v) => !v)}
@@ -124,6 +128,7 @@ function App() {
           <Route path="/review/:id" element={<ReviewEntryPage />} />
           <Route path="/admin" element={<AdminPage />} />
           <Route path="/admin/sync" element={<AdminSyncPage />} />
+          <Route path="/profile" element={<ProfilePage />} />
         </Routes>
       </main>
     </div>

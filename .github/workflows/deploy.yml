@@ -65,6 +65,7 @@ jobs:
             --set-env-vars GOOGLE_SHEETS_SPREADSHEET_ID="1KVYFjM8E_c65hzia2LWgtwvO9UKeqUXJpsfhB2OeOAo" \
             --set-env-vars GOOGLE_SHEETS_SHEET_GID="1363212709" \
             --set-env-vars GCS_DIRECTORY_IMAGES_BUCKET="dogs-directory-images" \
+            --set-env-vars GCS_USER_IMAGES_BUCKET="dogs-user-images" \
             --set-env-vars GCS_PROJECT_ID="collective-action-fd893" \
             --set-secrets DB_PASSWORD=db_password:latest,GOOGLE_MAPS_GEOCODING_API_KEY=GOOGLE_MAPS_GEOCODING_API_KEY:latest
 

@@ -60,19 +60,24 @@
 
 ## Milestone 2 — API auth
 
+**Superseded by [DOGS_Auth_Dev_Plan.md](./DOGS_Auth_Dev_Plan.md)** — instead of the API-key MVP
+below, DOGS is going straight to Firebase Auth with server-side ID token verification. Left here
+for history.
+
 **Deliverable:** Protect write/admin endpoints before broader exposure.
 
 ### Tasks
 
-- [ ] Choose auth mechanism: API key header (`X-API-Key`) for MVP
-- [ ] Store key(s) in Secret Manager; inject into Cloud Run
-- [ ] Middleware or dependency: require key on `POST/PATCH/DELETE /directory`, all `/admin/*`
+- [ ] ~~Choose auth mechanism: API key header (`X-API-Key`) for MVP~~
+- [ ] ~~Store key(s) in Secret Manager; inject into Cloud Run~~
+- [ ] ~~Middleware or dependency: require key on `POST/PATCH/DELETE /directory`, all `/admin/*`~~
 - [ ] `GET` endpoints remain public (or add optional auth later)
 - [ ] Document auth in OpenAPI
 
 ### Future (not Phase 2)
 
-- Firebase auth for Admin Portal (Phase 3)
+- ~~Firebase auth for Admin Portal (Phase 3)~~ — pulled forward into
+  [DOGS_Auth_Dev_Plan.md](./DOGS_Auth_Dev_Plan.md)
 - Per-app service accounts (Phase 4)
 
 ---

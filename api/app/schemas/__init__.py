@@ -31,6 +31,7 @@ from app.schemas.trash_report import (
     TrashReportSeverity,
     TrashReportUpdate,
 )
+from app.schemas.user import User, UserUpdate
 
 __all__ = [
     "ActivityStatus",
@@ -64,5 +65,7 @@ __all__ = [
     "TrashReportCreate",
     "TrashReportSeverity",
     "TrashReportUpdate",
+    "User",
+    "UserUpdate",
     "category_slug_from_label",
 ]

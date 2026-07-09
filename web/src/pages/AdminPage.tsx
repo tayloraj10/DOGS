@@ -100,7 +100,8 @@ export default function AdminPage() {
       <div className="mt-10 border-t border-slate-200 pt-6 dark:border-slate-800">
         <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">Orphaned images</h2>
         <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
-          GCS-hosted photos that no directory entry references — left behind by re-hosts or replacements.
+          GCS-hosted directory, project, and profile photos nothing references anymore — left
+          behind by re-hosts, replacements, or re-uploads.
         </p>
 
         <div className="mt-4 flex gap-3">
@@ -142,15 +143,20 @@ export default function AdminPage() {
         {orphans && orphans.length > 0 && (
           <ul className="mt-4 divide-y divide-slate-100 rounded-2xl bg-white shadow-sm ring-1 ring-slate-200 dark:divide-slate-800 dark:bg-slate-900 dark:ring-slate-800">
             {orphans.map((img) => (
-              <li key={img.name} className="flex items-center justify-between gap-4 px-4 py-3">
-                <a
-                  href={img.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="truncate text-sm text-emerald-700 hover:underline dark:text-emerald-400"
-                >
-                  {img.name}
-                </a>
+              <li key={`${img.source}-${img.name}`} className="flex items-center justify-between gap-4 px-4 py-3">
+                <div className="flex min-w-0 items-center gap-2">
+                  <span className="shrink-0 rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-500 dark:bg-slate-800 dark:text-slate-400">
+                    {img.source}
+                  </span>
+                  <a
+                    href={img.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="truncate text-sm text-emerald-700 hover:underline dark:text-emerald-400"
+                  >
+                    {img.name}
+                  </a>
+                </div>
                 <span className="shrink-0 text-xs text-slate-400">{formatBytes(img.size_bytes)}</span>
               </li>
             ))}
