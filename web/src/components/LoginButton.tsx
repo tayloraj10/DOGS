@@ -1,8 +1,12 @@
+import { useState } from "react";
+import { Link } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import { firebaseEnabled } from "../lib/firebase";
+import LoginModal from "./LoginModal";
 
 export default function LoginButton() {
-  const { user, loading, signIn, signOut } = useAuth();
+  const { user, loading } = useAuth();
+  const [modalOpen, setModalOpen] = useState(false);
 
   if (!firebaseEnabled) {
     return null;
@@ -15,10 +19,9 @@ export default function LoginButton() {
   if (user) {
     const label = user.displayName ?? user.email ?? "Account";
     return (
-      <button
-        type="button"
-        onClick={() => void signOut()}
-        title={`Signed in as ${label} — click to sign out`}
+      <Link
+        to="/profile"
+        title={`Signed in as ${label} — view profile`}
         className="flex h-7 w-7 items-center justify-center rounded-full overflow-hidden text-slate-500 transition-opacity hover:opacity-80 dark:text-slate-400"
       >
         {user.photoURL ? (
@@ -28,17 +31,20 @@ export default function LoginButton() {
             {label.charAt(0).toUpperCase()}
           </span>
         )}
-      </button>
+      </Link>
     );
   }
 
   return (
-    <button
-      type="button"
-      onClick={() => void signIn()}
-      className="text-sm font-medium text-slate-500 transition-colors hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200"
-    >
-      Sign in
-    </button>
+    <>
+      <button
+        type="button"
+        onClick={() => setModalOpen(true)}
+        className="text-sm font-medium text-slate-500 transition-colors hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200"
+      >
+        Sign in
+      </button>
+      {modalOpen && <LoginModal onClose={() => setModalOpen(false)} />}
+    </>
   );
 }

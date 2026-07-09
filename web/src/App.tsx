@@ -13,6 +13,7 @@ import AdminSyncPage from "./pages/AdminSyncPage";
 import AdminPage from "./pages/AdminPage";
 import EntryDetailPage from "./pages/EntryDetailPage";
 import EditEntryPage from "./pages/EditEntryPage";
+import ProfilePage from "./pages/ProfilePage";
 import ThemeToggle from "./components/ThemeToggle";
 import LoginButton from "./components/LoginButton";
 
@@ -127,6 +128,7 @@ function App() {
           <Route path="/review/:id" element={<ReviewEntryPage />} />
           <Route path="/admin" element={<AdminPage />} />
           <Route path="/admin/sync" element={<AdminSyncPage />} />
+          <Route path="/profile" element={<ProfilePage />} />
         </Routes>
       </main>
     </div>
