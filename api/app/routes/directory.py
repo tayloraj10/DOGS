@@ -22,7 +22,8 @@ from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile, 
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.models import DirectoryEntry as DirectoryEntryModel
+from app.models import DirectoryEntry as DirectoryEntryModel, User as UserModel
+from app.services.auth import get_current_user_optional
 from app.services.directory_service import (
     apply_create_data,
     apply_update_data,
@@ -32,6 +33,7 @@ from app.services.directory_service import (
     get_or_create_edit_token,
     list_entries,
     set_entry_categories,
+    stamp_creator,
 )
 from app.services.geocoding import geocode_location, lookup_location
 from app.services.scraping import extract_from_url
@@ -166,9 +168,17 @@ def get_directory_entry_edit_link(entry_id: UUID, db: Session = Depends(get_db))
 
 
 @router.post("", response_model=DirectoryEntry, status_code=status.HTTP_201_CREATED)
-async def create_directory_entry(body: DirectoryEntryCreate, db: Session = Depends(get_db)):
+async def create_directory_entry(
+    body: DirectoryEntryCreate,
+    db: Session = Depends(get_db),
+    current_user: UserModel | None = Depends(get_current_user_optional),
+):
+    """Auth is optional here: a valid `Authorization: Bearer <idToken>` stamps the signed-in
+    user's id into `user_ids`; an anonymous request works exactly as before, falling back to the
+    `edit_token` flow. An invalid/expired token is treated the same as no token — never a 401."""
     entry = DirectoryEntryModel()
     apply_create_data(entry, body)
+    stamp_creator(entry, current_user.id if current_user else None)
     db.add(entry)
     db.flush()
     get_or_create_edit_token(db, entry)

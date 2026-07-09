@@ -137,6 +137,17 @@ def apply_create_data(entry: DirectoryEntryModel, body: DirectoryEntryCreate) ->
     entry.user_ids = _serialize_user_ids(body.user_ids)
 
 
+def stamp_creator(entry: DirectoryEntryModel, user_id: UUID | None) -> None:
+    """Adds a signed-in creator's local user id to user_ids, alongside the anonymous
+    edit_token flow. No-op if signed out — anonymous creation is unaffected."""
+    if user_id is None:
+        return
+    ids = _parse_user_ids(entry.user_ids)
+    if user_id not in ids:
+        ids.append(user_id)
+    entry.user_ids = _serialize_user_ids(ids)
+
+
 def get_or_create_edit_token(db: Session, entry: DirectoryEntryModel) -> str:
     if not entry.edit_token:
         entry.edit_token = secrets.token_urlsafe(24)
