@@ -162,7 +162,7 @@ export interface SheetSyncResponse {
 }
 
 export interface OrphanedImage {
-  source: "directory" | "user";
+  source: "directory" | "project" | "user";
   name: string;
   url: string;
   size_bytes: number;

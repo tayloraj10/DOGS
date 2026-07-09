@@ -100,8 +100,8 @@ export default function AdminPage() {
       <div className="mt-10 border-t border-slate-200 pt-6 dark:border-slate-800">
         <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">Orphaned images</h2>
         <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
-          GCS-hosted directory and profile photos nothing references anymore — left behind by
-          re-hosts, replacements, or re-uploads.
+          GCS-hosted directory, project, and profile photos nothing references anymore — left
+          behind by re-hosts, replacements, or re-uploads.
         </p>
 
         <div className="mt-4 flex gap-3">

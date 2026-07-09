@@ -8,6 +8,7 @@ from app.models import DirectoryEntry
 from app.services.directory_service import find_orphaned_images as find_orphaned_directory_images
 from app.services.directory_service import get_or_create_edit_token
 from app.services.geocoding import geocode_location
+from app.services.project_service import find_orphaned_images as find_orphaned_project_images
 from app.services.sheet_sync import sync_from_google_sheet
 from app.services.storage import gcs_storage, user_images_storage
 from app.services.user_service import find_orphaned_images as find_orphaned_user_images
@@ -97,14 +98,19 @@ def backfill_edit_tokens(db: Session = Depends(get_db)):
 
 @router.get("/orphaned-images", response_model=OrphanedImagesResponse)
 def list_orphaned_images(db: Session = Depends(get_db)):
-    """GCS-hosted directory/profile photos nothing references anymore (left behind by
+    """GCS-hosted directory/project/profile photos nothing references anymore (left behind by
     re-hosts/replacements)."""
     directory_orphans = find_orphaned_directory_images(db)
+    project_orphans = find_orphaned_project_images(db)
     user_orphans = find_orphaned_user_images(db)
     return OrphanedImagesResponse(
         orphans=[
             OrphanedImage(source="directory", name=b.name, url=b.public_url, size_bytes=b.size or 0)
             for b in directory_orphans
+        ]
+        + [
+            OrphanedImage(source="project", name=b.name, url=b.public_url, size_bytes=b.size or 0)
+            for b in project_orphans
         ]
         + [
             OrphanedImage(source="user", name=b.name, url=b.public_url, size_bytes=b.size or 0)
@@ -115,11 +121,16 @@ def list_orphaned_images(db: Session = Depends(get_db)):
 
 @router.delete("/orphaned-images", response_model=DeleteOrphanedImagesResponse)
 def delete_orphaned_images(db: Session = Depends(get_db)):
-    """Delete GCS-hosted directory/profile photos nothing references anymore."""
+    """Delete GCS-hosted directory/project/profile photos nothing references anymore."""
     directory_orphans = find_orphaned_directory_images(db)
+    project_orphans = find_orphaned_project_images(db)
     user_orphans = find_orphaned_user_images(db)
     for blob in directory_orphans:
         gcs_storage.delete_blob(blob.name)
+    for blob in project_orphans:
+        gcs_storage.delete_blob(blob.name)
     for blob in user_orphans:
         user_images_storage.delete_blob(blob.name)
-    return DeleteOrphanedImagesResponse(deleted=len(directory_orphans) + len(user_orphans))
+    return DeleteOrphanedImagesResponse(
+        deleted=len(directory_orphans) + len(project_orphans) + len(user_orphans)
+    )
