@@ -37,9 +37,7 @@ def upgrade() -> None:
         ),
         schema=SCHEMA,
     )
-    op.create_index(
-        "ix_users_firebase_uid", "users", ["firebase_uid"], unique=True, schema=SCHEMA
-    )
+    op.create_index("ix_users_firebase_uid", "users", ["firebase_uid"], unique=True, schema=SCHEMA)
     op.create_index("ix_users_email", "users", ["email"], unique=True, schema=SCHEMA)
 
 

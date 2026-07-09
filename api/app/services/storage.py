@@ -125,7 +125,9 @@ class GCSStorage:
 
 
 gcs_storage = (
-    GCSStorage(settings.GCS_DIRECTORY_IMAGES_BUCKET) if settings.GCS_DIRECTORY_IMAGES_BUCKET else None
+    GCSStorage(settings.GCS_DIRECTORY_IMAGES_BUCKET)
+    if settings.GCS_DIRECTORY_IMAGES_BUCKET
+    else None
 )
 user_images_storage = (
     GCSStorage(settings.GCS_USER_IMAGES_BUCKET) if settings.GCS_USER_IMAGES_BUCKET else None
