@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { FirebaseError } from "firebase/app";
 import { useAuth } from "../hooks/useAuth";
+import { friendlyAuthErrorMessage } from "../lib/authErrors";
 
 interface LoginModalProps {
   onClose: () => void;
@@ -14,34 +15,9 @@ const IGNORED_ERROR_CODES = new Set([
 const INPUT_CLASSES =
   "rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder-slate-500 dark:focus:border-emerald-500";
 
-function friendlyErrorMessage(err: unknown): string {
-  if (err instanceof FirebaseError) {
-    switch (err.code) {
-      case "auth/invalid-email":
-        return "That email address doesn't look right.";
-      case "auth/user-disabled":
-        return "This account has been disabled.";
-      case "auth/user-not-found":
-      case "auth/wrong-password":
-      case "auth/invalid-credential":
-        return "Incorrect email or password.";
-      case "auth/email-already-in-use":
-        return "An account with that email already exists — try signing in instead.";
-      case "auth/weak-password":
-        return "Password should be at least 6 characters.";
-      case "auth/too-many-requests":
-        return "Too many attempts. Please wait a moment and try again.";
-      case "auth/network-request-failed":
-        return "Network error — please check your connection and try again.";
-      default:
-        return "Something went wrong. Please try again.";
-    }
-  }
-  return "Something went wrong. Please try again.";
-}
-
 export default function LoginModal({ onClose }: LoginModalProps) {
-  const { user, signIn, signInWithEmail, signUpWithEmail, resetPassword } = useAuth();
+  const { user, redirectError, signIn, signInWithEmail, signUpWithEmail, resetPassword } =
+    useAuth();
   const [mode, setMode] = useState<"sign-in" | "sign-up" | "reset">("sign-in");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -54,6 +30,8 @@ export default function LoginModal({ onClose }: LoginModalProps) {
     if (user) onClose();
   }, [user, onClose]);
 
+  const displayedError = error ?? redirectError;
+
   const handleGoogleSignIn = async () => {
     setPending(true);
     setError(null);
@@ -63,7 +41,7 @@ export default function LoginModal({ onClose }: LoginModalProps) {
       if (err instanceof FirebaseError && IGNORED_ERROR_CODES.has(err.code)) {
         return;
       }
-      setError(friendlyErrorMessage(err));
+      setError(friendlyAuthErrorMessage(err));
     } finally {
       setPending(false);
     }
@@ -84,7 +62,7 @@ export default function LoginModal({ onClose }: LoginModalProps) {
         await signInWithEmail(email, password);
       }
     } catch (err) {
-      setError(friendlyErrorMessage(err));
+      setError(friendlyAuthErrorMessage(err));
     } finally {
       setPending(false);
     }
@@ -102,7 +80,7 @@ export default function LoginModal({ onClose }: LoginModalProps) {
       await resetPassword(email);
       setResetSent(true);
     } catch (err) {
-      setError(friendlyErrorMessage(err));
+      setError(friendlyAuthErrorMessage(err));
     } finally {
       setPending(false);
     }
@@ -264,7 +242,9 @@ export default function LoginModal({ onClose }: LoginModalProps) {
               </button>
             </form>
 
-            {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
+            {displayedError && (
+              <p className="text-sm text-red-600 dark:text-red-400">{displayedError}</p>
+            )}
 
             <button
               type="button"
