@@ -259,7 +259,9 @@ def express_interest(
     interested in the same idea at once. Doesn't create a project by itself — an admin
     still confirms a team is actually underway before converting it (see convert_idea)."""
     if idea.status not in (ProjectIdeaStatus.approved.value, ProjectIdeaStatus.claimed.value):
-        raise ValueError(f"Idea is {idea.status}, must be approved before anyone can express interest")
+        raise ValueError(
+            f"Idea is {idea.status}, must be approved before anyone can express interest"
+        )
     existing = (
         db.query(IdeaInterestModel)
         .filter(IdeaInterestModel.idea_id == idea.id, IdeaInterestModel.user_id == user_id)
@@ -268,9 +270,7 @@ def express_interest(
     if existing:
         raise ValueError("Already marked as interested in this idea")
 
-    db.add(
-        IdeaInterestModel(idea_id=idea.id, user_id=user_id, shared_fields=body.shared_fields)
-    )
+    db.add(IdeaInterestModel(idea_id=idea.id, user_id=user_id, shared_fields=body.shared_fields))
     idea.status = ProjectIdeaStatus.claimed.value
     db.commit()
     return get_idea(db, idea.id)
@@ -289,9 +289,7 @@ def withdraw_interest(db: Session, idea: ProjectIdeaModel, user_id: UUID) -> Pro
     db.delete(interest)
     db.flush()
 
-    remaining = (
-        db.query(IdeaInterestModel).filter(IdeaInterestModel.idea_id == idea.id).count()
-    )
+    remaining = db.query(IdeaInterestModel).filter(IdeaInterestModel.idea_id == idea.id).count()
     if remaining == 0 and idea.status == ProjectIdeaStatus.claimed.value:
         idea.status = ProjectIdeaStatus.approved.value
 

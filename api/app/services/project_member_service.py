@@ -34,9 +34,7 @@ def get_member(db: Session, project_id: UUID, user_id: UUID) -> ProjectMemberMod
     return (
         db.query(ProjectMemberModel)
         .options(joinedload(ProjectMemberModel.user))
-        .filter(
-            ProjectMemberModel.project_id == project_id, ProjectMemberModel.user_id == user_id
-        )
+        .filter(ProjectMemberModel.project_id == project_id, ProjectMemberModel.user_id == user_id)
         .first()
     )
 

@@ -311,9 +311,7 @@ def list_project_members(
     project = get_project(db, project_id)
     if not project:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Project not found")
-    return [
-        member_to_schema(m, project.originator_user_id) for m in list_members(db, project_id)
-    ]
+    return [member_to_schema(m, project.originator_user_id) for m in list_members(db, project_id)]
 
 
 @router.post(

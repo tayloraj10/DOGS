@@ -117,8 +117,7 @@ def upgrade() -> None:
         f"USING gin (description gin_trgm_ops)"
     )
     op.execute(
-        f"CREATE INDEX ix_projects_name_trgm ON {SCHEMA}.projects "
-        f"USING gin (name gin_trgm_ops)"
+        f"CREATE INDEX ix_projects_name_trgm ON {SCHEMA}.projects USING gin (name gin_trgm_ops)"
     )
     op.execute(
         f"CREATE INDEX ix_projects_description_trgm ON {SCHEMA}.projects "
