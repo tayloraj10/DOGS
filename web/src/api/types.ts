@@ -52,6 +52,7 @@ export interface SocialLinks {
   app_store: string | null;
   google_play: string | null;
   github: string | null;
+  discord: string | null;
 }
 
 export interface Category {
@@ -119,6 +120,8 @@ export interface UserProfile {
   email: string;
   name: string | null;
   photo_url: string | null;
+  phone: string | null;
+  social_links: SocialLinks | null;
   admin: boolean;
   created_at: string;
   updated_at: string;
@@ -127,6 +130,8 @@ export interface UserProfile {
 export interface UserProfileUpdate {
   name?: string | null;
   photo_url?: string | null;
+  phone?: string | null;
+  social_links?: SocialLinks | null;
 }
 
 export interface DirectoryExtractResponse {
@@ -174,4 +179,85 @@ export interface OrphanedImagesResponse {
 
 export interface DeleteOrphanedImagesResponse {
   deleted: number;
+}
+
+export type ProjectIdeaStatus = "pending" | "approved" | "claimed" | "converted" | "rejected" | "merged";
+
+export interface SimilarApp {
+  id: string;
+  url: string;
+  name: string | null;
+  note: string | null;
+  added_by_user_id: string | null;
+  created_at: string;
+}
+
+export interface SimilarAppInput {
+  url: string;
+  name?: string | null;
+  note?: string | null;
+}
+
+export interface SimilarMatch {
+  kind: "idea" | "project";
+  id: string;
+  name: string;
+  description: string | null;
+  similarity: number;
+}
+
+export interface IdeaInterest {
+  user_id: string;
+  name: string | null;
+  photo_url: string | null;
+  shared_contact: Record<string, string>;
+  created_at: string;
+}
+
+export interface IdeaInterestInput {
+  shared_fields?: string[];
+}
+
+export interface ProjectIdea {
+  id: string;
+  name: string;
+  description: string;
+  categories: CategorySlug[];
+  suggested_category: string | null;
+  status: ProjectIdeaStatus;
+  submitter_user_id: string | null;
+  submitter_name: string | null;
+  merged_into_project_id: string | null;
+  interested: IdeaInterest[];
+  similar_apps: SimilarApp[];
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ProjectIdeaInput {
+  name: string;
+  description: string;
+  categories?: CategorySlug[];
+  suggested_category?: string | null;
+}
+
+export interface ProjectIdeaEditLink {
+  token: string;
+}
+
+export interface ProjectMember {
+  user_id: string;
+  name: string | null;
+  photo_url: string | null;
+  is_originator: boolean;
+  shared_contact: Record<string, string>;
+  joined_at: string;
+}
+
+export interface ProjectMemberJoinInput {
+  shared_fields?: string[];
+}
+
+export interface ProjectMemberUpdateInput {
+  shared_fields?: string[];
 }

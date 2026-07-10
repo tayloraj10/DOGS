@@ -3,6 +3,7 @@ import { Link, useParams } from "react-router-dom";
 import EntryImage from "../components/EntryImage";
 import SocialIcon, { SOCIAL_FIELDS } from "../components/SocialIcon";
 import LoadingState from "../components/LoadingState";
+import TeamSection from "../components/TeamSection";
 import type { DirectoryEntry, Project } from "../api/types";
 import { PROJECT_STAGE_LABELS, slugToLabel } from "../api/types";
 import { configForKind, parseRouteId } from "../lib/entryKind";
@@ -91,6 +92,8 @@ export default function EntryDetailPage() {
               ))}
             </div>
           )}
+
+          {"stage" in entry && <TeamSection projectId={entry.id} />}
         </div>
       </div>
     </div>

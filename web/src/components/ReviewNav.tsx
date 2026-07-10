@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
 import { directoryConfig, projectsConfig } from "../config/entityConfig";
+import { listIdeas } from "../api/projectIdeas";
 
 const linkClasses = ({ isActive }: { isActive: boolean }) =>
   isActive
@@ -10,6 +11,7 @@ const linkClasses = ({ isActive }: { isActive: boolean }) =>
 export default function ReviewNav() {
   const [pendingCount, setPendingCount] = useState<number | null>(null);
   const [needsPhotoCount, setNeedsPhotoCount] = useState<number | null>(null);
+  const [pendingIdeaCount, setPendingIdeaCount] = useState<number | null>(null);
 
   useEffect(() => {
     Promise.all([
@@ -21,6 +23,10 @@ export default function ReviewNav() {
       directoryConfig.api.listNeedingPhoto(),
       projectsConfig.api.listNeedingPhoto(),
     ]).then(([directoryEntries, projects]) => setNeedsPhotoCount(directoryEntries.length + projects.length));
+
+    Promise.all([listIdeas("pending", 500), listIdeas("claimed", 500)]).then(
+      ([pending, claimed]) => setPendingIdeaCount(pending.length + claimed.length),
+    );
   }, []);
 
   return (
@@ -33,6 +39,9 @@ export default function ReviewNav() {
       </NavLink>
       <NavLink to="/review/photos" className={linkClasses}>
         Needs photo{needsPhotoCount !== null && ` (${needsPhotoCount})`}
+      </NavLink>
+      <NavLink to="/review/ideas" className={linkClasses}>
+        Ideas{pendingIdeaCount !== null && ` (${pendingIdeaCount})`}
       </NavLink>
       <NavLink to="/admin" className={linkClasses}>
         Admin

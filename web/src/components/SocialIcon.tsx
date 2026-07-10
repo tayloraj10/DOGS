@@ -62,6 +62,12 @@ const ICONS: Record<SocialField, { viewBox: string; content: ReactNode }> = {
       <path d="M12 2a10 10 0 00-3.16 19.5c.5.1.68-.22.68-.48v-1.7c-2.78.6-3.37-1.34-3.37-1.34-.46-1.15-1.11-1.46-1.11-1.46-.9-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.9 1.53 2.34 1.1 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.56-1.11-4.56-4.94 0-1.1.39-1.99 1.03-2.7-.1-.25-.45-1.27.1-2.65 0 0 .84-.27 2.75 1.02a9.6 9.6 0 015 0c1.9-1.29 2.74-1.02 2.74-1.02.55 1.38.2 2.4.1 2.65.64.71 1.03 1.6 1.03 2.7 0 3.84-2.34 4.68-4.57 4.93.36.31.68.92.68 1.85v2.74c0 .27.18.58.69.48A10 10 0 0012 2z" />
     ),
   },
+  discord: {
+    viewBox: "0 0 24 24",
+    content: (
+      <path d="M20.3 5.3A18 18 0 0015.6 4l-.3.6a13 13 0 014.3 1.6 15.3 15.3 0 00-13.2 0A13 13 0 016.7 4.6L6.4 4a18 18 0 00-4.7 1.3C.2 8.9-.3 12.4.1 15.9a17.9 17.9 0 005.5 2.8l.7-1.2a11.5 11.5 0 01-1.8-.9l.4-.3a13 13 0 0014.2 0l.4.3a11.5 11.5 0 01-1.8.9l.7 1.2a17.9 17.9 0 005.5-2.8c.5-4-.6-7.5-3.6-10.6zM8.5 13.8c-.9 0-1.6-.8-1.6-1.8s.7-1.8 1.6-1.8 1.6.8 1.6 1.8-.7 1.8-1.6 1.8zm7 0c-.9 0-1.6-.8-1.6-1.8s.7-1.8 1.6-1.8 1.6.8 1.6 1.8-.7 1.8-1.6 1.8z" />
+    ),
+  },
 };
 
 const LABELS: Record<SocialField, string> = {
@@ -74,12 +80,13 @@ const LABELS: Record<SocialField, string> = {
   app_store: "App Store",
   google_play: "Google Play",
   github: "GitHub",
+  discord: "Discord",
 };
 
-export const RAW_URL_FIELDS: SocialField[] = ["website", "app_store", "google_play"];
+export const RAW_URL_FIELDS: SocialField[] = ["website", "app_store", "google_play", "discord"];
 
 const PROFILE_URL_BUILDERS: Record<
-  Exclude<SocialField, "website" | "app_store" | "google_play">,
+  Exclude<SocialField, "website" | "app_store" | "google_play" | "discord">,
   (username: string) => string
 > = {
   instagram: (username) => `https://instagram.com/${username}`,
@@ -90,20 +97,19 @@ const PROFILE_URL_BUILDERS: Record<
   github: (username) => `https://github.com/${username}`,
 };
 
+export function resolveSocialUrl(field: SocialField, href: string): string {
+  if (href.startsWith("http")) return href;
+  if (RAW_URL_FIELDS.includes(field)) return `https://${href}`;
+  return PROFILE_URL_BUILDERS[field as keyof typeof PROFILE_URL_BUILDERS](href);
+}
+
 interface SocialIconProps {
   field: SocialField;
   href: string;
 }
 
 export default function SocialIcon({ field, href }: SocialIconProps) {
-  let url: string;
-  if (href.startsWith("http")) {
-    url = href;
-  } else if (RAW_URL_FIELDS.includes(field)) {
-    url = `https://${href}`;
-  } else {
-    url = PROFILE_URL_BUILDERS[field as keyof typeof PROFILE_URL_BUILDERS](href);
-  }
+  const url = resolveSocialUrl(field, href);
   const { viewBox, content } = ICONS[field];
   return (
     <a
@@ -133,6 +139,7 @@ export const SOCIAL_FIELDS: SocialField[] = [
   "app_store",
   "google_play",
   "github",
+  "discord",
 ];
 
 // The subset the Directory of Good's own capture/edit form collects. Projects collect the

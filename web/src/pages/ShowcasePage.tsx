@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useCategories } from "../hooks/useCategories";
 import { useTypeFilter } from "../hooks/useTypeFilter";
 import CategoryFilterBar from "../components/CategoryFilterBar";
@@ -140,6 +140,14 @@ export default function ShowcasePage() {
           A growing collection of people, groups, and projects taking action for the good of the world
         </p>
       </div>
+
+      <Link
+        to="/ideas"
+        className="mt-6 flex flex-wrap items-center justify-center gap-x-2 gap-y-1 rounded-lg bg-emerald-50 px-4 py-2.5 text-center text-sm text-emerald-800 transition-colors hover:bg-emerald-100 dark:bg-emerald-950/30 dark:text-emerald-300 dark:hover:bg-emerald-950/50"
+      >
+        <span className="font-medium">Got an idea for a social-good app?</span>
+        <span className="underline underline-offset-2">Submit it →</span>
+      </Link>
 
       <div className="mt-8 flex justify-center">
         <TypeFilterBar selected={selectedKinds} onToggle={toggleKind} />

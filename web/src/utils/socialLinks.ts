@@ -1,6 +1,9 @@
 import type { SocialLinks } from "../api/types";
 
-type SocialUsernameField = Exclude<keyof SocialLinks, "website" | "app_store" | "google_play">;
+type SocialUsernameField = Exclude<
+  keyof SocialLinks,
+  "website" | "app_store" | "google_play" | "discord"
+>;
 
 const PLATFORM_URL_PATTERNS: Record<SocialUsernameField, RegExp> = {
   instagram: /instagram\.com\/([A-Za-z0-9_.]+)/i,

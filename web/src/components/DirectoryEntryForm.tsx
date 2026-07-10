@@ -20,7 +20,10 @@ import type {
 import { CORE_SOCIAL_FIELDS, RAW_URL_FIELDS } from "./SocialIcon";
 import type { SocialField } from "./SocialIcon";
 
-type SocialUsernameField = Exclude<SocialField, "website" | "app_store" | "google_play">;
+type SocialUsernameField = Exclude<
+  SocialField,
+  "website" | "app_store" | "google_play" | "discord"
+>;
 
 const EMPTY_LOCATION: StructuredLocation = {
   city: null,
@@ -39,6 +42,7 @@ const EMPTY_SOCIAL: SocialLinks = {
   app_store: null,
   google_play: null,
   github: null,
+  discord: null,
 };
 
 const SOCIAL_LABELS: Record<keyof SocialLinks, string> = {
@@ -51,6 +55,7 @@ const SOCIAL_LABELS: Record<keyof SocialLinks, string> = {
   app_store: "App Store",
   google_play: "Google Play",
   github: "GitHub",
+  discord: "Discord",
 };
 
 const INPUT_CLASSES =
