@@ -109,6 +109,20 @@ Not part of the numbered phase sequence — can proceed independently.
 
 ---
 
+### Project Idea Intake
+
+**[DOGS_Project_Intake_Dev_Plan.md](./DOGS_Project_Intake_Dev_Plan.md)**
+
+- Public submission funnel (`/ideas/submit`) tuned for cold social-media traffic
+- New `project_ideas` entity with trigram-based dedup search against existing ideas and projects
+- Crowdsourced `idea_similar_apps` prior-art links, addable by anyone, not just the submitter
+- Approved ideas promote into the existing `projects` table; `project_members` lets signed-in users join a project and see a contact-visible team roster
+- Depends on both Projects Directory (dedup target) and Auth (membership)
+
+**Exit criteria:** `/ideas` is fit to post on social media, submissions get flagged against existing work before going live, and an approved idea's project page shows a joinable, contactable team.
+
+---
+
 ### Auth
 
 **[DOGS_Auth_Dev_Plan.md](./DOGS_Auth_Dev_Plan.md)**

@@ -4,6 +4,7 @@ import type { User } from "firebase/auth";
 export interface AuthContextValue {
   user: User | null;
   loading: boolean;
+  redirectError: string | null;
   signIn: () => Promise<void>;
   signInWithEmail: (email: string, password: string) => Promise<void>;
   signUpWithEmail: (email: string, password: string) => Promise<void>;

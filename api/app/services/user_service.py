@@ -29,6 +29,10 @@ def update_user(db: Session, user: UserModel, body: UserUpdate) -> UserModel:
         user.name = body.name
     if "photo_url" in fields:
         user.photo_url = body.photo_url
+    if "phone" in fields:
+        user.phone = body.phone
+    if "social_links" in fields:
+        user.social_links = body.social_links.model_dump() if body.social_links else None
     db.commit()
     db.refresh(user)
     return user
