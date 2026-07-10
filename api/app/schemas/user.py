@@ -3,12 +3,16 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict
 
+from app.schemas.location import SocialLinks
+
 
 class User(BaseModel):
     id: UUID
     email: str
     name: str | None = None
     photo_url: str | None = None
+    phone: str | None = None
+    social_links: SocialLinks | None = None
     admin: bool = False
     created_at: datetime
     updated_at: datetime
@@ -21,3 +25,5 @@ class UserUpdate(BaseModel):
 
     name: str | None = None
     photo_url: str | None = None
+    phone: str | None = None
+    social_links: SocialLinks | None = None

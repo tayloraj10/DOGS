@@ -75,6 +75,42 @@ erDiagram
         uuid directory_entry_id PK,FK
     }
 
+    PROJECT_IDEAS {
+        uuid id PK
+        string name
+        text description
+        uuid submitter_user_id FK
+        string edit_token
+        string status
+        uuid merged_into_project_id FK
+        string suggested_category
+        timestamptz created_at
+        timestamptz updated_at
+    }
+
+    IDEA_CATEGORIES {
+        uuid idea_id PK,FK
+        uuid category_id PK,FK
+    }
+
+    IDEA_SIMILAR_APPS {
+        uuid id PK
+        uuid idea_id FK
+        text url
+        string name
+        text note
+        uuid added_by_user_id FK
+        timestamptz created_at
+    }
+
+    PROJECT_MEMBERS {
+        uuid project_id PK,FK
+        uuid user_id PK,FK
+        string role
+        text contact_info
+        timestamptz joined_at
+    }
+
     TRASH_REPORTS {
         uuid id PK
         string title
@@ -92,9 +128,28 @@ erDiagram
         timestamptz resolved_at
     }
 
-    CATEGORIES ||--o{ DIRECTORY_ENTRY_CATEGORIES : has
+    USERS {
+        uuid id PK
+        string firebase_uid
+        string email
+        string name
+        text photo_url
+        boolean admin
+        timestamptz created_at
+        timestamptz updated_at
+    }
+
     DIRECTORY_ENTRIES ||--o{ DIRECTORY_ENTRY_CATEGORIES : has
-    PROJECTS ||--o{ PROJECT_CATEGORIES : has
+    CATEGORIES ||--o{ DIRECTORY_ENTRY_CATEGORIES : has
     CATEGORIES ||--o{ PROJECT_CATEGORIES : has
-    DIRECTORY_ENTRIES ||--o{ PROJECT_DIRECTORY_ENTRIES : has
+    PROJECTS ||--o{ PROJECT_CATEGORIES : has
     PROJECTS ||--o{ PROJECT_DIRECTORY_ENTRIES : has
+    DIRECTORY_ENTRIES ||--o{ PROJECT_DIRECTORY_ENTRIES : has
+    USERS ||--o{ PROJECT_IDEAS : has
+    PROJECTS ||--o{ PROJECT_IDEAS : has
+    CATEGORIES ||--o{ IDEA_CATEGORIES : has
+    PROJECT_IDEAS ||--o{ IDEA_CATEGORIES : has
+    USERS ||--o{ IDEA_SIMILAR_APPS : has
+    PROJECT_IDEAS ||--o{ IDEA_SIMILAR_APPS : has
+    USERS ||--o{ PROJECT_MEMBERS : has
+    PROJECTS ||--o{ PROJECT_MEMBERS : has

@@ -11,6 +11,7 @@ from app.routes import (
     directory,
     erd,
     health,
+    project_ideas,
     projects,
     trash_reports,
     users,
@@ -41,6 +42,7 @@ app.include_router(health.router)
 app.include_router(categories.router)
 app.include_router(directory.router)
 app.include_router(projects.router)
+app.include_router(project_ideas.router)
 app.include_router(cleanups.router)
 app.include_router(trash_reports.router)
 app.include_router(admin.router)

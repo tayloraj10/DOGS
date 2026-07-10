@@ -14,6 +14,12 @@ import AdminPage from "./pages/AdminPage";
 import EntryDetailPage from "./pages/EntryDetailPage";
 import EditEntryPage from "./pages/EditEntryPage";
 import ProfilePage from "./pages/ProfilePage";
+import IdeasListPage from "./pages/IdeasListPage";
+import IdeaSubmitPage from "./pages/IdeaSubmitPage";
+import IdeaDetailPage from "./pages/IdeaDetailPage";
+import IdeaEditPage from "./pages/IdeaEditPage";
+import ReviewIdeasPage from "./pages/ReviewIdeasPage";
+import ReviewIdeaPage from "./pages/ReviewIdeaPage";
 import ThemeToggle from "./components/ThemeToggle";
 import LoginButton from "./components/LoginButton";
 
@@ -60,6 +66,7 @@ function App() {
             <NavLink to="/map" className={desktopNavClasses}>Map</NavLink>
             <NavLink to="/network" className={desktopNavClasses}>Network</NavLink>
             <NavLink to="/submit" className={desktopNavClasses}>Submit</NavLink>
+            <NavLink to="/ideas" className={desktopNavClasses}>Ideas</NavLink>
             <ThemeToggle />
             <LoginButton />
           </nav>
@@ -101,6 +108,7 @@ function App() {
               <NavLink to="/map" className={mobileNavClasses} onClick={closeMenu}>Map</NavLink>
               <NavLink to="/network" className={mobileNavClasses} onClick={closeMenu}>Network</NavLink>
               <NavLink to="/submit" className={mobileNavClasses} onClick={closeMenu}>Submit</NavLink>
+              <NavLink to="/ideas" className={mobileNavClasses} onClick={closeMenu}>Ideas</NavLink>
             </nav>
           </div>
         </>
@@ -110,7 +118,7 @@ function App() {
         className={
           isFullPage
             ? "flex-1 flex flex-col overflow-hidden min-h-0"
-            : "mx-auto max-w-6xl px-6 py-10"
+            : "mx-auto w-full max-w-6xl px-6 py-10"
         }
       >
         <Routes>
@@ -125,10 +133,16 @@ function App() {
           <Route path="/review" element={<ReviewQueuePage />} />
           <Route path="/review/all" element={<AllEntriesPage />} />
           <Route path="/review/photos" element={<NeedsPhotoPage />} />
+          <Route path="/review/ideas" element={<ReviewIdeasPage />} />
+          <Route path="/review/ideas/:id" element={<ReviewIdeaPage />} />
           <Route path="/review/:id" element={<ReviewEntryPage />} />
           <Route path="/admin" element={<AdminPage />} />
           <Route path="/admin/sync" element={<AdminSyncPage />} />
           <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/ideas" element={<IdeasListPage />} />
+          <Route path="/ideas/submit" element={<IdeaSubmitPage />} />
+          <Route path="/ideas/:id/edit" element={<IdeaEditPage />} />
+          <Route path="/ideas/:id" element={<IdeaDetailPage />} />
         </Routes>
       </main>
     </div>
