@@ -1,5 +1,11 @@
 import { initializeApp } from "firebase/app";
-import { getAuth, type Auth } from "firebase/auth";
+import {
+  browserLocalPersistence,
+  browserPopupRedirectResolver,
+  indexedDBLocalPersistence,
+  initializeAuth,
+  type Auth,
+} from "firebase/auth";
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -18,7 +24,16 @@ let auth: Auth | null = null;
 
 if (firebaseEnabled) {
   const firebaseApp = initializeApp(firebaseConfig);
-  auth = getAuth(firebaseApp);
+  // `getAuth()` auto-detects persistence/resolver, but on WebKit-based mobile
+  // browsers (Safari and Chrome/Firefox on iOS all use WebKit) that detection
+  // can pick a persistence layer that doesn't survive the signInWithRedirect
+  // round trip, so the redirect completes on Google's side but
+  // getRedirectResult() comes back empty on return. Pinning IndexedDB
+  // persistence explicitly avoids that.
+  auth = initializeAuth(firebaseApp, {
+    persistence: [indexedDBLocalPersistence, browserLocalPersistence],
+    popupRedirectResolver: browserPopupRedirectResolver,
+  });
 } else {
   console.warn(
     "Firebase config is missing (VITE_FIREBASE_* env vars) — sign-in is disabled, app runs signed-out only.",
