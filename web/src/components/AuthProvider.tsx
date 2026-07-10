@@ -11,6 +11,7 @@ import {
   signOut as firebaseSignOut,
 } from "firebase/auth";
 import type { User } from "firebase/auth";
+import { FirebaseError } from "firebase/app";
 import { auth } from "../lib/firebase";
 import { AuthContext } from "../lib/authContext";
 import { friendlyAuthErrorMessage } from "../lib/authErrors";
@@ -32,7 +33,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!auth) return;
     getRedirectResult(auth).catch((err) => {
-      setRedirectError(friendlyAuthErrorMessage(err));
+      const code = err instanceof FirebaseError ? ` (${err.code})` : "";
+      setRedirectError(`${friendlyAuthErrorMessage(err)}${code}`);
     });
   }, []);
 
