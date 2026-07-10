@@ -19,12 +19,23 @@ from app.schemas import (
     Project,
     ProjectCreate,
     ProjectEditLink,
+    ProjectMember,
+    ProjectMemberJoin,
+    ProjectMemberUpdate,
     ProjectPublicUpdate,
     ProjectStage,
     ProjectUpdate,
 )
-from app.services.auth import get_current_user_optional
+from app.services.auth import get_current_user, get_current_user_optional
 from app.services.geocoding import geocode_location
+from app.services.project_member_service import (
+    get_member,
+    join_project,
+    leave_project,
+    list_members,
+    member_to_schema,
+    update_shared_fields,
+)
 from app.services.project_service import (
     apply_create_data,
     apply_update_data,
@@ -287,6 +298,74 @@ def approve_suggested_category_endpoint(project_id: UUID, db: Session = Depends(
     except ValueError as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
     return project_to_schema(project)
+
+
+@router.get("/{project_id}/members", response_model=list[ProjectMember])
+def list_project_members(
+    project_id: UUID,
+    db: Session = Depends(get_db),
+    _current_user: UserModel = Depends(get_current_user),
+):
+    """Signed-in only: the roster includes member contact info, which the plan scopes to
+    other signed-in users rather than the general public."""
+    project = get_project(db, project_id)
+    if not project:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Project not found")
+    return [
+        member_to_schema(m, project.originator_user_id) for m in list_members(db, project_id)
+    ]
+
+
+@router.post(
+    "/{project_id}/join", response_model=ProjectMember, status_code=status.HTTP_201_CREATED
+)
+def join_project_endpoint(
+    project_id: UUID,
+    body: ProjectMemberJoin,
+    db: Session = Depends(get_db),
+    current_user: UserModel = Depends(get_current_user),
+):
+    """Signed-in only: the first hard-auth-required action in the app, since joining a
+    project's roster needs a real identity to attach, unlike anonymous submissions."""
+    project = get_project(db, project_id)
+    if not project:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Project not found")
+    try:
+        member = join_project(db, project_id, current_user.id, body)
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)) from e
+    return member_to_schema(member, project.originator_user_id)
+
+
+@router.delete("/{project_id}/leave", status_code=status.HTTP_204_NO_CONTENT)
+def leave_project_endpoint(
+    project_id: UUID,
+    db: Session = Depends(get_db),
+    current_user: UserModel = Depends(get_current_user),
+):
+    try:
+        leave_project(db, project_id, current_user.id)
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e)) from e
+
+
+@router.patch("/{project_id}/members/me", response_model=ProjectMember)
+def update_own_membership(
+    project_id: UUID,
+    body: ProjectMemberUpdate,
+    db: Session = Depends(get_db),
+    current_user: UserModel = Depends(get_current_user),
+):
+    project = get_project(db, project_id)
+    if not project:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Project not found")
+    member = get_member(db, project_id, current_user.id)
+    if not member:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Not a member of this project"
+        )
+    member = update_shared_fields(db, member, body)
+    return member_to_schema(member, project.originator_user_id)
 
 
 @router.delete("/{project_id}", status_code=status.HTTP_204_NO_CONTENT)

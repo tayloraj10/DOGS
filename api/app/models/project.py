@@ -30,6 +30,9 @@ class Project(Base):
     status: Mapped[str] = mapped_column(String(20), default="published", nullable=False)
     suggested_category: Mapped[str | None] = mapped_column(String(255), nullable=True)
     edit_token: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    originator_user_id: Mapped[uuid.UUID | None] = mapped_column(
+        Uuid(as_uuid=True), ForeignKey(f"{DOGS_SCHEMA}.users.id", ondelete="SET NULL"), nullable=True
+    )
     featured: Mapped[bool] = mapped_column(default=False, nullable=False)
     user_ids: Mapped[list | None] = mapped_column(JSON, nullable=True)
     created_at: Mapped[datetime] = mapped_column(

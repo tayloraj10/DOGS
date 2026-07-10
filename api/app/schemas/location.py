@@ -255,6 +255,7 @@ class SocialLinks(BaseModel):
     app_store: str | None = None
     google_play: str | None = None
     github: str | None = None
+    discord: str | None = None
 
     model_config = ConfigDict(extra="ignore")
 
@@ -268,6 +269,7 @@ class SocialLinks(BaseModel):
         "app_store",
         "google_play",
         "github",
+        "discord",
         mode="before",
     )
     @classmethod
@@ -278,6 +280,6 @@ class SocialLinks(BaseModel):
         if cleaned is None:
             return None
         # These are stored as full URLs, not handles — no username to extract.
-        if info.field_name in ("website", "app_store", "google_play", "github"):
+        if info.field_name in ("website", "app_store", "google_play", "github", "discord"):
             return cleaned
         return _extract_username_from_url(info.field_name, cleaned)
