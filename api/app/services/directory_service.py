@@ -16,7 +16,11 @@ from app.schemas import (
 from sqlalchemy import func
 from sqlalchemy.orm import Session, selectinload
 
-from app.models import Category as CategoryModel, DirectoryEntry as DirectoryEntryModel
+from app.models import (
+    Category as CategoryModel,
+    DirectoryEntry as DirectoryEntryModel,
+    Project as ProjectModel,
+)
 from app.services.storage import gcs_storage, hosted_image_url_prefix, is_hosted_image_url
 
 
@@ -254,6 +258,9 @@ def find_orphaned_images(db: Session) -> list:
 
     Happens when a photo is re-hosted or replaced (NeedsPhotoPage, edits, sheet sync) —
     nothing deletes the old blob automatically.
+
+    Projects can link to a directory entry and inherit its image_url, so a blob under
+    directory/ is still "referenced" if any Project points to it too — not just DirectoryEntry.
     """
     if not gcs_storage:
         return []
@@ -262,5 +269,9 @@ def find_orphaned_images(db: Session) -> list:
         for (url,) in db.query(DirectoryEntryModel.image_url).filter(
             DirectoryEntryModel.image_url.isnot(None)
         )
+    }
+    referenced |= {
+        url
+        for (url,) in db.query(ProjectModel.image_url).filter(ProjectModel.image_url.isnot(None))
     }
     return [b for b in gcs_storage.list_directory_entry_photos() if b.public_url not in referenced]

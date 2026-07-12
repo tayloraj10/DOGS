@@ -249,11 +249,21 @@ def approve_suggested_category(db: Session, project: ProjectModel) -> ProjectMod
 
 
 def find_orphaned_images(db: Session) -> list:
-    """GCS-hosted project photos no project's image_url points to anymore."""
+    """GCS-hosted project photos no project's image_url points to anymore.
+
+    Projects can link to a directory entry and inherit its image_url, so a blob under
+    projects/ is still "referenced" if any DirectoryEntry points to it too — not just Project.
+    """
     if not gcs_storage:
         return []
     referenced = {
         url
         for (url,) in db.query(ProjectModel.image_url).filter(ProjectModel.image_url.isnot(None))
+    }
+    referenced |= {
+        url
+        for (url,) in db.query(DirectoryEntryModel.image_url).filter(
+            DirectoryEntryModel.image_url.isnot(None)
+        )
     }
     return [b for b in gcs_storage.list_project_photos() if b.public_url not in referenced]
