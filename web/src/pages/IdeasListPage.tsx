@@ -8,6 +8,15 @@ import { getCategoryColor, slugToLabel } from "../api/types";
 import type { Project, ProjectIdea } from "../api/types";
 import { entryHref } from "../lib/entryKind";
 
+function shuffle<T>(items: T[]): T[] {
+  const result = [...items];
+  for (let i = result.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [result[i], result[j]] = [result[j], result[i]];
+  }
+  return result;
+}
+
 interface IdeaCardProps {
   idea: ProjectIdea;
   statusBadge: { label: string; className: string };
@@ -63,16 +72,13 @@ export default function IdeasListPage() {
       listIdeas("pending", 100),
       listIdeas("approved", 100),
       listIdeas("claimed", 100),
-      listProjects("published", 50),
+      listProjects("published", 500),
     ])
       .then(([pending, approved, claimed, projectResults]) => {
         setPendingIdeas(pending);
         setApprovedIdeas(approved);
         setClaimedIdeas(claimed);
-        const sorted = [...projectResults].sort(
-          (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-        );
-        setRecentProjects(sorted.slice(0, 6));
+        setRecentProjects(shuffle(projectResults).slice(0, 6));
       })
       .finally(() => setLoading(false));
   }, []);
@@ -103,11 +109,13 @@ export default function IdeasListPage() {
             Recently built from ideas like yours
           </h2>
           <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
-            {recentProjects.map((project) => (
+            {recentProjects.map((project, index) => (
               <Link
                 key={project.id}
                 to={entryHref("project", project.id, project.name)}
-                className="flex items-center gap-3 rounded-xl bg-white p-3 shadow-sm ring-1 ring-slate-200 transition-shadow hover:shadow-md dark:bg-slate-900 dark:ring-slate-800 dark:hover:shadow-none"
+                className={`items-center gap-3 rounded-xl bg-white p-3 shadow-sm ring-1 ring-slate-200 transition-shadow hover:shadow-md dark:bg-slate-900 dark:ring-slate-800 dark:hover:shadow-none ${
+                  index < 3 ? "flex" : "hidden sm:flex"
+                }`}
               >
                 <div className="h-14 w-14 shrink-0 overflow-hidden rounded-lg bg-slate-100 dark:bg-slate-800">
                   {project.image_url ? (
